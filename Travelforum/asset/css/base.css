@@ -91,7 +91,10 @@ input:focus {
 }
 
 /* End Header */
-
+#main {
+    padding-top: 60px;
+    margin-bottom: 20px;
+}
 /* Footer */
 #footer {
     background-color: #f8f8f8;
