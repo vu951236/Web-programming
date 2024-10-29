@@ -1,0 +1,74 @@
+/* style.css */
+
+/* General Styles */
+
+.post-page {
+    padding: 20px;
+}
+
+.post-layout {
+    display: flex;
+}
+
+.post-container {
+    flex: 3;
+    margin-right: 20px;
+}
+
+.post {
+    border: 2px solid #28a745;
+    border-radius: 8px; 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+    transition: all 0.3s ease; 
+    padding: 15px;
+    margin-bottom: 15px; 
+}
+
+.post-image {
+    width: 100%;
+    height: auto;
+}
+
+.post:hover {
+    border-color: #155724; 
+    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.5); 
+}
+
+.recent-posts {
+    flex: 1;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border: 2px solid #007bff;
+    padding: 10px;
+    background-color: #f8f9fa; 
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.recent-post {
+    margin-bottom: 10px;
+}
+
+.recent-post h4 a {
+    text-decoration: none;
+    color: #007bff;
+}
+
+.recent-post .date {
+    font-size: 12px;
+    color: #666;
+}
+
+.recent-posts:hover {
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.5); 
+    background-color: #e9f5ff; 
+}
+
+.detail-image {
+    width: 100%;
+    height: auto;
+}
+
+.post-detail {
+    padding: 20px;
+}
