@@ -102,35 +102,49 @@
     margin-top: 20px;
 }
 
-.star-rating {
-    display: inline-flex;
-    flex-direction: row-reverse; 
-    gap: 5px;
-}
-
 .star {
     font-size: 30px;
-    color: #ccc; 
+    color: #ccc;
     cursor: pointer;
-    transition: color 0.2s ease, transform 0.2s ease; 
+    display: inline-block;
+    position: relative;
+    transition: color 0.2s ease;
 }
-
-/* Tô màu các sao bên trái khi hover */
+/* Ngôi sao đầy đủ */
+.star.filled {
+    color: gold;
+}
+/* Ngôi sao một phần */
+.star.partial::before {
+    content: '★';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--partial-fill, 0%);
+    overflow: hidden;
+    color: gold;
+}
+/* Tô màu các sao từ trái qua khi hover */
 .star:hover,
 .star:hover ~ .star {
     color: #ffe100; 
-    transform: scale(1.2); 
-}
-
-.star:hover ~ .star {
-    color: #ffe100; /* Màu cho các sao bên trái khi hover */
+    transform: scale(1.2); /* Phóng to khi hover */
 }
 
 /* Màu cho sao đã chọn */
-.star.selected,
-.star.selected ~ .star {
-    color: #ffe100; /* Màu cho các sao đã chọn */
+.star.selected {
+    color: #ffe100;
 }
+
+/* Màu cho sao đã đánh giá dựa trên lớp CSS */
+.star-rating .star.filled {
+    color: gold; /* Màu vàng cho sao đã đánh giá */
+}
+
+.star-rating .star.empty {
+    color: lightgray; /* Màu trắng cho sao chưa đánh giá */
+}
+
 
 .create-post-btn {
     position: fixed; /* Fix the button at the bottom right of the viewport */
