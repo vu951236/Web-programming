@@ -1,0 +1,63 @@
+/* login.css */
+
+/* Đảm bảo body có padding trên và căn giữa nội dung */
+body {
+    height: 100vh; /* Đảm bảo body đầy đủ chiều cao màn hình */
+    margin: 0; /* Bỏ margin mặc định */
+    background-color: #f8f9fa; /* Màu nền nhẹ cho trang */
+}
+
+/* Căn chỉnh hình ảnh chiếm toàn bộ màn hình */
+.container-fluid {
+    height: 100vh; /* Đặt chiều cao cho container */
+    padding-top: 20px; 
+}
+
+/* Hình ảnh chiếm hết chiều rộng màn hình và bo góc */
+.img-fluid {
+    width: 100%; /* Chiếm toàn bộ chiều rộng */
+    height: 85%; /* Chiếm toàn bộ chiều cao */
+    object-fit: cover; /* Đảm bảo hình ảnh không bị méo */
+    border-top-left-radius: 20px; /* Bo góc trên bên trái */
+    border-bottom-left-radius: 20px; /* Bo góc dưới bên trái */
+}
+
+/* Định dạng form đăng nhập */
+.login-form {
+    width: 100%; /* Chiếm toàn bộ chiều rộng của cột */
+    max-width: 500px; /* Giới hạn chiều rộng tối đa */
+    padding: 20px; /* Thêm padding cho form */
+    border: 1px solid #dee2e6; /* Thêm đường viền cho form */
+    border-radius: 10px; /* Bo góc form */
+    background-color: #ffffff; /* Màu nền cho form */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Thêm bóng cho form */
+    margin-top: -20px; /* Kéo form lên gần hình ảnh hơn */
+}
+
+/* Định dạng nút Đăng nhập */
+.btn-primary {
+    width: 100%; /* Chiếm toàn bộ chiều rộng của nút */
+}
+
+/* Bỏ padding bên phải của cột hình ảnh */
+.col-md-6 {
+    padding: 0; /* Bỏ padding */
+    height: 100vh; /* Đặt chiều cao cho cột */
+}
+
+/* Đặt chiều cao cho cột chứa form */
+.col-md-6:nth-child(2) {
+    height: 100vh; /* Đặt chiều cao cho cột chứa form */
+    display: flex; /* Sử dụng flex để căn giữa nội dung */
+    justify-content: center; /* Căn giữa theo chiều ngang */
+    align-items: center; /* Căn giữa theo chiều dọc */
+}
+/* Thêm vào css của bạn (index.css hoặc register.css) */
+.fade {
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.fade.show {
+    opacity: 1;
+}
