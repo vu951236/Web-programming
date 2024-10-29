@@ -32,7 +32,9 @@
 .post:hover {
     border-color: #155724; 
     box-shadow: 0 4px 10px rgba(40, 167, 69, 0.5); 
+    transform: scale(1.02);
 }
+
 
 .recent-posts {
     flex: 1;
@@ -93,7 +95,6 @@
     border: 1px solid #ddd;
 }
 
-/* Star Rating Styles */
 .rating-section {
     display: flex;
     flex-direction: column;
@@ -103,17 +104,71 @@
 
 .star-rating {
     display: inline-flex;
+    flex-direction: row-reverse; 
     gap: 5px;
 }
 
 .star {
     font-size: 30px;
-    color: #ccc;
+    color: #ccc; 
     cursor: pointer;
-    transition: color 0.2s ease;
+    transition: color 0.2s ease, transform 0.2s ease; 
 }
 
+/* Tô màu các sao bên trái khi hover */
 .star:hover,
 .star:hover ~ .star {
-    color: #007bff;
+    color: #ffe100; 
+    transform: scale(1.2); 
+}
+
+.star:hover ~ .star {
+    color: #ffe100; /* Màu cho các sao bên trái khi hover */
+}
+
+/* Màu cho sao đã chọn */
+.star.selected,
+.star.selected ~ .star {
+    color: #ffe100; /* Màu cho các sao đã chọn */
+}
+
+.create-post-btn {
+    position: fixed; /* Fix the button at the bottom right of the viewport */
+    bottom: 20px; /* Adjust as needed */
+    right: 20px; /* Adjust as needed */
+}
+
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
 }
