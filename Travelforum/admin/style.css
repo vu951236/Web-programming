@@ -1,0 +1,111 @@
+/* Basic reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Container for sidebar and content */
+.container {
+    display: flex; /* Sử dụng flexbox để chia đôi */
+    height: 100vh; /* Đặt chiều cao của container là 100vh */
+}
+
+/* Sidebar styling */
+.sidebar {
+    border-radius: 10px;
+    width: 250px;
+    background-color: #87CEFA;
+    color: black;
+    padding: 20px;
+    position: fixed; /* Sidebar cố định */
+    height: 100%; /* Chiều cao sidebar bằng 100% của container */
+}
+
+/* Navigation styling */
+.sidebar nav {
+    margin-top: 20px; /* Tạo khoảng cách giữa tiêu đề và nav */
+}
+
+.sidebar nav a {
+    font-size: 20px;
+    display: block; /* Đảm bảo mỗi link chiếm toàn bộ chiều rộng */
+    padding: 10px 15px; /* Thêm padding để tạo khoảng cách cho các link */
+    color: black; /* Màu chữ cho các link */
+    text-decoration: none; /* Bỏ gạch chân */
+    border-radius: 5px; /* Bo tròn góc cho các link */
+    transition: background-color 0.3s; /* Hiệu ứng chuyển đổi cho màu nền */
+}
+
+.sidebar nav a:hover {
+    background-color: #AFEEEE; /* Màu nền khi hover */
+    color: blue; /* Đổi màu chữ khi hover */
+}
+
+/* Active link styling */
+.sidebar nav a.active {
+    background-color: #007bff; /* Màu nền cho link đang hoạt động */
+    color: white; /* Màu chữ cho link đang hoạt động */
+}
+
+/* Đẩy nội dung chính sang phải để không bị che bởi sidebar */
+.content-area {
+    margin-left: 250px; /* Bằng chiều rộng của sidebar */
+    width: calc(100% - 250px); /* Đảm bảo nội dung chiếm hết chiều rộng còn lại */
+    display: flex;
+    flex-direction: column; /* Đặt chiều hướng cột cho content-area */
+}
+
+/* Main content styling */
+.main-content {
+    flex: 1; /* Cho phép nội dung chính mở rộng để chiếm hết không gian còn lại */
+    padding: 20px;
+    background-color: #f4f4f9;
+}
+
+.main-content h1 {
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+
+/* Footer styling */
+.footer {
+    background-color: #A9A9A9;
+    padding: 20px;
+    text-align: left;
+    box-shadow: 0 2px 8px #00000033;
+    /* Đảm bảo footer ở cuối content-area */
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 10px;
+}
+
+.footer-content div {
+    text-align: left;
+}
+
+.footer-content h3 {
+    margin-bottom: 10px;
+}
+
+.footer-content a {
+    color: #333;
+    text-decoration: none;
+    display: block;
+}
+
+.footer-content a:hover {
+    color: #007bff;
+}
+
+.social a {
+    margin-right: 10px;
+    color: #333;
+}
+
+.social a:hover {
+    color: #007bff;
+}
