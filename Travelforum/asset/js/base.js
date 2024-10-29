@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded',function(){
 
     buttons.forEach(button => {
         button.addEventListener('click',function(e){
-            e.preventDefault();
             buttons.forEach(btn => btn.classList.remove('activee'));
             this.classList.add('activee');
         })
@@ -15,7 +14,6 @@ document.addEventListener('DOMContentLoaded',function(){
 
     navs.forEach(a => {
         a.addEventListener('click',function(e){
-            e.preventDefault();
             navs.forEach(navv => navv.classList.remove('active-nav'));
             this.classList.add('active-nav');
         })
