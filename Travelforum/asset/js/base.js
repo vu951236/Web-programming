@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded',function(){
     buttons.forEach(button => {
         button.addEventListener('click',function(e){
             e.preventDefault();
-            buttons.forEach(btn => btn.classList.remove('active'));
+            buttons.forEach(btn => btn.classList.remove('activee'));
             this.classList.add('activee');
         })
     })
