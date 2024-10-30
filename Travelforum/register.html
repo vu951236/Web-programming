@@ -33,6 +33,24 @@
             document.body.classList.add('show');
         });
     </script>
+<<<<<<< HEAD
+=======
+    <script>
+        function validatePassword() {
+            const password = document.getElementById("password").value;
+            const confirmPassword = document.getElementById("confirmPassword").value;
+            const errorMessage = document.getElementById("error-message");
+
+            if (password !== confirmPassword) {
+                errorMessage.textContent = "Xác nhận mật khẩu không trùng khớp.";
+                return false; // Ngăn gửi form nếu mật khẩu không trùng
+            }
+
+            errorMessage.textContent = ""; // Xóa thông báo lỗi nếu trùng khớp
+            return true;
+        }
+    </script>
+>>>>>>> 768c40f64407681d968f20a0765cbbd37866ed7a
     
 </head>
 <body class="fade">
@@ -41,8 +59,13 @@
             Logo
         </div>
         <div class="header-account">
+<<<<<<< HEAD
             <a class="btn-account activee" href="#login">Đăng nhập</a>
             <a class="btn-account" href="#register">Đăng ký</a>
+=======
+            <a class="btn-account activee" href="./login.html">Đăng nhập</a>
+            <a class="btn-account" href="./register.html">Đăng ký</a>
+>>>>>>> 768c40f64407681d968f20a0765cbbd37866ed7a
         </div>
     </div>
 
@@ -55,7 +78,11 @@
                 <div class="register-form text-center">
                     <h2>Xin chào, thành viên mới!</h2>
                     <br>
+<<<<<<< HEAD
                     <form>
+=======
+                    <form onsubmit="return validatePassword()">
+>>>>>>> 768c40f64407681d968f20a0765cbbd37866ed7a
                         <div class="mb-3">
                             <input type="email" class="form-control" placeholder="Nhập Email" required>
                         </div>
@@ -67,10 +94,27 @@
                         </div>
                         <div class="mb-3">
                             <input type="password" class="form-control" placeholder="Nhập lại mật khẩu" required>
+<<<<<<< HEAD
                         </div>
                         <button type="submit" class="btn btn-primary">Đăng ký</button>
                     </form>
                     <p class="mt-3">Đã có tài khoản? <a class="btn-account" href="login.html" onclick="showLogin()">Đăng nhập</a></p>
+=======
+                            <div id="error-message" class="error-message" style="color: red; text-align: right;"></div>
+                        </div>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" placeholder="Họ và tên" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="textl" class="form-control" placeholder="Địa chỉ" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" placeholder="Mã admin">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Đăng ký</button>
+                    </form>
+                    <p class="mt-3">Đã có tài khoản? <a href="login.html" onclick="showLogin()">Đăng nhập</a></p>
+>>>>>>> 768c40f64407681d968f20a0765cbbd37866ed7a
                 </div>
             </div>
         </div>

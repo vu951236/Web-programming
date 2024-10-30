@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h2 style="margin-top: 30px; text-align: center; font-size: 35px;">Admin Panel</h2>
+            <nav>
+                <a href="#">Dashboard</a>
+                <a href="usersmanager.html">Quản lý người dùng</a>
+                <a href="postmanager.html">Quản lý bài viết</a>
+            </nav>
+        </aside>
+
+        <div class="content-area">
+            <!-- Main Content -->
+            <main class="main-content">
+                <div class="top-bar">
+                    <h1>Danh sách bài đăng</h1>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tên bài viết</th>
+                                <th>Ngày đăng</th>
+                                <th style="width: 500px;">Nội dung</th>
+                                <th style="width: 100px;">Đánh giá</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body">
+                            <tr>
+                                <td>001</td>
+                                <td>Kinh nghiệm du lịch Đà Nẵng</td>
+                                <td>2024-10-15</td>
+                                <td id="content_col">Kinh Nghiệm Du Lịch Đà Nẵng – Điểm Đến Không Thể Bỏ Qua
+
+                                    Đà Nẵng, thành phố biển xinh đẹp miền Trung, từ lâu đã trở thành điểm đến lý tưởng cho những ai yêu thích vẻ đẹp thiên nhiên hòa quyện cùng nét văn hóa đặc sắc. Nổi tiếng với những bãi biển xanh ngắt, những cây cầu độc đáo và vô vàn món ăn ngon, Đà Nẵng mang đến cho du khách trải nghiệm đa dạng và khó quên.
+                                    
+                                </td>
+                                <td>4.5 sao</td>
+                                <td id="contain-btn">
+                                    <button class="btn action-btn edit-btn" >Chi tiết</button>
+                                    <button class="btn action-btn delete-btn">Xóa</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div> <!-- Kết thúc content-area -->
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
