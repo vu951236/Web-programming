@@ -4,11 +4,7 @@
 body {
     height: 100vh; /* Đảm bảo body đầy đủ chiều cao màn hình */
     margin: 0; /* Bỏ margin mặc định */
-<<<<<<< HEAD
-    background-color: #f8f9fa; /* Màu nền nhẹ cho trang */
-=======
     background-color: #f2f4b8; /* Màu nền nhẹ cho trang */
->>>>>>> 768c40f64407681d968f20a0765cbbd37866ed7a
 }
 
 /* Căn chỉnh hình ảnh chiếm toàn bộ màn hình */

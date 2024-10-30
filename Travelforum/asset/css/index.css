@@ -1,14 +1,9 @@
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
+
 #main {
     padding-top: 60px;
     margin-bottom: 20px;
 }
 
-=======
->>>>>>> 63523739a6d03b86785b74eba411f8167525b61c
->>>>>>> 768c40f64407681d968f20a0765cbbd37866ed7a
 .banner {
     width: 100%;
     height: 550px;
@@ -29,25 +24,17 @@
     padding: 0 20px !important;
 } */
 
-<<<<<<< HEAD
+.col {
+    justify-content: center !important;
+    display: flex;
+}
+
 .col {
     justify-content: center !important;
     display: flex;
 }
 
 .card {
-=======
-<<<<<<< HEAD
-.card {
-    width: 100% !important;
-=======
-.col {
-    justify-content: center !important;
-    display: flex;
-}
-
-.card {
->>>>>>> 768c40f64407681d968f20a0765cbbd37866ed7a
     width: 90% !important;
     border-radius: 20px;
     /* overflow: hidden; */
@@ -61,23 +48,12 @@
     padding: 5px 10px;
     text-decoration: none;
     transition: border-color 0.3s ease;
-<<<<<<< HEAD
-=======
->>>>>>> 63523739a6d03b86785b74eba411f8167525b61c
->>>>>>> 768c40f64407681d968f20a0765cbbd37866ed7a
 }
 
 .card img {
     max-width: 400px;
     max-height: 400px;
-<<<<<<< HEAD
     border-radius: 20px 20px 0 0;
-=======
-<<<<<<< HEAD
-=======
-    border-radius: 20px 20px 0 0;
->>>>>>> 63523739a6d03b86785b74eba411f8167525b61c
->>>>>>> 768c40f64407681d968f20a0765cbbd37866ed7a
 }
 
 .carousel-indicators {
@@ -88,11 +64,6 @@
 .carousel-inner {
     padding-bottom: 50px;
 }
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
->>>>>>> 768c40f64407681d968f20a0765cbbd37866ed7a
 
 .wrapper-member{
     display: flex;
@@ -110,9 +81,4 @@
     text-align: center;
     font-size: 12px;
     margin: 7px;
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 63523739a6d03b86785b74eba411f8167525b61c
->>>>>>> 768c40f64407681d968f20a0765cbbd37866ed7a
