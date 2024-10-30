@@ -11,12 +11,19 @@
     height: 100vh; /* Đặt chiều cao của container là 100vh */
 }
 
+<<<<<<< HEAD
 
 
 /* Sidebar styling */
 .sidebar {
     border-radius: 10px;
     width: 270px;
+=======
+/* Sidebar styling */
+.sidebar {
+    border-radius: 10px;
+    width: 250px;
+>>>>>>> 63523739a6d03b86785b74eba411f8167525b61c
     background-color: #87CEFA;
     color: black;
     padding: 20px;
@@ -30,15 +37,22 @@
 }
 
 .sidebar nav a {
+<<<<<<< HEAD
     font-size: 22px;
     font-weight: bold;
+=======
+    font-size: 20px;
+>>>>>>> 63523739a6d03b86785b74eba411f8167525b61c
     display: block; /* Đảm bảo mỗi link chiếm toàn bộ chiều rộng */
     padding: 10px 15px; /* Thêm padding để tạo khoảng cách cho các link */
     color: black; /* Màu chữ cho các link */
     text-decoration: none; /* Bỏ gạch chân */
     border-radius: 5px; /* Bo tròn góc cho các link */
     transition: background-color 0.3s; /* Hiệu ứng chuyển đổi cho màu nền */
+<<<<<<< HEAD
     margin-bottom: 15px;
+=======
+>>>>>>> 63523739a6d03b86785b74eba411f8167525b61c
 }
 
 .sidebar nav a:hover {
@@ -62,6 +76,7 @@
 
 /* Main content styling */
 .main-content {
+<<<<<<< HEAD
     width: 100%;
     flex-grow: 1;
     padding: 20px;
@@ -168,3 +183,56 @@ table #table-body #content_col {
 
 
 
+=======
+    flex: 1; /* Cho phép nội dung chính mở rộng để chiếm hết không gian còn lại */
+    padding: 20px;
+    background-color: #f4f4f9;
+}
+
+.main-content h1 {
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+
+/* Footer styling */
+.footer {
+    background-color: #A9A9A9;
+    padding: 20px;
+    text-align: left;
+    box-shadow: 0 2px 8px #00000033;
+    /* Đảm bảo footer ở cuối content-area */
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 10px;
+}
+
+.footer-content div {
+    text-align: left;
+}
+
+.footer-content h3 {
+    margin-bottom: 10px;
+}
+
+.footer-content a {
+    color: #333;
+    text-decoration: none;
+    display: block;
+}
+
+.footer-content a:hover {
+    color: #007bff;
+}
+
+.social a {
+    margin-right: 10px;
+    color: #333;
+}
+
+.social a:hover {
+    color: #007bff;
+}
+>>>>>>> 63523739a6d03b86785b74eba411f8167525b61c
