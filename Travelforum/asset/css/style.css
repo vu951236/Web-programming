@@ -32,15 +32,9 @@
 .post:hover {
     border-color: #155724; 
     box-shadow: 0 4px 10px rgba(40, 167, 69, 0.5); 
-<<<<<<< HEAD
-}
-
-=======
     transform: scale(1.02);
 }
 
-
->>>>>>> 63523739a6d03b86785b74eba411f8167525b61c
 .recent-posts {
     flex: 1;
     border: 1px solid #ddd;
@@ -81,6 +75,9 @@
 }
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
+>>>>>>> 768c40f64407681d968f20a0765cbbd37866ed7a
 
 .comments-section {
     margin-top: 20px;
@@ -109,6 +106,38 @@
     margin-top: 20px;
 }
 
+<<<<<<< HEAD
+.star-rating {
+    display: inline-flex;
+    flex-direction: row-reverse; 
+    gap: 5px;
+}
+
+.star {
+    font-size: 30px;
+    color: #ccc; 
+    cursor: pointer;
+    transition: color 0.2s ease, transform 0.2s ease; 
+}
+
+/* Tô màu các sao bên trái khi hover */
+.star:hover,
+.star:hover ~ .star {
+    color: #ffe100; 
+    transform: scale(1.2); 
+}
+
+.star:hover ~ .star {
+    color: #ffe100; /* Màu cho các sao bên trái khi hover */
+}
+
+/* Màu cho sao đã chọn */
+.star.selected,
+.star.selected ~ .star {
+    color: #ffe100; /* Màu cho các sao đã chọn */
+}
+
+=======
 .star {
     font-size: 30px;
     color: #ccc; /* Màu cho sao rỗng */
@@ -160,7 +189,11 @@
 }
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 768c40f64407681d968f20a0765cbbd37866ed7a
+>>>>>>> d5c31f5f93fae1f1e45b3ca47881a4759f32c46c
 .create-post-btn {
     position: fixed; /* Fix the button at the bottom right of the viewport */
     bottom: 20px; /* Adjust as needed */
@@ -201,4 +234,7 @@
     text-decoration: none;
     cursor: pointer;
 }
+<<<<<<< HEAD
+=======
 >>>>>>> 63523739a6d03b86785b74eba411f8167525b61c
+>>>>>>> 768c40f64407681d968f20a0765cbbd37866ed7a
