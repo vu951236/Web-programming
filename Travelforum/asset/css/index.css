@@ -1,3 +1,11 @@
+<<<<<<< HEAD
+#main {
+    padding-top: 60px;
+    margin-bottom: 20px;
+}
+
+=======
+>>>>>>> 63523739a6d03b86785b74eba411f8167525b61c
 .banner {
     width: 100%;
     height: 550px;
@@ -18,6 +26,10 @@
     padding: 0 20px !important;
 } */
 
+<<<<<<< HEAD
+.card {
+    width: 100% !important;
+=======
 .col {
     justify-content: center !important;
     display: flex;
@@ -37,12 +49,16 @@
     padding: 5px 10px;
     text-decoration: none;
     transition: border-color 0.3s ease;
+>>>>>>> 63523739a6d03b86785b74eba411f8167525b61c
 }
 
 .card img {
     max-width: 400px;
     max-height: 400px;
+<<<<<<< HEAD
+=======
     border-radius: 20px 20px 0 0;
+>>>>>>> 63523739a6d03b86785b74eba411f8167525b61c
 }
 
 .carousel-indicators {
@@ -53,6 +69,8 @@
 .carousel-inner {
     padding-bottom: 50px;
 }
+<<<<<<< HEAD
+=======
 
 .wrapper-member{
     display: flex;
@@ -71,3 +89,4 @@
     font-size: 12px;
     margin: 7px;
 }
+>>>>>>> 63523739a6d03b86785b74eba411f8167525b61c

@@ -32,10 +32,15 @@
 .post:hover {
     border-color: #155724; 
     box-shadow: 0 4px 10px rgba(40, 167, 69, 0.5); 
+<<<<<<< HEAD
+}
+
+=======
     transform: scale(1.02);
 }
 
 
+>>>>>>> 63523739a6d03b86785b74eba411f8167525b61c
 .recent-posts {
     flex: 1;
     border: 1px solid #ddd;
@@ -74,6 +79,8 @@
 .post-detail {
     padding: 20px;
 }
+<<<<<<< HEAD
+=======
 
 .comments-section {
     margin-top: 20px;
@@ -194,3 +201,4 @@
     text-decoration: none;
     cursor: pointer;
 }
+>>>>>>> 63523739a6d03b86785b74eba411f8167525b61c
