@@ -19,7 +19,7 @@ $stmt->execute(['id' => $post_id]);
 $post = $stmt->fetch(PDO::FETCH_ASSOC);
 
 // Lấy bình luận của bài viết
-$comment_stmt = $pdo->prepare("SELECT * FROM comment WHERE idpost = :idpost");
+$comment_stmt = $pdo->prepare("SELECT * FROM postcomment WHERE idpost = :idpost");
 $comment_stmt->execute(['idpost' => $post_id]);
 $comments = $comment_stmt->fetchAll(PDO::FETCH_ASSOC);
 
