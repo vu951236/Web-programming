@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="./asset/font/fontawesome-free-6.6.0-web/fontawesome-free-6.6.0-web/css/all.min.css">
     <link rel="stylesheet" href="./asset/css/index.css">
     <link rel="stylesheet" href="./asset/css/base.css">
-    <link rel="stylesheet" href="./asset/css/login.css"> 
+    <link rel="stylesheet" href="./asset/css/register.css"> 
     <script src="./asset/js/base.js"></script>
     <script src="./asset/js/index.js"></script>
     <script>
@@ -43,6 +43,21 @@
             margin-bottom: 10px; /* Giảm khoảng cách giữa hình ảnh và form */
         }
     </style>
+    <script>
+        function validatePassword() {
+            const password = document.getElementById("password").value;
+            const confirmPassword = document.getElementById("confirmPassword").value;
+            const errorMessage = document.getElementById("error-message");
+
+            if (password !== confirmPassword) {
+                errorMessage.textContent = "Xác nhận mật khẩu không trùng khớp.";
+                return false; // Ngăn gửi form nếu mật khẩu không trùng
+            }
+
+            errorMessage.textContent = ""; // Xóa thông báo lỗi nếu trùng khớp
+            return true;
+        }
+    </script>
     
 </head>
 <body class="fade">
@@ -58,13 +73,13 @@
     <div class="container-fluid d-flex flex-column justify-content-center align-items-center" style="height: 100vh;">
         <img src="./asset/img/login_register/resetpass.png" alt="Reset Password" class="img-fluid mb-4" style="max-width: 20%; height: auto;">
         <div class="forgot-password-form text-center">
-            <h2>Hãy nhập email để tạo mật khẩu mới</h2>
+            <h2>Hãy nhập mật khẩu mới</h2>
             <br>
-            <form>
+            <form onsubmit="return validatePassword()">
                 <div class="mb-3">
-                    <input type="email" class="form-control" placeholder="Email" required><br>
-                    <input type="email" class="form-control" placeholder="Xác nhận lại mật khẩu" required><br>
-                    <input type="email" class="form-control" placeholder="Mã xác thực gửi qua email" required><br>
+                    <input type="password" id="password" class="form-control" placeholder="Mật khẩu" required><br>
+                    <input type="password" id="confirmPassword" class="form-control" placeholder="Xác nhận lại mật khẩu" required>
+                    <div id="error-message" class="error-message" style="color: red; text-align: right;"></div><br> 
                 </div>
                 <button type="submit" class="btn btn-primary">Xác nhận</button>
             </form>
