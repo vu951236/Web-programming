@@ -10,8 +10,8 @@ return [
     'email' => [
         'smtp_host' => 'smtp.gmail.com',
         'smtp_port' => '587',
-        'username' => 'hoangvuvo907@gmail.com',
-        'password' => 'kbjg errq ffrk vsrd'
+        'username' => '',
+        'password' => ''
     ]
 ];
 ?>
