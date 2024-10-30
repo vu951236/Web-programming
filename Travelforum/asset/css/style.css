@@ -104,26 +104,33 @@
 
 .star {
     font-size: 30px;
-    color: #ccc;
+    color: #ccc; /* Màu cho sao rỗng */
     cursor: pointer;
     display: inline-block;
     position: relative;
     transition: color 0.2s ease;
 }
+
 /* Ngôi sao đầy đủ */
 .star.filled {
     color: gold;
 }
+
 /* Ngôi sao một phần */
+.star.partial {
+    color: transparent; /* Ẩn màu của sao một phần */
+}
+
 .star.partial::before {
-    content: '★';
+    content: '★'; /* Hiện ngôi sao */
     position: absolute;
     top: 0;
     left: 0;
-    width: var(--partial-fill, 0%);
+    width: var(--partial-fill, 0%); /* Thiết lập chiều rộng theo phần trăm */
     overflow: hidden;
-    color: gold;
+    color: gold; /* Màu cho phần lấp đầy */
 }
+
 /* Tô màu các sao từ trái qua khi hover */
 .star:hover,
 .star:hover ~ .star {
@@ -133,7 +140,7 @@
 
 /* Màu cho sao đã chọn */
 .star.selected {
-    color: #ffe100;
+    color: #ffe100; /* Màu cho sao đã chọn */
 }
 
 /* Màu cho sao đã đánh giá dựa trên lớp CSS */
@@ -142,8 +149,9 @@
 }
 
 .star-rating .star.empty {
-    color: lightgray; /* Màu trắng cho sao chưa đánh giá */
+    color: lightgray; /* Màu cho sao chưa đánh giá */
 }
+
 
 
 .create-post-btn {
