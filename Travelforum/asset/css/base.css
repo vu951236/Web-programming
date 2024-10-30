@@ -91,7 +91,14 @@ input:focus {
 }
 
 /* End Header */
+<<<<<<< HEAD
 
+=======
+#main {
+    padding-top: 60px;
+    margin-bottom: 20px;
+}
+>>>>>>> 63523739a6d03b86785b74eba411f8167525b61c
 /* Footer */
 #footer {
     background-color: #f8f8f8;

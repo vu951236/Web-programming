@@ -1,0 +1,163 @@
+.main-content {
+    padding-top: 20px ;
+}
+
+.nav-wrapper {
+    position: fixed;
+}
+
+.nav {
+    text-align: left;
+}
+
+.nav-link {
+    position: relative;
+    color: #333;
+    padding: 10px;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -5px;
+    left: 50%;
+    background-color: #333;
+    transition: width 0.3s ease, left 0.3s ease;
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+    width: 100%;
+    left: 0;
+}
+
+.nav-link:hover {
+    color: #333;
+}
+
+.nav-link.active {
+    color: #333;
+    font-weight: bold;
+}
+
+.wrapper {
+    max-width: 800px;
+    margin: 20px auto; 
+}
+
+.post {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.post-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.post-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+.post-author {
+    font-weight: bold;
+}
+.post-time {
+    color: #aaa;
+}
+.post-content {
+    margin: 10px 0;
+    text-align: left;
+}
+
+.post-image {
+    max-width: 100%;
+    height: auto; 
+    border-radius: 10px; 
+    margin-bottom: 10px; 
+}
+
+.post-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #ddd;
+    padding-top: 10px;
+    margin-top: 10px;
+}
+.post-actions {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+}
+.post-actions button {
+    background: none;
+    border: none;
+    color: #333;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+}
+
+.post-actions button.active {
+    color: blue;
+}
+.post-actions button:focus {
+    outline: none;
+}
+.post-actions i {
+    margin-right: 5px;
+}
+.post-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.active-person {
+    display: flex;
+    position: fixed;
+    margin: 15px 20px;
+    text-align: right;
+    width: auto;
+    flex-direction: column;
+}
+
+.active-users {
+    list-style: none;
+    padding: 0; 
+    margin: 0; 
+}
+
+.active-user {
+    display: flex; 
+    align-items: center; 
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.active-user:last-child {
+    border-bottom: none;
+}
+
+.user-avatar {
+    width: 40px; 
+    height: 40px; 
+    border-radius: 50%; 
+    margin-right: 10px; 
+}
+
+.user-name {
+    font-weight: bold; 
+}

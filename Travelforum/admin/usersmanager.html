@@ -1,97 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Quản lý người dùng</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet">
-    <link rel="stylesheet" href="./asset/font/fontawesome-free-6.6.0-web/fontawesome-free-6.6.0-web/css/all.min.css">
-    <link href="./asset/css/base.css" rel="stylesheet">
-    <link href="./asset/css/index.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <!-- Header -->
-    <div id="header">
-        <div class="header-logo">
-            Logo
-        </div>
-        <div class="header-search">
-            <input type="text" placeholder="Tìm kiếm..." />
-            <button class="btn-header">Tìm kiếm</button>
-        </div>
-        <nav class="header-nav">
-            <a href="#status">Bài viết</a>
-            <a href="#explore">Khám phá</a>
-            <a href="#about">Về chúng tôi</a>
-        </nav>
-        <div class="header-account">
-            <a class="btn-account activee" href="#login">Đăng nhập</a>
-            <a class="btn-account" href="#register">Đăng ký</a>
-        </div>
-    </div>
-    <!-- Header -->
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h2 style="margin-top: 30px; text-align: center; font-size: 35px;">Admin Panel</h2>
+            <nav>
+                <a href="#">Dashboard</a>
+                <a href="usersmanager.html">Quản lý người dùng</a>
+                <a href="postmanager.html">Quản lý bài viết</a>
+            </nav>
+        </aside>
 
-    <!-- Main -->
-
-    <h1> Hello xin chao tat ca cac ban</h1>
-    <h1> Hello xin chao tat ca cac ban</h1>
-    <h1> Hello xin chao tat ca cac ban</h1>
-    <h1> Hello xin chao tat ca cac ban</h1>
-    <h1> Hello xin chao tat ca cac ban</h1>
-    <h1> Hello xin chao tat ca cac ban</h1>
-    <h1> Hello xin chao tat ca cac ban</h1>
-    <h1> Hello xin chao tat ca cac ban</h1>
-    <h1> Hello xin chao tat ca cac ban</h1>
-    <h1> Hello xin chao tat ca cac ban</h1>
-    <h1> Hello xin chao tat ca cac ban</h1>
-    <h1> Hello xin chao tat ca cac ban</h1>
-    <h1> Hello xin chao tat ca cac ban</h1>
-    <h1> Hello xin chao tat ca cac ban</h1>
-    <h1> Hello xin chao tat ca cac ban</h1>
-    <!-- Main -->
-
-    <!-- Footer -->
-    <div id="footer">
-        <div class="footer-container">
-            <div class="footer-section">
-                <h3>Liên hệ</h3>
-                <p>Email: contact@example.com</p>
-                <p>Điện thoại: +123 456 7890</p>
-            </div>
-            <div class="footer-section">
-                <h3>Thông tin</h3>
-                <ul>
-                    <li><a href="#about">Về chúng tôi</a></li>
-                    <li><a href="#privacy">Chính sách bảo mật</a></li>
-                    <li><a href="#terms">Điều khoản sử dụng</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>Liên kết hữu ích</h3>
-                <ul>
-                    <li><a href="#faq">Câu hỏi thường gặp</a></li>
-                    <li><a href="#support">Hỗ trợ</a></li>
-                    <li><a href="#forum">Diễn đàn</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>Mạng xã hội</h3>
-                <div class="social-icons">
-                    <a href="https://www.threads.net/@hvdien04" target="_blank"><i class="fa-brands fa-square-threads"></i></a>
-                    <a href="https://www.instagram.com/hvdien04/" target="_blank"><i class="fa-brands fa-square-instagram"></i></a>
-                    <a href="https://www.facebook.com/HoangVanDien.Profile" target="_blank"><i class="fa-brands fa-facebook"></i></a>
+        <div class="content-area"> <!-- Thay đổi ở đây -->
+            <main class="main-content">
+                <div class="top-bar">
+                    <h1>Danh sách khách hàng</h1>
                 </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2024 Diễn đàn của chúng tôi. Bảo lưu mọi quyền.</p>
-        </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th style="width: 200px;">Tên khách hàng</th>
+                                <th style="width: 80px;">Email</th>
+                                <th>Số điện thoại</th>
+                                <th style="width: 200px;">Địa chỉ</th>
+                                <th style="width: 150px;">Thời gian bị cấm (phút)</th>
+                                <th>Số lượng bài</th>
+                                <th style="width: 150px;">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body">
+                            <td>KH01</td>
+                            <td>Nguyễn Minh Thịnh</td>
+                            <td>deptrai123@gmail.com</td>
+                            <td>0123456789</td>
+                            <td>Tổ 2, khu phố 8, thành phố Quy Nhơn, tỉnh Bình Định</td>
+                            <td>
+                                <input type="number" min="0" placeholder="Số phút" style="width: 90%; padding: 8px; box-sizing: border-box;">
+                            
+                            </td>
+                            <td>3</td>
+                            <td id="contain-btn">
+                                <button class="btn edit-btn">Chi tiết</button>
+                                <button class="btn delete-btn">Xóa</button>
+                            </td>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div> <!-- Kết thúc content-area -->
+
+    
     </div>
-    <!-- Footer -->
 
-    <script src="./asset/js/base.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-
-
+    <script src="customer.js"></script>
 </body>
 </html>

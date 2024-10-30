@@ -32,10 +32,22 @@
 .post:hover {
     border-color: #155724; 
     box-shadow: 0 4px 10px rgba(40, 167, 69, 0.5); 
+<<<<<<< HEAD
     transform: scale(1.02);
 }
 
 
+=======
+<<<<<<< HEAD
+}
+
+=======
+    transform: scale(1.02);
+}
+
+
+>>>>>>> 63523739a6d03b86785b74eba411f8167525b61c
+>>>>>>> 768c40f64407681d968f20a0765cbbd37866ed7a
 .recent-posts {
     flex: 1;
     border: 1px solid #ddd;
@@ -74,6 +86,11 @@
 .post-detail {
     padding: 20px;
 }
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> 768c40f64407681d968f20a0765cbbd37866ed7a
 
 .comments-section {
     margin-top: 20px;
@@ -102,6 +119,7 @@
     margin-top: 20px;
 }
 
+<<<<<<< HEAD
 .star-rating {
     display: inline-flex;
     flex-direction: row-reverse; 
@@ -132,6 +150,52 @@
     color: #ffe100; /* Màu cho các sao đã chọn */
 }
 
+=======
+.star {
+    font-size: 30px;
+    color: #ccc;
+    cursor: pointer;
+    display: inline-block;
+    position: relative;
+    transition: color 0.2s ease;
+}
+/* Ngôi sao đầy đủ */
+.star.filled {
+    color: gold;
+}
+/* Ngôi sao một phần */
+.star.partial::before {
+    content: '★';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--partial-fill, 0%);
+    overflow: hidden;
+    color: gold;
+}
+/* Tô màu các sao từ trái qua khi hover */
+.star:hover,
+.star:hover ~ .star {
+    color: #ffe100; 
+    transform: scale(1.2); /* Phóng to khi hover */
+}
+
+/* Màu cho sao đã chọn */
+.star.selected {
+    color: #ffe100;
+}
+
+/* Màu cho sao đã đánh giá dựa trên lớp CSS */
+.star-rating .star.filled {
+    color: gold; /* Màu vàng cho sao đã đánh giá */
+}
+
+.star-rating .star.empty {
+    color: lightgray; /* Màu trắng cho sao chưa đánh giá */
+}
+
+
+>>>>>>> 768c40f64407681d968f20a0765cbbd37866ed7a
 .create-post-btn {
     position: fixed; /* Fix the button at the bottom right of the viewport */
     bottom: 20px; /* Adjust as needed */
@@ -172,3 +236,7 @@
     text-decoration: none;
     cursor: pointer;
 }
+<<<<<<< HEAD
+=======
+>>>>>>> 63523739a6d03b86785b74eba411f8167525b61c
+>>>>>>> 768c40f64407681d968f20a0765cbbd37866ed7a
