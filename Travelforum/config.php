@@ -1,3 +1,4 @@
+<?php
 return [
     'db' => [
         'host' => 'localhost',
@@ -13,4 +14,4 @@ return [
         'password' => 'frrv krhj jgtq rehp'
     ]
 ];
-
+?>
