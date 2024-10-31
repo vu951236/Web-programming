@@ -1,15 +1,18 @@
 <?php
-// Kết nối đến cơ sở dữ liệu PostgreSQL
-$host = 'localhost';
-$db = 'Webphp';
-$user = 'postgres';
-$pass = '951236vu';
+session_start(); 
+
+// Load file cấu hình
+$config = include('config.php');
+
+// Kết nối cơ sở dữ liệu
+$dbConfig = $config['db'];
+$dsn = "pgsql:host={$dbConfig['host']};port={$dbConfig['port']};dbname={$dbConfig['dbname']}";
 
 try {
-    $pdo = new PDO("pgsql:host=$host;dbname=$db", $user, $pass);
+    $pdo = new PDO($dsn, $dbConfig['user'], $dbConfig['password']);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
-    echo "Connection failed: " . $e->getMessage();
+    die("Kết nối đến cơ sở dữ liệu thất bại: " . $e->getMessage());
 }
 
 // Lấy nội dung bài viết
@@ -23,29 +26,78 @@ $comment_stmt = $pdo->prepare("SELECT * FROM postcomment WHERE idpost = :idpost"
 $comment_stmt->execute(['idpost' => $post_id]);
 $comments = $comment_stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Xử lý đánh giá mới
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rating'])) {
     $newRating = (int) $_POST['rating'];
-    $postId = $post['id'];
-    $currentRate = $post['rate'];
-    $currentAmongRate = $post['amongrate'];
-
-    // Tính toán đánh giá mới
-    $updatedRate = (($currentRate * $currentAmongRate) + $newRating) / ($currentAmongRate + 1);
-    $updatedAmongRate = $currentAmongRate + 1;
-
-    // Cập nhật cơ sở dữ liệu
-    $updateStmt = $pdo->prepare("UPDATE postdetail SET rate = :rate, amongrate = :amongrate WHERE id = :id");
-    $updateStmt->execute([
-        'rate' => $updatedRate,
-        'amongrate' => $updatedAmongRate,
-        'id' => $postId
-    ]);
     
-    // Tải lại trang sau khi cập nhật
-    header("Location: " . $_SERVER['REQUEST_URI']);
-    exit;
-}
+    // Kiểm tra nếu bài viết tồn tại
+    if ($post) {
+        $currentRate = $post['rate'];
+        $currentAmongRate = $post['amongrate'];
+        $postCreatorId = $post['userid'];
+        $postLocation = $post['location'];
 
+        // Tính toán đánh giá mới
+        $updatedRate = (($currentRate * $currentAmongRate) + $newRating) / ($currentAmongRate + 1);
+        $updatedAmongRate = $currentAmongRate + 1;
+
+        // Cập nhật cột rate và amongrate trong cơ sở dữ liệu
+        $updateStmt = $pdo->prepare("UPDATE postdetail SET rate = :rate, amongrate = :amongrate WHERE id = :id");
+        $updateStmt->execute([
+            'rate' => $updatedRate,
+            'amongrate' => $updatedAmongRate,
+            'id' => $post_id
+        ]);
+
+        // Cập nhật điểm cho người tạo bài viết
+        $userPostsStmt = $pdo->prepare("SELECT rate, view FROM postdetail WHERE userid = :userid");
+        $userPostsStmt->execute(['userid' => $postCreatorId]);
+        $userPosts = $userPostsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $totalUserRate = 0;
+        $totalUserViews = 0;
+        $numUserPosts = count($userPosts);
+        
+        foreach ($userPosts as $userPost) {
+            $totalUserRate += $userPost['rate'];
+            $totalUserViews += $userPost['view'];
+        }
+
+        $userPoint = ($totalUserRate / max($numUserPosts, 1)) + ($numUserPosts * 0.5) + ($totalUserViews * 0.1);
+        $updateUserPointStmt = $pdo->prepare("UPDATE users SET point = :point WHERE id = :userid");
+        $updateUserPointStmt->execute([
+            'point' => $userPoint,
+            'userid' => $postCreatorId
+        ]);
+
+        // Cập nhật điểm cho địa điểm trong bảng locationdetail
+        $locationPostsStmt = $pdo->prepare("SELECT rate, view FROM postdetail WHERE location = :location");
+        $locationPostsStmt->execute(['location' => $postLocation]);
+        $locationPosts = $locationPostsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $totalLocationRate = 0;
+        $totalLocationViews = 0;
+        $numLocationPosts = count($locationPosts);
+        
+        foreach ($locationPosts as $locationPost) {
+            $totalLocationRate += $locationPost['rate'];
+            $totalLocationViews += $locationPost['view'];
+        }
+
+        $locationPoint = ($totalLocationRate / max($numLocationPosts, 1)) + ($numLocationPosts * 0.5) + ($totalLocationViews * 0.1);
+        $updateLocationPointStmt = $pdo->prepare("UPDATE locationdetail SET point = :point WHERE location = :location");
+        $updateLocationPointStmt->execute([
+            'point' => $locationPoint,
+            'location' => $postLocation
+        ]);
+
+        // Tải lại trang sau khi cập nhật
+        header("Location: " . $_SERVER['REQUEST_URI']);
+        exit;
+    } else {
+        echo "Bài viết không tồn tại.";
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -62,6 +114,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rating'])) {
     <link rel="stylesheet" href="./asset/css/style.css"> 
     <script src="./asset/js/base.js"></script>
     <script src="./asset/js/index.js"></script>
+    <script>
+        // Hàm để cập nhật đánh giá khi người dùng chọn sao
+        function setRating(rating) {
+            const stars = document.querySelectorAll('.star-rating .star');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('filled');
+                    star.classList.remove('empty');
+                } else {
+                    star.classList.add('empty');
+                    star.classList.remove('filled', 'partial');
+                }
+            });
+            document.getElementById('ratingInput').value = rating; // Cập nhật giá trị vào input ẩn
+        }
+
+        function hoverRating(rating) {
+            const stars = document.querySelectorAll('.star-rating .star');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('filled');
+                    star.classList.remove('empty');
+                } else if (index === Math.floor(rating) && rating % 1 !== 0) {
+                    star.classList.add('partial');
+                    star.classList.remove('empty');
+                    star.style.setProperty('--partial-fill', `${(rating % 1) * 100}%`); // Đặt tỷ lệ phần trăm cho sao một phần
+                } else {
+                    star.classList.add('empty');
+                    star.classList.remove('filled', 'partial');
+                }
+            });
+        }
+
+        function resetRating() {
+            const currentRating = document.getElementById('ratingInput').value;
+            displayRating(currentRating); // Gọi hàm hiển thị lại rating
+        }
+
+        function displayRating(rating) {
+            const stars = document.querySelectorAll('.star');
+            stars.forEach((star, index) => {
+                const starValue = index + 1; // Giá trị sao hiện tại
+
+                // Xóa tất cả các lớp
+                star.classList.remove('filled', 'partial', 'empty'); // Xóa tất cả lớp
+                star.style.visibility = 'visible'; // Đảm bảo hiển thị tất cả các sao
+
+                // Gán ngôi sao đầy đủ
+                if (starValue <= Math.floor(rating)) {
+                    star.classList.add('filled'); // Ngôi sao đầy
+                } 
+                // Gán ngôi sao một phần
+                else if (starValue === Math.ceil(rating) && rating % 1 !== 0) {
+                    const partialFill = (rating - Math.floor(rating)) * 100; // Phần trăm lấp đầy
+                    star.classList.add('partial');
+                    star.style.setProperty('--partial-fill', `${partialFill}%`);
+                } else {
+                    star.classList.add('empty'); // Ngôi sao rỗng
+                }
+            });
+        }
+
+    </script>
+
 </head>
 <body>
     <div id="header">
@@ -76,8 +192,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rating'])) {
             <a href="mypost.html#about">Về chúng tôi</a>
         </nav>
         <div class="header-account">
-            <a class="btn-account activee" href="#login">Đăng nhập</a>
-            <a class="btn-account" href="#register">Đăng ký</a>
+            <?php
+            // Kiểm tra xem có username trong session không
+            if (isset($_SESSION['username'])) {
+                // Nếu có username, hiển thị nút Đăng xuất
+                echo '<a class="btn-account" href="logout.php">Đăng xuất</a>';
+            } else {
+                // Nếu không có username, hiển thị nút Đăng nhập và Đăng ký
+                echo '<a class="btn-account activee" href="login.php">Đăng nhập</a>';
+                echo '<a class="btn-account" href="register.php">Đăng ký</a>';
+            }
+            ?>
         </div>
     </div>
 
@@ -112,10 +237,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rating'])) {
                         <h3>Rate this post</h3>
                         <div class="star-rating">
                             <?php
-                            // Giá trị rate có thể là số lẻ (ví dụ 4.3)
                             $rate = $post['rate'];
-                            $fullStars = floor($rate); // Số lượng sao đầy
-                            $partialStar = $rate - $fullStars; // Phần trăm cho sao lẻ
+                            $fullStars = floor($rate);
+                            $partialStar = $rate - $fullStars;
 
                             for ($i = 1; $i <= 5; $i++):
                                 if ($i <= $fullStars) {
@@ -126,8 +250,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rating'])) {
                                 } else {
                                     $starClass = 'empty'; // Ngôi sao chưa đánh giá
                                 }
-                                ?>
-                                <span class="star <?php echo $starClass; ?>" style="--partial-fill: <?php echo $starClass == 'partial' ? $partialFill : 0; ?>%;" data-value="<?php echo $i; ?>" onclick="setRating(<?php echo $i; ?>)">&#9733;</span>
+                            ?>
+                                <span class="star <?php echo $starClass; ?>" style="--partial-fill: <?php echo $starClass == 'partial' ? $partialFill : 0; ?>%;" data-value="<?php echo $i; ?>" 
+                                    onmouseover="hoverRating(<?php echo $i; ?>)" 
+                                    onmouseout="resetRating()" 
+                                    onclick="setRating(<?php echo $i; ?>)">&#9733;</span>
                             <?php endfor; ?>
                         </div>
 
@@ -136,46 +263,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rating'])) {
                             <button type="submit" class="btn btn-primary mt-2">Submit Rating</button>
                         </form>
                     </div>
-
-
-                    <script>
-                    // Hàm để cập nhật đánh giá khi người dùng chọn sao
-                    function setRating(rating) {
-                        const stars = document.querySelectorAll('.star-rating .star');
-                        stars.forEach((star, index) => {
-                            // Nếu chỉ số sao nhỏ hơn hoặc bằng giá trị được chọn, đổi màu sang vàng (filled)
-                            if (index < rating) {
-                                star.classList.add('filled');
-                                star.classList.remove('empty');
-                            } else {
-                                star.classList.add('empty');
-                                star.classList.remove('filled');
-                            }
-                        });
-                        // Cập nhật giá trị rating vào input ẩn
-                        document.getElementById('ratingInput').value = rating;
-                    }
-                    function displayRating(rating) {
-                        const stars = document.querySelectorAll('.star');
-                        stars.forEach((star, index) => {
-                            const starValue = index + 1;
-                            star.classList.remove('filled', 'partial');
-                            
-                            // Gán ngôi sao đầy đủ
-                            if (starValue <= Math.floor(rating)) {
-                                star.classList.add('filled');
-                            } 
-                            // Gán ngôi sao một phần
-                            else if (starValue === Math.ceil(rating)) {
-                                const partialFill = (rating - Math.floor(rating)) * 100; // Phần trăm lấp đầy
-                                star.classList.add('partial');
-                                star.style.setProperty('--partial-fill', `${partialFill}%`);
-                            }
-                        });
-                    }
-
-                    </script>
-                    
+           
                 </div>
 
                 <!-- Recent Posts Sidebar -->

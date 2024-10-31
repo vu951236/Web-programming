@@ -1,4 +1,3 @@
-<?php
 return [
     'db' => [
         'host' => 'localhost',
@@ -10,8 +9,8 @@ return [
     'email' => [
         'smtp_host' => 'smtp.gmail.com',
         'smtp_port' => '587',
-        'username' => '',
-        'password' => ''
+        'username' => 'hoangvuvo907@gmail.com',
+        'password' => 'frrv krhj jgtq rehp'
     ]
 ];
-?>
+

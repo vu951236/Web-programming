@@ -49,8 +49,8 @@ CREATE TABLE comment (
 );
 INSERT INTO comment (username, content, date, idpost)
 VALUES ('vu951236', 'Đẹp quá', '2024-10-15', 1);
-ALTER TABLE postdetail
-ADD COLUMN view int;
+ALTER TABLE locationdetail
+ADD COLUMN point int;
 
 CREATE TABLE locationdetail (
     id SERIAL PRIMARY KEY,        -- Thêm cột id làm khóa chính
@@ -129,6 +129,16 @@ INSERT INTO locationdetail (name) VALUES
 Select * from locationcomment
 Select * from postcomment
 Select * from locationdetail
+Select * from postdetail
+Select * from users
+
+ALTER TABLE postdetail
+ALTER COLUMN userid TYPE integer USING userid::integer;
+
+ALTER TABLE postdetail
+ADD CONSTRAINT fk_userid
+FOREIGN KEY (userid) REFERENCES users(id);
+
 
 ALTER TABLE locationdetail
 DROP COLUMN comment;
@@ -218,4 +228,84 @@ CREATE TABLE users (
     avatar VARCHAR(255),                    -- Đường dẫn ảnh đại diện
     banned_until TIMESTAMP,                 -- Ngày hết hạn khóa tài khoản
     count_post INT DEFAULT 0                -- Số lượng bài đăng, mặc định là 0
+);
+UPDATE locationdetail
+SET location = CASE
+    WHEN name = 'An Giang' THEN 'angiang'
+    WHEN name = 'Bà Rịa - Vũng Tàu' THEN 'bariavungtau'
+    WHEN name = 'Bắc Giang' THEN 'bacgiang'
+    WHEN name = 'Bắc Kạn' THEN 'backan'
+    WHEN name = 'Bạc Liêu' THEN 'baclieu'
+    WHEN name = 'Bắc Ninh' THEN 'bacninh'
+    WHEN name = 'Bến Tre' THEN 'bentre'
+    WHEN name = 'Bình Định' THEN 'binhdinh'
+    WHEN name = 'Bình Dương' THEN 'binhduong'
+    WHEN name = 'Bình Phước' THEN 'binhphuoc'
+    WHEN name = 'Bình Thuận' THEN 'binhthuan'
+    WHEN name = 'Cà Mau' THEN 'camau'
+    WHEN name = 'Cần Thơ' THEN 'cantho'
+    WHEN name = 'Cao Bằng' THEN 'caobang'
+    WHEN name = 'Đà Nẵng' THEN 'danang'
+    WHEN name = 'Đắk Lắk' THEN 'daklak'
+    WHEN name = 'Đắk Nông' THEN 'daknong'
+    WHEN name = 'Điện Biên' THEN 'dienbien'
+    WHEN name = 'Đồng Nai' THEN 'dongnai'
+    WHEN name = 'Đồng Tháp' THEN 'dongthap'
+    WHEN name = 'Gia Lai' THEN 'gialai'
+    WHEN name = 'Hà Giang' THEN 'hagiang'
+    WHEN name = 'Hà Nam' THEN 'hanam'
+    WHEN name = 'Hà Nội' THEN 'hanoi'
+    WHEN name = 'Hà Tĩnh' THEN 'hatinh'
+    WHEN name = 'Hải Dương' THEN 'haiduong'
+    WHEN name = 'Hải Phòng' THEN 'haiphong'
+    WHEN name = 'Hậu Giang' THEN 'haugiang'
+    WHEN name = 'Hòa Bình' THEN 'hoabinh'
+    WHEN name = 'Hồ Chí Minh' THEN 'hochiminh'
+    WHEN name = 'Hưng Yên' THEN 'hungyen'
+    WHEN name = 'Khánh Hòa' THEN 'khanhhoa'
+    WHEN name = 'Kiên Giang' THEN 'kiengiang'
+    WHEN name = 'Kon Tum' THEN 'kontum'
+    WHEN name = 'Lai Châu' THEN 'laichau'
+    WHEN name = 'Lâm Đồng' THEN 'lamdong'
+    WHEN name = 'Lạng Sơn' THEN 'langson'
+    WHEN name = 'Lào Cai' THEN 'laocai'
+    WHEN name = 'Long An' THEN 'longan'
+    WHEN name = 'Nam Định' THEN 'namdinh'
+    WHEN name = 'Nghệ An' THEN 'nghean'
+    WHEN name = 'Ninh Bình' THEN 'ninhbinh'
+    WHEN name = 'Ninh Thuận' THEN 'ninhthuan'
+    WHEN name = 'Phú Thọ' THEN 'phutho'
+    WHEN name = 'Phú Yên' THEN 'phuyen'
+    WHEN name = 'Quảng Bình' THEN 'quangbinh'
+    WHEN name = 'Quảng Nam' THEN 'quangnam'
+    WHEN name = 'Quảng Ngãi' THEN 'quangngai'
+    WHEN name = 'Quảng Ninh' THEN 'quangninh'
+    WHEN name = 'Quảng Trị' THEN 'quangtri'
+    WHEN name = 'Sóc Trăng' THEN 'soctrang'
+    WHEN name = 'Sơn La' THEN 'sonla'
+    WHEN name = 'Tây Ninh' THEN 'tayninh'
+    WHEN name = 'Thái Bình' THEN 'thaibinh'
+    WHEN name = 'Thái Nguyên' THEN 'thainguyen'
+    WHEN name = 'Thanh Hóa' THEN 'thanhhoa'
+    WHEN name = 'Thừa Thiên Huế' THEN 'thuathienhue'
+    WHEN name = 'Tiền Giang' THEN 'tiengiang'
+    WHEN name = 'Trà Vinh' THEN 'travinh'
+    WHEN name = 'Tuyên Quang' THEN 'tuyenquang'
+    WHEN name = 'Vĩnh Long' THEN 'vinhlong'
+    WHEN name = 'Vĩnh Phúc' THEN 'vinhphuc'
+    WHEN name = 'Yên Bái' THEN 'yenbai'
+    ELSE location
+END
+WHERE name IN (
+    'An Giang', 'Bà Rịa - Vũng Tàu', 'Bắc Giang', 'Bắc Kạn', 'Bạc Liêu', 
+    'Bắc Ninh', 'Bến Tre', 'Bình Định', 'Bình Dương', 'Bình Phước', 'Bình Thuận', 
+    'Cà Mau', 'Cần Thơ', 'Cao Bằng', 'Đà Nẵng', 'Đắk Lắk', 'Đắk Nông', 'Điện Biên', 
+    'Đồng Nai', 'Đồng Tháp', 'Gia Lai', 'Hà Giang', 'Hà Nam', 'Hà Nội', 'Hà Tĩnh', 
+    'Hải Dương', 'Hải Phòng', 'Hậu Giang', 'Hòa Bình', 'Hồ Chí Minh', 'Hưng Yên', 
+    'Khánh Hòa', 'Kiên Giang', 'Kon Tum', 'Lai Châu', 'Lâm Đồng', 'Lạng Sơn', 
+    'Lào Cai', 'Long An', 'Nam Định', 'Nghệ An', 'Ninh Bình', 'Ninh Thuận', 
+    'Phú Thọ', 'Phú Yên', 'Quảng Bình', 'Quảng Nam', 'Quảng Ngãi', 'Quảng Ninh', 
+    'Quảng Trị', 'Sóc Trăng', 'Sơn La', 'Tây Ninh', 'Thái Bình', 'Thái Nguyên', 
+    'Thanh Hóa', 'Thừa Thiên Huế', 'Tiền Giang', 'Trà Vinh', 'Tuyên Quang', 
+    'Vĩnh Long', 'Vĩnh Phúc', 'Yên Bái'
 );
