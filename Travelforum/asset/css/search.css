@@ -1,41 +1,190 @@
-.small-post {
-    border: 1px solid #ddd; 
-    border-radius: 10px;
-    padding: 10px; 
-    margin: 10px 0; 
-    background-color: #f9f9f9; 
-    max-width: 500px;
+/* Chỉnh sửa cho các bài viết */
+#posts {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #f8f9fa; /* Màu nền sáng cho phần bài viết */
+    border-radius: 8px; /* Bo góc cho khung */
 }
 
-.small-post:hover{
-    cursor: pointer;
+.small-post {
+    border: 1px solid #ddd; /* Viền xung quanh */
+    border-radius: 10px; /* Bo góc */
+    padding: 10px; /* Giảm padding cho nội dung bài viết */
+    margin: 10px 0; /* Khoảng cách giữa các bài viết */
+    background-color: #f9f9f9; /* Màu nền sáng cho từng bài viết */
+    max-width: 500px; /* Giới hạn chiều rộng của bài viết */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Đổ bóng nhẹ cho bài viết */
+    transition: transform 0.2s; /* Hiệu ứng khi hover */
+}
+
+.small-post:hover {
+    transform: scale(1.02); /* Phóng to nhẹ khi hover */
+    cursor: pointer; /* Thay đổi con trỏ khi hover */
 }
 
 .post-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 5px
+    display: flex; /* Sử dụng flexbox để căn chỉnh avatar và tên tác giả */
+    align-items: center; /* Canh giữa theo chiều dọc */
+    margin-bottom: 5px; /* Khoảng cách dưới phần header */
 }
 
 .post-author {
-    color: #333;
-    font-weight: bold;
-    margin-left: 10px ;
+    color: #333; /* Màu chữ cho tên tác giả */
+    font-weight: bold; /* Đậm cho tên tác giả */
+    margin-left: 10px; /* Khoảng cách giữa avatar và tên tác giả */
 }
 
 .post-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+    width: 40px; /* Kích thước avatar */
+    height: 40px; /* Kích thước avatar */
+    border-radius: 50%; /* Bo tròn avatar */
 }
 
 .center {
-    display: flex;
-    justify-content: center;
+    display: flex; /* Canh giữa nội dung */
+    justify-content: center; /* Canh giữa theo chiều ngang */
 }
 
 .post-content {
-    font-size: 14px;
-    color: #333;
-    text-align: left;
+    font-size: 14px; /* Kích thước chữ cho nội dung bài viết */
+    color: #333; /* Màu chữ cho nội dung bài viết */
+    text-align: left; /* Căn trái cho nội dung bài viết */
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .small-post {
+        padding: 8px; /* Giảm padding cho thiết bị di động */
+    }
+
+    .post-avatar {
+        width: 30px; /* Kích thước avatar trên thiết bị di động */
+        height: 30px; /* Kích thước avatar trên thiết bị di động */
+    }
+
+    .post-content {
+        font-size: 12px; /* Giảm kích thước chữ cho nội dung bài viết trên thiết bị di động */
+    }
+}
+
+/* Chỉnh sửa cho các bài viết */
+#posts {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #f8f9fa; /* Màu nền sáng cho phần bài viết */
+    border-radius: 8px; /* Bo góc cho khung */
+}
+
+.small-post {
+    background-color: white; /* Màu nền trắng cho từng bài viết */
+    border: 1px solid #dee2e6; /* Viền xung quanh */
+    border-radius: 8px; /* Bo góc */
+    padding: 15px; /* Padding cho nội dung bài viết */
+    margin-bottom: 20px; /* Khoảng cách giữa các bài viết */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Đổ bóng nhẹ cho bài viết */
+    transition: transform 0.2s; /* Hiệu ứng khi hover */
+}
+
+.small-post:hover {
+    transform: scale(1.02); /* Phóng to nhẹ khi hover */
+}
+
+.post-header {
+    display: flex; /* Sử dụng flexbox để căn chỉnh avatar và tên tác giả */
+    align-items: center; /* Canh giữa theo chiều dọc */
+    margin-bottom: 10px; /* Khoảng cách dưới phần header */
+}
+
+.post-avatar {
+    width: 40px; /* Kích thước avatar */
+    height: 40px; /* Kích thước avatar */
+    border-radius: 50%; /* Bo tròn avatar */
+    margin-right: 10px; /* Khoảng cách giữa avatar và tên tác giả */
+}
+
+.card-img-top {
+    border-top-left-radius: 8px; /* Bo góc cho ảnh ở góc trên trái */
+    border-top-right-radius: 8px; /* Bo góc cho ảnh ở góc trên phải */
+}
+
+.card-title {
+    font-size: 1.25rem; /* Kích thước chữ tiêu đề */
+    margin: 10px 0; /* Khoảng cách trên và dưới tiêu đề */
+}
+
+.post-content {
+    font-size: 0.9rem; /* Kích thước chữ cho nội dung bài viết */
+    color: #6c757d; /* Màu chữ cho nội dung bài viết */
+    line-height: 1.5; /* Khoảng cách giữa các dòng */
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .small-post {
+        padding: 10px; /* Giảm padding cho thiết bị di động */
+    }
+
+    .post-avatar {
+        width: 30px; /* Kích thước avatar trên thiết bị di động */
+        height: 30px; /* Kích thước avatar trên thiết bị di động */
+    }
+
+    .card-title {
+        font-size: 1.1rem; /* Giảm kích thước tiêu đề */
+    }
+}
+/* Tạo kiểu cho tiêu đề địa điểm */
+#locations h4 {
+    font-size: 24px; /* Kích thước chữ */
+    margin-bottom: 20px; /* Khoảng cách dưới tiêu đề */
+    color: #333; /* Màu sắc chữ */
+}
+
+/* Tạo kiểu cho vùng chứa địa điểm */
+#locations .explore-content {
+    margin: 0 auto; /* Căn giữa nội dung */
+}
+
+/* Tạo kiểu cho các thẻ card địa điểm */
+.card {
+    border: none; /* Bỏ đường viền */
+    border-radius: 8px; /* Bo góc */
+    overflow: hidden; /* Ẩn phần vượt ra ngoài */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Đổ bóng */
+    transition: transform 0.3s; /* Hiệu ứng khi hover */
+}
+
+/* Hiệu ứng khi hover lên thẻ card */
+.card:hover {
+    transform: translateY(-5px); /* Dịch chuyển lên một chút */
+}
+
+/* Tạo kiểu cho hình ảnh trong thẻ card */
+.card-img-top {
+    height: 200px; /* Chiều cao cố định cho hình ảnh */
+    object-fit: cover; /* Giữ tỷ lệ hình ảnh */
+}
+
+/* Tạo kiểu cho tiêu đề trong thẻ card */
+.card-title {
+    font-size: 18px; /* Kích thước chữ */
+    font-weight: bold; /* Đậm chữ */
+    color: #007bff; /* Màu sắc chữ */
+}
+
+/* Tạo kiểu cho nội dung trong thẻ card */
+.card-text {
+    font-size: 14px; /* Kích thước chữ */
+    color: #666; /* Màu sắc chữ */
+    margin-bottom: 15px; /* Khoảng cách dưới nội dung */
+}
+
+/* Tạo kiểu cho phần chứa địa điểm */
+#locations .row {
+    margin-bottom: 30px; /* Khoảng cách giữa các hàng */
+}
+
+/* Căn giữa phần nội dung trong card */
+.card-body {
+    text-align: center; /* Căn giữa chữ */
 }

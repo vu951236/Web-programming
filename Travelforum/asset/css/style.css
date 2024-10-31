@@ -103,7 +103,7 @@
 
 .star-rating {
     display: inline-flex;
-    flex-direction: row-reverse; 
+    flex-direction: row; 
     gap: 5px;
 }
 

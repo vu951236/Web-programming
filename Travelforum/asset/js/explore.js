@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded',function(){
 
     nav.forEach(navs => {
         navs.addEventListener('click',function(e){
-            e.preventDefault();
             nav.forEach(c => c.classList.remove('active'));
             this.classList.add('active');
         })

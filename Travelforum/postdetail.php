@@ -183,13 +183,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rating'])) {
     <div id="header">
         <div class="header-logo">Logo</div>
         <div class="header-search">
-            <input type="text" placeholder="Tìm kiếm..." />
-            <button class="btn-header">Tìm kiếm</button>
+            <form action="search.php" method="GET">
+                <input type="text" name="keyword" placeholder="Tìm kiếm..." required />
+                <button class="btn-header" type="submit">Tìm kiếm</button>
+            </form>
         </div>
         <nav class="header-nav">
-            <a href="mypost.html#status">Bài viết</a>
-            <a href="mypost.html#explore">Khám phá</a>
-            <a href="mypost.html#about">Về chúng tôi</a>
+            <a href="post.php">Bài viết</a>
+            <a href="explore.php">Khám phá</a>
+            <a href="aboutus.html">Về chúng tôi</a>
         </nav>
         <div class="header-account">
             <?php
