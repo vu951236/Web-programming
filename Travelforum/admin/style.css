@@ -89,7 +89,7 @@
     cursor: pointer;
     transition: background-color 0.3s ease;
     margin: 4px 0; /* Tạo khoảng cách giữa các nút */
-    width: 100%; /* Chiều rộng 100% để nút trải đều chiều rộng của ô */
+    width: 80%; /* Chiều rộng 100% để nút trải đều chiều rộng của ô */
     box-sizing: border-box; /* Đảm bảo padding không làm tăng chiều rộng của nút */
 }
 

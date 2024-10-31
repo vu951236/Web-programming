@@ -1,0 +1,127 @@
+/* Đảm bảo toàn bộ chiều cao của viewport cho phần tử cha */
+html, body {
+    height: 100%;
+    margin: 0; /* Xóa margin mặc định */
+}
+
+/* Khung chính của trang */
+#main {
+    display: flex; /* Sử dụng flexbox */
+    min-height: calc(100% - 80px); /* Chiều cao tối thiểu bằng chiều cao viewport trừ chiều cao footer (60px) + padding (20px) */
+    padding-bottom: 80px; /* Thêm padding dưới cùng để tránh chồng lên footer */
+}
+
+/* Định dạng cho thanh điều hướng bên */
+.aside-nav {
+    display: flex; /* Sử dụng flexbox */
+    flex-direction: column; /* Đặt chiều hướng là cột */
+    padding: 20px; /* Khoảng cách xung quanh nav */
+    background-color: #34495e; /* Màu nền cho nav */
+    border: 1px solid #ddd; /* Đường viền cho nav */
+    border-radius: 20px; /* Bo tròn góc cho nav */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Đổ bóng cho nav */
+    width: 220px; /* Đặt chiều rộng cho nav */
+    margin-top: 80px; /* Khoảng cách từ trên cùng */
+    margin-left: 10px; /* Khoảng cách từ bên trái */
+    position: fixed; /* Giữ nav cố định */
+}
+
+/* Định dạng cho nội dung chính */
+.content {
+    flex: 1; /* Chiếm không gian còn lại */
+    margin-left: 300px; /* Để tránh chồng lên thanh nav (220px + margin) */
+    padding: 20px; /* Khoảng cách cho nội dung */
+}
+
+/* Định dạng cho các mục của nav */
+.aside-nav a {
+    text-decoration: none; /* Không có gạch chân */
+    color: #333; /* Màu chữ */
+    padding: 10px 15px; /* Khoảng cách cho các mục */
+    margin: 5px 0; /* Khoảng cách giữa các mục */
+    transition: background-color 0.3s, color 0.3s; /* Hiệu ứng chuyển đổi cho nền và màu chữ */
+}
+
+/* Hiệu ứng khi hover */
+.aside-nav a:hover {
+    background-color: #007bff; /* Nền khi hover */
+    color: white; /* Màu chữ khi hover */
+    border-radius: 5px; /* Bo tròn góc */
+}
+
+/* Định dạng cho các mục mới */
+.aside-nav a.new-item {
+    color: white; /* Màu sắc cho các mục mới */
+    font-weight: bold; /* Độ đậm cho các mục mới */
+}
+
+.aside-nav a.new-item:hover {
+    color: white; /* Màu chữ khi hover trên mục mới */
+    background-color: #007bff; /* Nền khi hover trên mục mới */
+}
+
+
+/* Thiết lập bố cục Flex cho form */
+form {
+    display: flex;
+    gap: 20px; /* Khoảng cách giữa 2 khối */
+}
+
+/* Khối bên trái */
+.left-section {
+    flex: 1; /* Chiếm 1 phần không gian */
+}
+
+/* Rút ngắn chiều rộng của các input */
+.short-input {
+    width: 350px; /* Chiều rộng ngắn hơn */
+}
+
+.right-section {
+    display: flex;
+    flex-direction: column; /* Đặt các phần tử theo chiều dọc */
+    align-items: center; /* Căn giữa các phần tử */
+    margin-right: 100px;
+}
+
+.image-container {
+    margin-bottom: 10px; /* Khoảng cách giữa ảnh và khối dưới */
+}
+
+.profile-image {
+    height: 150px; /* Chiều cao của ảnh */
+    width: 250px; /* Chiều rộng của ảnh */
+}
+
+.upload-container {
+    text-align: center; /* Căn giữa nội dung trong khối này */
+}
+
+.custom-file-upload {
+    cursor: pointer;
+    display: inline-block;
+    padding: 6px 12px;
+    color: white;
+    background-color: #6c757d; /* Màu sắc của nút */
+    border-radius: 4px;
+    margin-top: 10px; /* Khoảng cách phía trên nút */
+}
+
+.custom-file-upload:hover {
+    background-color: #5a6268; /* Màu nền khi di chuột qua nút */
+}
+
+.hidden-input {
+    display: none; /* Ẩn input file */
+}
+
+.form-text {
+    margin-top: 5px; /* Khoảng cách phía trên mô tả */
+    text-align: center; /* Căn giữa mô tả */
+}
+
+button[type="submit"] {
+    display: block; /* Đảm bảo nút có dòng mới */
+    margin: 30px auto; /* Tạo khoảng cách phía trên và căn giữa */
+}
+
