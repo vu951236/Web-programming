@@ -14,5 +14,4 @@ return [
         'password' => 'frrv krhj jgtq rehp'
     ]
 ];
-
 ?>
