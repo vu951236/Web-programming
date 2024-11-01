@@ -161,3 +161,16 @@
 .user-name {
     font-weight: bold; 
 }
+i.fa-eye {
+    text-decoration: none !important;
+    border-bottom: none !important;
+}
+a {
+    text-decoration: none !important;
+}
+
+a .post-actions button {
+    text-decoration: none !important;
+}
+
+

@@ -16,15 +16,26 @@ try {
 }
 
 // Lấy nội dung bài viết
-$post_id = 1; // Thay thế bằng id của bài viết bạn muốn lấy
+$post_id = isset($_GET['id']) ? (int) $_GET['id'] : 1; // Lấy post_id từ query string
 $stmt = $pdo->prepare("SELECT * FROM postdetail WHERE id = :id");
 $stmt->execute(['id' => $post_id]);
 $post = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Kiểm tra xem bài viết có tồn tại không
+if (!$post) {
+    echo "Bài viết không tồn tại.";
+    exit; // Dừng thực hiện script nếu không có bài viết
+}
 
 // Lấy bình luận của bài viết
 $comment_stmt = $pdo->prepare("SELECT * FROM postcomment WHERE idpost = :idpost");
 $comment_stmt->execute(['idpost' => $post_id]);
 $comments = $comment_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Lấy 3 bài viết gần đây
+$recentPostsStmt = $pdo->prepare("SELECT * FROM postdetail ORDER BY date DESC LIMIT 3");
+$recentPostsStmt->execute();
+$recentPosts = $recentPostsStmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Xử lý đánh giá mới
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rating'])) {
@@ -98,6 +109,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rating'])) {
         echo "Bài viết không tồn tại.";
     }
 }
+// Kiểm tra nếu có nội dung comment và người dùng đã đăng nhập
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment'])) {
+    if (isset($_SESSION['username'])) {
+        $commentContent = trim($_POST['comment']);
+        $post_id = (int) $_POST['idpost'];
+        $username = $_SESSION['username'];
+        $date = date('Y-m-d H:i:s'); // Lấy thời gian hiện tại
+
+        // Chuẩn bị câu lệnh SQL để chèn bình luận vào bảng postcomment
+        $stmt = $pdo->prepare("INSERT INTO postcomment (idpost, date, content, username) VALUES (:idpost, :date, :content, :username)");
+        $stmt->execute([
+            'idpost' => $post_id,
+            'date' => $date,
+            'content' => $commentContent,
+            'username' => $username
+        ]);
+
+        // Chuyển hướng về trang chi tiết bài viết sau khi bình luận thành công
+        header("Location: postdetail.php?id=" . $post_id);
+        exit;
+    }
+    // Nếu người dùng chưa đăng nhập, không làm gì cả
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -220,7 +255,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rating'])) {
                     <img src="<?php echo htmlspecialchars($post['image']); ?>" alt="Post Image" class="detail-image">
                     <p><?php echo nl2br(htmlspecialchars($post['content'])); ?></p>
 
-                    <!-- Comments -->
                     <div class="comments-section mt-4">
                         <h3>Comments</h3>
                         <?php foreach ($comments as $comment): ?>
@@ -228,12 +262,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rating'])) {
                                 <p><strong><?php echo htmlspecialchars($comment['username']); ?>:</strong> <?php echo nl2br(htmlspecialchars($comment['content'])); ?></p>
                             </div>
                         <?php endforeach; ?>
-                        <form class="add-comment-form" method="POST" action="add_comment.php">
-                            <textarea name="comment" placeholder="Add your comment here..." required></textarea>
-                            <input type="hidden" name="idpost" value="<?php echo $post_id; ?>">
-                            <button type="submit" class="btn btn-primary mt-2">Submit</button>
-                        </form>
+
+                        <?php if (isset($_SESSION['username'])): ?>
+                            <form class="add-comment-form" method="POST" action="postdetail.php">
+                                <textarea name="comment" placeholder="Add your comment here..." required></textarea>
+                                <input type="hidden" name="idpost" value="<?php echo $post_id; ?>">
+                                <button type="submit" class="btn btn-primary mt-2">Submit</button>
+                            </form>
+                        <?php else: ?>
+                            <p class="text-danger">Vui lòng <a href="login.php">đăng nhập</a> để bình luận.</p>
+                        <?php endif; ?>
                     </div>
+
 
                     <div class="rating-section">
                         <h3>Rate this post</h3>
@@ -271,19 +311,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rating'])) {
                 <!-- Recent Posts Sidebar -->
                 <div class="recent-posts ms-4">
                     <h3>Các bài viết gần đây</h3>
-                    <div class="recent-post">
-                        <h4><a href="postdetail.html">ABC</a></h4>
-                        <p class="date">October 12, 2024</p>
-                    </div>
-                    <div class="recent-post">
-                        <h4><a href="postdetail.html">ABD</a></h4>
-                        <p class="date">October 10, 2024</p>
-                    </div>
-                    <div class="recent-post">
-                        <h4><a href="postdetail.html">ABE</a></h4>
-                        <p class="date">October 8, 2024</p>
-                    </div>
+                    <?php foreach ($recentPosts as $recentPost): ?>
+                        <div class="recent-post">
+                            <h4><a href="postdetail.php?id=<?php echo $recentPost['id']; ?>"><?php echo htmlspecialchars($recentPost['name']); ?></a></h4>
+                            <p class="date"><?php echo date('F j, Y', strtotime($recentPost['date'])); ?></p>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
+
             </div>
         </div>
     </div>

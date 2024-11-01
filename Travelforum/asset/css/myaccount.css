@@ -60,11 +60,12 @@ html, body {
     background-color: #007bff; /* Nền khi hover trên mục mới */
 }
 
-
 /* Thiết lập bố cục Flex cho form */
-form {
+#myForm {
     display: flex;
     gap: 20px; /* Khoảng cách giữa 2 khối */
+    align-items: flex-start; /* Căn chỉnh các phần tử bên trong form */
+    flex-direction: row; /* Đặt các phần tử theo chiều ngang trong form */
 }
 
 /* Khối bên trái */
@@ -73,31 +74,38 @@ form {
 }
 
 /* Rút ngắn chiều rộng của các input */
-.short-input {
-    width: 350px; /* Chiều rộng ngắn hơn */
+.left-section .short-input,
+.right-section .short-input {
+    width: 100%; /* Chiều rộng 100% để chiếm toàn bộ không gian khối chứa */
 }
 
+/* Khối bên phải */
 .right-section {
     display: flex;
     flex-direction: column; /* Đặt các phần tử theo chiều dọc */
     align-items: center; /* Căn giữa các phần tử */
-    margin-right: 100px;
+    flex: 0 0 300px; /* Thiết lập chiều rộng cố định cho khối này */
 }
 
+/* Phần tử ảnh */
 .image-container {
     margin-bottom: 10px; /* Khoảng cách giữa ảnh và khối dưới */
 }
 
+/* Ảnh đại diện */
 .profile-image {
     height: 150px; /* Chiều cao của ảnh */
-    width: 250px; /* Chiều rộng của ảnh */
+    width: 100%; /* Đặt chiều rộng là 100% để phù hợp với khối chứa */
+    object-fit: cover; /* Cắt và căn chỉnh ảnh cho phù hợp */
 }
 
+/* Khối tải ảnh */
 .upload-container {
     text-align: center; /* Căn giữa nội dung trong khối này */
 }
 
-.custom-file-upload {
+/* Nút tải ảnh */
+.upload-container .custom-file-upload {
     cursor: pointer;
     display: inline-block;
     padding: 6px 12px;
@@ -107,21 +115,90 @@ form {
     margin-top: 10px; /* Khoảng cách phía trên nút */
 }
 
-.custom-file-upload:hover {
+/* Hiệu ứng hover cho nút */
+.upload-container .custom-file-upload:hover {
     background-color: #5a6268; /* Màu nền khi di chuột qua nút */
 }
 
+/* Ẩn input file */
 .hidden-input {
     display: none; /* Ẩn input file */
 }
 
-.form-text {
+/* Đặt tên lớp cho phần của form để tránh xung đột */
+#accountSettings {
+    padding: 20px; /* Thêm padding cho phần form */
+    background-color: #f8f9fa; /* Nền màu sáng để phân biệt với header */
+    border: 1px solid #dee2e6; /* Đường viền cho form */
+    border-radius: 5px; /* Bo góc cho form */
+    margin-top: 20px; /* Khoảng cách trên với phần khác */
+}
+
+/* Căn chỉnh các phần tử bên trong form */
+#accountSettings .form-label {
+    font-weight: bold; /* Làm đậm label */
+}
+
+#accountSettings .form-control {
+    margin-bottom: 15px; /* Khoảng cách dưới mỗi input */
+}
+
+/* Khối bên trái */
+#accountSettings .left-section {
+    flex: 1; /* Chiếm 1 phần không gian */
+}
+
+/* Khối bên phải */
+#accountSettings .right-section {
+    width: 250px; /* Thiết lập chiều rộng cố định cho khối này */
+}
+
+/* Ảnh đại diện */
+#accountSettings .profile-image {
+    height: 150px; /* Chiều cao của ảnh */
+    width: 100%; /* Đặt chiều rộng là 100% để phù hợp với khối chứa */
+    object-fit: cover; /* Cắt và căn chỉnh ảnh cho phù hợp */
+}
+
+/* Phần tử tải ảnh */
+#accountSettings .upload-container {
+    text-align: center; /* Căn giữa nội dung trong khối này */
+}
+
+/* Ẩn input file */
+#accountSettings .hidden-input {
+    display: none; /* Ẩn input file */
+}
+
+/* Mô tả dưới input */
+#accountSettings .form-text {
     margin-top: 5px; /* Khoảng cách phía trên mô tả */
     text-align: center; /* Căn giữa mô tả */
 }
 
-button[type="submit"] {
+/* Nút submit */
+#accountSettings .btn-primary {
     display: block; /* Đảm bảo nút có dòng mới */
-    margin: 30px auto; /* Tạo khoảng cách phía trên và căn giữa */
+    margin: 20px auto; /* Tạo khoảng cách phía trên và căn giữa */
+    padding: 10px 20px; /* Thêm padding để nút dễ nhấn hơn */
+    font-size: 16px; /* Kích thước chữ cho nút */
 }
 
+
+.header-search {
+    position: relative; /* Đặt vị trí cho container */
+}
+
+.header-search input {
+    position: relative; /* Đặt vị trí cho input */
+    top: 0px; /* Kéo xuống thêm 10px */
+    margin: 0 10px; /* Margin hai bên */
+    border-radius: 20px;
+    padding: 10px 20px;
+    height: 40px;
+}
+.header-search input {
+    margin: 0 10px;
+    border-radius: 20px;
+    padding: 0 20px;
+}

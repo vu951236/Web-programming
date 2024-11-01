@@ -66,9 +66,12 @@
 }
 
 .detail-image {
-    width: 100%;
-    height: auto;
+    display: block; /* Đảm bảo ảnh là một khối */
+    max-width: 100%; /* Giới hạn chiều rộng của ảnh */
+    height: auto; /* Giữ tỷ lệ khung hình */
+    width: auto; /* Chiều rộng tự động theo kích thước thực */
 }
+
 
 .post-detail {
     padding: 20px;

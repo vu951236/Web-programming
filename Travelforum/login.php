@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['username']) && !empt
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['username'] = $user['username'];
                 $_SESSION['isadmin'] = $user['isadmin'];
-                header("Location: index.html");
+                header("Location: index.php");
                 exit;
             } else {
                 $error_message = "Sai mật khẩu. Vui lòng thử lại.";
