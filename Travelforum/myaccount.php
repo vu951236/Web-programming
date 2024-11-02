@@ -10,68 +10,265 @@ $dbConfig = $config['db'];
 $dsn = "pgsql:host={$dbConfig['host']};port={$dbConfig['port']};dbname={$dbConfig['dbname']}";
 
 $message = ''; // Biến để lưu thông báo
+$section = '';
 
 try {
     // Tạo kết nối đến cơ sở dữ liệu
     $pdo = new PDO($dsn, $dbConfig['user'], $dbConfig['password']);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // Kiểm tra nếu người dùng đã đăng nhập
     if (!isset($_SESSION['user_id'])) {
-        die("Bạn cần đăng nhập để cập nhật thông tin.");
+        header("Location: login.php");
+        exit();
     }
 
-    // Kiểm tra nếu biểu mẫu được gửi
+    // Lấy thông tin người dùng từ cơ sở dữ liệu
+    $stmt = $pdo->prepare("SELECT fullname, email, avatar FROM users WHERE id = :id");
+    $stmt->bindParam(':id', $_SESSION['user_id']);
+    $stmt->execute();
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $oldAvatar = $user['avatar'] ?? '';
+
+    // Lấy tất cả bài viết của người dùng
+    $stmt = $pdo->prepare("SELECT * FROM postdetail WHERE userid = :user_id ORDER BY date DESC");
+    $stmt->bindParam(':user_id', $_SESSION['user_id']);
+    $stmt->execute();
+    $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        // Lấy dữ liệu từ biểu mẫu
-        $fullname = $_POST['fullname'] ?? null; // Sử dụng null nếu không có dữ liệu
-        $email = $_POST['email'] ?? null;
-        $password = $_POST['password'] ?? null;
+        if (isset($_POST['action']) && $_POST['action'] === 'editaccount') {
+            // Cập nhật thông tin cá nhân
+            $fullname = $_POST['fullname'] ?? null;
+            $email = $_POST['email'] ?? null;
+            $password = $_POST['password'] ?? null;
+            $newAvatar = null;
 
-        // Tạo một mảng để lưu các cặp khóa-giá trị cho tham số
-        $params = [];
-        $sql = "UPDATE users SET";
+            $params = [];
+            $sql = "UPDATE users SET";
 
-        // Kiểm tra và thêm các trường cần cập nhật vào câu truy vấn
-        if ($fullname) {
-            $sql .= " fullname = :fullname,";
-            $params[':fullname'] = $fullname; // Thêm tham số fullname
+            if ($fullname) {
+                $sql .= " fullname = :fullname,";
+                $params[':fullname'] = $fullname;
+            }
+            if ($email) {
+                $sql .= " email = :email,";
+                $params[':email'] = $email;
+            }
+            if ($password) {
+                $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+                $sql .= " password = :password,";
+                $params[':password'] = $hashedPassword;
+            }
+
+            // Kiểm tra và xử lý file avatar
+            if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['size'] > 0) {
+                $avatarFile = $_FILES['profile_picture'];
+                $extension = pathinfo($avatarFile['name'], PATHINFO_EXTENSION); // Lấy phần mở rộng của file
+                $newAvatar = uniqid('avatar_', true) . '.' . $extension; // Tạo tên file duy nhất
+                // Đường dẫn đến thư mục images trên server 
+                $serverImagesDir = __DIR__ . '/database/users';
+
+                // Tạo thư mục nếu chưa tồn tại
+                if (!file_exists($serverImagesDir)) {
+                    mkdir($serverImagesDir, 0777, true);
+                }
+
+                // Xóa avatar cũ
+                if ($oldAvatar) {
+                    $oldServerPath = $serverImagesDir . '/' . basename($oldAvatar);
+                    if (file_exists($oldServerPath)) unlink($oldServerPath);
+                }
+
+                // Đường dẫn lưu avatar mới
+                $serverUploadPath = $serverImagesDir . '/' . $newAvatar;
+
+                // Di chuyển file avatar vào thư mục server 
+                move_uploaded_file($avatarFile['tmp_name'], $serverUploadPath);
+
+                // Cập nhật đường dẫn avatar vào cơ sở dữ liệu
+                $sql .= " avatar = :avatar,";
+                $params[':avatar'] = 'database/users/' . $newAvatar;
+            }
+
+            if (count($params) > 0) {
+                $sql = rtrim($sql, ',') . " WHERE id = :id";
+                $params[':id'] = $_SESSION['user_id'];
+
+                $stmt = $pdo->prepare($sql);
+                foreach ($params as $key => $value) {
+                    $stmt->bindValue($key, $value);
+                }
+                $stmt->execute();
+
+                $_SESSION['message'] = "Cập nhật thành công!";
+                $_SESSION['section'] = 'accountSettings';
+                header("Location: myaccount.php");
+                exit();
+            } else {
+                $_SESSION['message'] = "Không có thông tin nào để cập nhật.";
+            }
         }
-        if ($email) {
-            $sql .= " email = :email,";
-            $params[':email'] = $email; // Thêm tham số email
-        }
-        if ($password) {
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-            $sql .= " password = :password,";
-            $params[':password'] = $hashedPassword; // Thêm tham số password
-        }
 
-        // Kiểm tra xem có trường nào được cập nhật hay không
-        if (count($params) > 0) {
-            // Xóa dấu phẩy cuối cùng nếu có
-            $sql = rtrim($sql, ',') . " WHERE id = :id";
-            $params[':id'] = $_SESSION['user_id']; // Thêm tham số id
-
-            // Chuẩn bị và thực thi câu truy vấn
+        if (isset($_POST['action']) && $_POST['action'] === 'editpost') {
+            $editPostId = $_POST['post_id'];
+            $postName = $_POST['name'] ?? '';
+            $postContent = $_POST['content'] ?? '';
+            $newImage = null; // Biến lưu đường dẫn hình ảnh mới
+        
+            // Cập nhật bài viết
+            $sql = "UPDATE postdetail SET name = :name, content = :content";
+            $params = [
+                ':name' => $postName,
+                ':content' => $postContent,
+            ];
+        
+            // Kiểm tra xem có hình ảnh mới không
+            if (isset($_FILES['image']) && $_FILES['image']['size'] > 0) {
+                $imageFile = $_FILES['image'];
+                $extension = pathinfo($imageFile['name'], PATHINFO_EXTENSION); // Lấy phần mở rộng của file
+                $newImage = uniqid('post_', true) . '.' . $extension; // Tạo tên file duy nhất
+        
+                // Đường dẫn đến thư mục lưu trữ hình ảnh trên server
+                $serverImagesDir = __DIR__ . '/database/posts';
+        
+                // Tạo thư mục nếu chưa tồn tại
+                if (!file_exists($serverImagesDir)) {
+                    mkdir($serverImagesDir, 0777, true);
+                }
+        
+                // Xóa hình ảnh cũ nếu có
+                $stmt = $pdo->prepare("SELECT image FROM postdetail WHERE id = :id");
+                $stmt->bindParam(':id', $editPostId);
+                $stmt->execute();
+                $oldImage = $stmt->fetchColumn();
+        
+                if ($oldImage) {
+                    $oldServerPath = $serverImagesDir . '/' . basename($oldImage);
+                    if (file_exists($oldServerPath)) unlink($oldServerPath);
+                }
+        
+                // Di chuyển file hình ảnh mới vào thư mục server
+                $serverUploadPath = $serverImagesDir . '/' . $newImage;
+                move_uploaded_file($imageFile['tmp_name'], $serverUploadPath);
+        
+                // Cập nhật đường dẫn hình ảnh mới vào cơ sở dữ liệu
+                $sql .= ", image = :image";
+                $params[':image'] = 'database/posts/' . $newImage;
+            }
+        
+            // Hoàn tất câu lệnh SQL
+            $sql .= " WHERE id = :id";
+            $params[':id'] = $editPostId;
+        
             $stmt = $pdo->prepare($sql);
-            
-            // Bind các tham số
             foreach ($params as $key => $value) {
                 $stmt->bindValue($key, $value);
             }
+            $stmt->execute();
+        
+            $affectedRows = $stmt->rowCount();
+            if ($affectedRows > 0) {
+                $_SESSION['message'] = "Chỉnh sửa bài viết thành công!";
+            } else {
+                $_SESSION['message'] = "Không có thay đổi nào được thực hiện. Post ID: $editPostId, Name: $postName, Content: $postContent";
+            }
+        
+            $_SESSION['section'] = 'myPosts';
+            header("Location: myaccount.php");
+            exit();
+        }
+        // Xử lý thêm bài viết
+        if (isset($_POST['action']) && $_POST['action'] === 'addpost') {
+            $postTitle = $_POST['postTitle'] ?? '';
+            $postDescription = $_POST['postDescription'] ?? ''; // Nhận trường mô tả
+            $postContent = $_POST['postContent'] ?? '';
+            $postLocation = $_POST['postLocation'] ?? ''; // Nhận tỉnh thành
+            $newImage = null;
 
-            // Thực thi câu truy vấn
+            // Xử lý hình ảnh
+            if (isset($_FILES['postImage']) && $_FILES['postImage']['size'] > 0) {
+                $imageFile = $_FILES['postImage'];
+                $extension = pathinfo($imageFile['name'], PATHINFO_EXTENSION); // Lấy phần mở rộng của file
+                $newImageName = uniqid('post_', true) . '.' . $extension; // Tạo tên file duy nhất
+
+                // Đường dẫn đến thư mục lưu trữ hình ảnh trên server
+                $serverImagesDir = __DIR__ . '/database/posts';
+
+                // Tạo thư mục nếu chưa tồn tại
+                if (!file_exists($serverImagesDir)) {
+                    mkdir($serverImagesDir, 0777, true);
+                }
+
+                // Di chuyển file hình ảnh vào thư mục server
+                $serverUploadPath = $serverImagesDir . '/' . $newImageName;
+                move_uploaded_file($imageFile['tmp_name'], $serverUploadPath);
+                $newImage = 'database/posts/' . $newImageName; // Lưu đường dẫn hình ảnh
+            }
+
+            // Thêm bài viết vào cơ sở dữ liệu
+            $sql = "INSERT INTO postdetail (userid, name, description, content, image, location, date) VALUES (:userid, :name, :description, :content, :image, :location, NOW())";
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':userid', $_SESSION['user_id']);
+            $stmt->bindParam(':name', $postTitle);
+            $stmt->bindParam(':description', $postDescription); 
+            $stmt->bindParam(':content', $postContent);
+            $stmt->bindParam(':image', $newImage);
+            $stmt->bindParam(':location', $postLocation); 
             $stmt->execute();
 
-            $message = "Cập nhật thành công!"; // Lưu thông báo thành công
-        } else {
-            $message = "Không có thông tin nào để cập nhật."; // Lưu thông báo không có thông tin
+            $_SESSION['message'] = "Thêm bài viết thành công!";
+            $_SESSION['section'] = 'addPost';
+            header("Location: myaccount.php");
+            exit();
         }
     }
+
+    // Kiểm tra và xử lý yêu cầu xóa bài viết
+    if (isset($_POST['action']) && $_POST['action'] === 'deletepost' && isset($_POST['post_id'])) {
+        $deletePostId = $_POST['post_id']; // Thay đổi từ $_GET sang $_POST
+        $stmt = $pdo->prepare("DELETE FROM postdetail WHERE id = :id AND userid = :user_id");
+        $stmt->bindParam(':id', $deletePostId);
+        $stmt->bindParam(':user_id', $_SESSION['user_id']);
+        $stmt->execute();
+
+        $affectedRows = $stmt->rowCount();
+        if ($affectedRows > 0) {
+            $_SESSION['message'] = "Xóa bài viết thành công!";
+        } else {
+            $_SESSION['message'] = "Không có thay đổi nào được thực hiện. Post ID: $deletePostId"; // Cập nhật ID đúng
+        }
+        $_SESSION['section'] = 'myPosts';
+        header("Location: myaccount.php");
+        exit();
+    }
+    // Xử lý yêu cầu xóa tài khoản
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'deleteaccount') {
+        $userId = $_SESSION['user_id']; // Lấy ID người dùng từ phiên làm việc
+
+        // Xóa tất cả bình luận của người dùng trong bảng postcomment
+        $deleteCommentsStmt = $pdo->prepare("DELETE FROM postcomment WHERE userid = :userid");
+        $deleteCommentsStmt->execute(['userid' => $userId]);
+
+        // Xóa tất cả bài viết của người dùng trong bảng postdetail
+        $deletePostsStmt = $pdo->prepare("DELETE FROM postdetail WHERE userid = :userid");
+        $deletePostsStmt->execute(['userid' => $userId]);
+
+        // Xóa thông tin người dùng trong bảng users
+        $deleteUserStmt = $pdo->prepare("DELETE FROM users WHERE id = :userid");
+        $deleteUserStmt->execute(['userid' => $userId]);
+
+        // Hủy phiên làm việc và chuyển hướng về trang chính
+        session_destroy();
+        header("Location: index.php"); // Chuyển hướng về trang chính hoặc trang đăng nhập
+        exit;
+    }
+
+
 } catch (PDOException $e) {
-    $message = "Lỗi kết nối: " . $e->getMessage(); // Lưu thông báo lỗi
+    $message = "Lỗi kết nối: " . $e->getMessage();
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -86,6 +283,7 @@ try {
     <link rel="stylesheet" href="./asset/font/fontawesome-free-6.6.0-web/fontawesome-free-6.6.0-web/css/all.min.css">
     <link rel="stylesheet" href="./asset/css/index.css">
     <link rel="stylesheet" href="./asset/css/base.css">
+    <link rel="stylesheet" href="./asset/css/post.css">
     <link rel="stylesheet" href="./asset/css/myaccount.css">
     <style>
         .hidden { display: none; }
@@ -133,16 +331,16 @@ try {
         <div class="content p-4">
             <div id="accountSettings" class="section">
                 <h2 class="mb-4">Sửa thông tin</h2>
-                <form action="myaccount.php" method="post" class="d-flex flex-column">
+                <form action="myaccount.php" method="post" enctype="multipart/form-data" class="d-flex flex-column">
                     <div class="d-flex align-items-start mb-3">
                         <div class="left-section flex-grow-1">
                             <div class="mb-3">
                                 <label for="fullname" class="form-label">Tên người dùng</label>
-                                <input type="text" class="form-control" id="fullname" name="fullname" placeholder="Nhập tên người dùng" >
+                                <input type="text" class="form-control" id="fullname" name="fullname" placeholder="Nhập tên người dùng" value="<?php echo htmlspecialchars($user['fullname'] ?? ''); ?>">
                             </div>
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" placeholder="Nhập email" >
+                                <input type="email" class="form-control" id="email" name="email" placeholder="Nhập email" value="<?php echo htmlspecialchars($user['email'] ?? ''); ?>">
                             </div>
                             <div class="mb-3">
                                 <label for="password" class="form-label">Mật khẩu mới</label>
@@ -155,7 +353,7 @@ try {
                         </div>
                         <div class="right-section ms-3 text-center">
                             <div class="image-container mb-2">
-                                <img src="./asset/img/user_image.png" alt="User Image" class="profile-image">
+                                <img src="<?php echo $user['avatar'] ? './' . htmlspecialchars($user['avatar']) : './asset/img/user_image.png'; ?>" alt="User Image" class="profile-image" id="current-image">
                             </div>
                             <div class="upload-container">
                                 <label for="profile_picture" class="custom-file-upload btn btn-secondary">Chọn ảnh</label>
@@ -164,25 +362,66 @@ try {
                             <small class="form-text text-muted">Chọn ảnh để làm ảnh đại diện của bạn (JPEG, PNG).</small>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary mt-3">Lưu thay đổi</button>
-                    <?php if ($message): ?>
-                        <div class="text-danger"><?php echo htmlspecialchars($message); ?></div>
-                    <?php endif; ?>
+                    <button type="submit" class="btn btn-primary mt-3" name="action" value="editaccount">Lưu thay đổi</button>
                 </form>
             </div>
 
             <!-- Nội dung Bài viết của tôi -->
-            <div id="myPosts" class="section hidden">
+            <div id="myPosts" class="section">
                 <h2 class="mb-4">Bài viết của tôi</h2>
                 <div id="postsContainer">
-                    <div class="post">
-                        <h3>Tên bài viết 1</h3>
-                        <p>Mô tả ngắn gọn về bài viết 1...</p>
-                    </div>
-                    <div class="post">
-                        <h3>Tên bài viết 2</h3>
-                        <p>Mô tả ngắn gọn về bài viết 2...</p>
-                    </div>
+                    <?php if (!empty($posts)): ?>
+                        <?php foreach ($posts as $post): ?>
+                            <div class="post">
+                                <div class="post-header">
+                                    <img src="<?php echo htmlspecialchars($post['image'] ?? 'asset/img/default.jpg'); ?>" alt="Ảnh bài viết" class="post-image">
+                                    <h3><?php echo htmlspecialchars($post['name']); ?></h3>
+                                    <p><?php echo htmlspecialchars($post['description']); ?></p>
+                                    <small><?php echo htmlspecialchars($post['date']); ?></small>
+                                </div>
+                                <!-- Nút chỉnh sửa và xóa -->
+                                <div class="post-actions">
+                                    <button class="edit-btn" onclick="openEditModal(<?php echo htmlspecialchars(json_encode($post)); ?>)">
+                                        <i class="fa fa-pencil"></i> Sửa
+                                    </button>
+                                    <a href="/Travelforum/Travelforum/postdetail.php?id=<?php echo htmlspecialchars($post['id']); ?>">
+                                        <button><i class="fa-regular fa-eye"></i> Xem bài viết</button>
+                                    </a>
+                                    <form action="javascript:void(0);" style="display: inline;" onclick="openDeleteModal(<?php echo htmlspecialchars($post['id']); ?>)">
+                                        <button type="button" class="delete-btn">
+                                            <i class="fa fa-trash"></i> Xóa
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>                         
+                        <?php endforeach; ?>                       
+                    <?php else: ?>
+                        <p>Không có bài viết nào.</p>
+                    <?php endif; ?>
+                </div>              
+            </div>
+
+            <!-- Modal chỉnh sửa bài viết -->
+            <div id="editModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeEditModal()">&times;</span>
+                    <h2>Chỉnh sửa bài viết</h2>
+                    <form action="myaccount.php" method="post" enctype="multipart/form-data">
+                        <input type="hidden" id="edit-post-id" name="post_id">
+                        <div class="form-group">
+                            <label for="edit-post-name">Tên bài viết:</label>
+                            <input type="text" id="edit-post-name" name="name" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-post-content">Nội dung:</label>
+                            <textarea id="edit-post-content" name="content" class="form-control" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-post-image">Ảnh bài viết:</label>
+                            <input type="file" id="edit-post-image" name="image" accept="image/*" class="form-control">
+                        </div>
+                        <button type="submit" class="btn btn-primary" name="action" value="editpost">Sửa bài viết</button>
+                    </form>
                 </div>
             </div>
 
@@ -193,10 +432,14 @@ try {
                     <details>
                         <summary class="btn btn-primary">Mở Thêm Bài Viết</summary>
                         <div class="create-post">
-                            <form action="your_post_submission_endpoint" method="POST" enctype="multipart/form-data">
+                            <form action="myaccount.php" method="POST" enctype="multipart/form-data">
                                 <div class="mb-3">
                                     <label for="postTitle" class="form-label">Tiêu đề</label>
                                     <input type="text" class="form-control" id="postTitle" name="postTitle" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="postDescription" class="form-label">Mô tả</label>
+                                    <input type="text" class="form-control" id="postDescription" name="postDescription" required>
                                 </div>
                                 <div class="mb-3">
                                     <label for="postContent" class="form-label">Nội dung</label>
@@ -206,12 +449,69 @@ try {
                                     <label for="postImage" class="form-label">Hình ảnh</label>
                                     <input type="file" class="form-control" id="postImage" name="postImage">
                                 </div>
-                                <button type="submit" class="btn btn-success">Tạo Bài Viết</button>
+                                <div class="mb-3">
+                                    <label for="postLocation" class="form-label">Chọn Tỉnh Thành</label>
+                                    <select class="form-select" id="postLocation" name="postLocation" required>
+                                        <option value="">Chọn Tỉnh Thành</option>
+                                        <option value="angiang">An Giang</option>
+                                        <option value="bariavungtau">Bà Rịa - Vũng Tàu</option>
+                                        <option value="bacgiang">Bắc Giang</option>
+                                        <option value="bacninh">Bắc Ninh</option>
+                                        <option value="bentre">Bến Tre</option>
+                                        <option value="binhduong">Bình Dương</option>
+                                        <option value="binhphuoc">Bình Phước</option>
+                                        <option value="binhdinh">Bình Định</option>
+                                        <option value="caobang">Cao Bằng</option>
+                                        <option value="daklak">Đắk Lắk</option>
+                                        <option value="daknong">Đắk Nông</option>
+                                        <option value="dienbien">Điện Biên</option>
+                                        <option value="hagiang">Hà Giang</option>
+                                        <option value="hanoi">Hà Nội</option>
+                                        <option value="haiphong">Hải Phòng</option>
+                                        <option value="hanam">Hà Nam</option>
+                                        <option value="hatinh">Hà Tĩnh</option>
+                                        <option value="hochiminh">Hồ Chí Minh</option>
+                                        <option value="hoabinh">Hòa Bình</option>
+                                        <option value="hungyen">Hưng Yên</option>
+                                        <option value="khanhhoa">Khánh Hòa</option>
+                                        <option value="kiengiang">Kiên Giang</option>
+                                        <option value="kontum">Kon Tum</option>
+                                        <option value="laichau">Lai Châu</option>
+                                        <option value="lamdong">Lâm Đồng</option>
+                                        <option value="langson">Lạng Sơn</option>
+                                        <option value="longan">Long An</option>
+                                        <option value="namdinh">Nam Định</option>
+                                        <option value="nghean">Nghệ An</option>
+                                        <option value="ninhbinh">Ninh Bình</option>
+                                        <option value="ninhthuan">Ninh Thuận</option>
+                                        <option value="phutho">Phú Thọ</option>
+                                        <option value="phuquoc">Phú Quốc</option>
+                                        <option value="quangbinh">Quảng Bình</option>
+                                        <option value="quangnam">Quảng Nam</option>
+                                        <option value="quangngai">Quảng Ngãi</option>
+                                        <option value="quangninh">Quảng Ninh</option>
+                                        <option value="quangtri">Quảng Trị</option>
+                                        <option value="soctrang">Sóc Trăng</option>
+                                        <option value="sola">Sơn La</option>
+                                        <option value="tayninh">Tây Ninh</option>
+                                        <option value="thanhhoa">Thanh Hóa</option>
+                                        <option value="thuathienhue">Thừa Thiên Huế</option>
+                                        <option value="tiengiang">Tiền Giang</option>
+                                        <option value="travinh">Trà Vinh</option>
+                                        <option value="tuyenquang">Tuyên Quang</option>
+                                        <option value="vinhphuc">Vĩnh Phúc</option>
+                                        <option value="vinhlong">Vĩnh Long</option>
+                                        <option value="yenbai">Yên Bái</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-success" name="action" value="addpost">Tạo Bài Viết</button>
                             </form>
                         </div>
                     </details>
                 </div>
             </div>
+
+
 
             <!-- Nội dung Chính sách sử dụng -->
             <div id="policyContent" class="section hidden">
@@ -225,11 +525,50 @@ try {
             <div id="deleteAccount" class="section hidden">
                 <h2 class="mb-4">Xóa tài khoản</h2>
                 <p>Bạn chắc chắn muốn xóa tài khoản của mình? Hành động này không thể hoàn tác.</p>
-                <button class="btn btn-danger">Xóa tài khoản</button>
+                <button class="btn btn-danger" onclick="openDeleteAccountModal()">Xóa tài khoản</button>
             </div>
 
         </div>
     </div>
+    <!-- Modal thông báo -->
+    <div id="notificationModal" class="notification-modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeNotificationModal()">&times;</span>
+            <h2>Thông báo</h2>
+            <p id="notificationMessage">Nội dung thông báo ở đây</p>
+            <button onclick="closeNotificationModal()">Xác nhận</button>
+        </div>
+    </div>
+
+    <!-- Modal xác nhận xóa bài viết -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeDeleteModal()">&times;</span>
+            <h2>Xác nhận</h2>
+            <p>Bạn có chắc chắn muốn xóa bài viết này không?</p>
+            <form id="deletePostForm" action="myaccount.php" method="post">
+                <input type="hidden" name="post_id" id="post_id_to_delete">
+                <button type="submit" class="btn btn-danger" name="action" value="deletepost">Xóa</button>
+                <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Hủy</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal xác nhận xóa tài khoản -->
+    <div id="deleteAccountModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeDeleteAccountModal()">&times;</span>
+            <h2>Xác nhận</h2>
+            <p>Sau khi xóa tài khoản, tất cả các bình luận và bài viết của bạn sẽ biến mất. Bạn có chắc chắn muốn xóa tài khoản không?</p>
+            <form id="deleteAccountForm" action="myaccount.php" method="post">
+                <input type="hidden" name="action" value="deleteaccount">
+                <button type="submit" class="btn btn-danger">Xóa tài khoản</button>
+                <button type="button" class="btn btn-secondary" onclick="closeDeleteAccountModal()">Hủy</button>
+            </form>
+        </div>
+    </div>
+
+
 
     <div id="footer">
         <div class="footer-container">
@@ -326,10 +665,91 @@ try {
             }
         }
 
-        // Hiển thị phần cài đặt tài khoản mặc định khi vào trang
-        window.onload = function() {
-            showSection('accountSettings');
-        };
+        const sectionId = "<?php echo $_SESSION['section'] ?? 'accountSettings'; ?>"; // Mặc định là accountSettings nếu không có phần nào được lưu
+        showSection(sectionId);
+
+         // Hiển thị ảnh mới ngay khi người dùng chọn
+         document.getElementById("profile_picture").addEventListener("change", function(event) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById("current-image").src = e.target.result;
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        });
+        // Hàm mở modal
+        function openEditModal(post) {
+            document.getElementById('editModal').style.display = 'block';
+            document.getElementById('edit-post-id').value = post.id;
+            document.getElementById('edit-post-name').value = post.name;
+            document.getElementById('edit-post-content').value = post.content;
+        }
+
+        // Hàm đóng modal
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        // Thêm sự kiện cho nút đóng
+        document.querySelector('.close').addEventListener('click', closeEditModal);
+
+        // Ngăn không cho modal đóng khi nhấn vào nội dung của modal
+        document.querySelector('.modal-content').addEventListener('click', function(event) {
+            event.stopPropagation();
+        });
+
+        // Đóng modal khi nhấn vào vùng tối bên ngoài modal
+        document.querySelector('.modal').addEventListener('click', closeEditModal);
+
+
+        function showNotification(message) {
+            document.getElementById('notificationMessage').innerText = message;
+            document.getElementById('notificationModal').style.display = 'block';
+        }
+
+        function closeNotificationModal() {
+            document.getElementById('notificationModal').style.display = 'none';
+        }
+
+        function openDeleteModal(postId) {
+            document.getElementById('post_id_to_delete').value = postId; // Gán ID bài viết vào input
+            document.getElementById('deleteModal').style.display = 'block'; // Mở modal
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none'; // Đóng modal
+        }
+
+        // Đóng modal khi người dùng nhấn bên ngoài modal
+        window.onclick = function(event) {
+            var modal = document.getElementById('deleteModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        function openDeleteAccountModal() {
+            document.getElementById('deleteAccountModal').style.display = 'block'; // Mở modal
+        }
+
+        function closeDeleteAccountModal() {
+            document.getElementById('deleteAccountModal').style.display = 'none'; // Đóng modal
+        }
+
+        // Đóng modal khi người dùng nhấn bên ngoài modal
+        window.onclick = function(event) {
+            var modal = document.getElementById('deleteAccountModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+
+
+        <?php if (isset($_SESSION['message'])): ?>
+            showNotification("<?php echo htmlspecialchars($_SESSION['message']); ?>");
+            // Xóa thông báo sau khi hiển thị
+            <?php unset($_SESSION['message']); ?>
+        <?php endif; ?>
 
     </script>
 </body>

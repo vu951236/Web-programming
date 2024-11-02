@@ -27,6 +27,21 @@ if (!$post) {
     exit; // Dừng thực hiện script nếu không có bài viết
 }
 
+// Kiểm tra nếu người dùng chưa xem bài viết
+if (!isset($_SESSION['viewed_posts'])) {
+    $_SESSION['viewed_posts'] = []; // Khởi tạo session nếu chưa có
+}
+
+// Nếu người dùng chưa xem bài viết này, tăng cột view
+if (!in_array($post_id, $_SESSION['viewed_posts'])) {
+    // Tăng view cho bài viết
+    $updateViewStmt = $pdo->prepare("UPDATE postdetail SET view = view + 1 WHERE id = :id");
+    $updateViewStmt->execute(['id' => $post_id]);
+
+    // Lưu lại post_id vào session
+    $_SESSION['viewed_posts'][] = $post_id;
+}
+
 // Lấy bình luận của bài viết
 $comment_stmt = $pdo->prepare("SELECT * FROM postcomment WHERE idpost = :idpost");
 $comment_stmt->execute(['idpost' => $post_id]);
@@ -111,19 +126,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rating'])) {
 }
 // Kiểm tra nếu có nội dung comment và người dùng đã đăng nhập
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment'])) {
-    if (isset($_SESSION['username'])) {
+    if (isset($_SESSION['user_id'])) {
         $commentContent = trim($_POST['comment']);
         $post_id = (int) $_POST['idpost'];
         $username = $_SESSION['username'];
         $date = date('Y-m-d H:i:s'); // Lấy thời gian hiện tại
+        $userid = $_SESSION['user_id'];
 
         // Chuẩn bị câu lệnh SQL để chèn bình luận vào bảng postcomment
-        $stmt = $pdo->prepare("INSERT INTO postcomment (idpost, date, content, username) VALUES (:idpost, :date, :content, :username)");
+        $stmt = $pdo->prepare("INSERT INTO postcomment (idpost, date, content, username, userid) VALUES (:idpost, :date, :content, :username, :userid)");
         $stmt->execute([
             'idpost' => $post_id,
             'date' => $date,
             'content' => $commentContent,
-            'username' => $username
+            'username' => $username,
+            'userid' => $userid
         ]);
 
         // Chuyển hướng về trang chi tiết bài viết sau khi bình luận thành công

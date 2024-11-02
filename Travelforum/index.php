@@ -104,7 +104,7 @@ session_start();
                                         <?php if (isset($locations[$index])): // Kiểm tra xem địa điểm tồn tại không ?>
                                             <div class="col">
                                                 <div class="card">
-                                                    <img src="./asset/img/<?php echo $locations[$index]['image']; ?>" class="card-img-top" alt="...">
+                                                    <img src="./<?php echo $locations[$index]['image']; ?>" class="card-img-top" alt="...">
                                                     <div class="card-body">
                                                         <h5 class="card-title"><?php echo $locations[$index]['name']; ?></h5>
                                                         <p class="card-text"><?php echo $locations[$index]['information']; ?></p>
@@ -138,7 +138,7 @@ session_start();
                         <?php foreach ($users as $row): ?>
                             <div class="col">
                                 <div class="team-mem">
-                                    <img class="member-img" src="./asset/img/<?php echo $row['avatar'] ?: 'test.jpg'; ?>">
+                                    <img class="member-img" src="./<?php echo $row['avatar'] ?: 'asset/img/test.jpg'; ?>">
                                     <h4 class="member-name"><?php echo $row['username']; ?></h4>
                                 </div>
                             </div>

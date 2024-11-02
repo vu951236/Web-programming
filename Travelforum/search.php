@@ -76,7 +76,6 @@ if (isset($_GET['keyword'])) {
     <link rel="stylesheet" href="./asset/css/base.css">
     <script src="./asset/js/base.js"></script>
     <script src="./asset/js/index.js"></script>
-    <script src="./asset/js/search.js"></script>
 </head>
 <body>
 <div id="header">
@@ -120,7 +119,7 @@ if (isset($_GET['keyword'])) {
                                     foreach ($locations as $location) {
                                         echo '<div class="col">';
                                         echo '  <div class="card">';
-                                        echo '    <img src="asset/img/' . htmlspecialchars($location['image']) . '" class="card-img-top" alt="...">'; // Hiển thị hình ảnh với đường dẫn mới
+                                        echo '    <img src="./' . htmlspecialchars($location['image']) . '" class="card-img-top" alt="...">'; // Hiển thị hình ảnh với đường dẫn mới
                                         echo '    <div class="card-body">';
                                         echo '      <h5 class="card-title">' . htmlspecialchars($location['name']) . '</h5>';
                                         echo '      <p class="card-text">' . htmlspecialchars($location['information']) . '</p>'; // Sử dụng information
@@ -147,7 +146,7 @@ if (isset($_GET['keyword'])) {
                             echo '<div class="col center">';
                             echo '    <div class="small-post">';
                             echo '      <div class="post-header">';
-                            echo '        <img src="' . htmlspecialchars($row['author_avatar']) . '" alt="Avatar" class="post-avatar">'; // Sửa đường dẫn đến ảnh
+                            echo '        <img src="' . htmlspecialchars($row['author_avatar']?? 'asset/img/test.jpg') . '" alt="Avatar" class="post-avatar">'; // Sửa đường dẫn đến ảnh
                             echo '        <div class="post-author">' . htmlspecialchars($row['author_name']) . '</div>';
                             echo '      </div>';
                             echo '      <img src="' . htmlspecialchars($row['image']) . '" class="card-img-top" alt="...">';

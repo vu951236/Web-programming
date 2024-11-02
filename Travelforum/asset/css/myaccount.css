@@ -202,3 +202,113 @@ html, body {
     border-radius: 20px;
     padding: 0 20px;
 }
+/* CSS cho phần bài viết */
+#postsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.post {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 10px;
+    width: 300px; /* Chiều rộng cố định cho bài viết */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.post-header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.post-image {
+    width: 500px; /* Cố định chiều rộng ảnh */
+    height: auto;
+    margin-bottom: 10px;
+}
+
+/* CSS cho modal */
+.modal {
+    display: none; /* Ẩn modal theo mặc định */
+    position: fixed; /* Vị trí cố định */
+    z-index: 1000; /* Đặt trên cùng */
+    left: 0;
+    top: 0;
+    width: 100%; /* Chiếm toàn bộ chiều rộng */
+    height: 100%; /* Chiếm toàn bộ chiều cao */
+    overflow: auto; /* Kích hoạt cuộn nếu cần */
+    background-color: rgba(0, 0, 0, 0.5); /* Nền tối với độ trong suốt */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* Căn giữa modal */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Chiều rộng của modal */
+    max-width: 500px; /* Chiều rộng tối đa của modal */
+    border-radius: 5px; /* Bo tròn các góc */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Đổ bóng cho modal */
+    max-height: 90vh;
+}
+
+.close {
+    position: absolute; /* Đặt nút đóng ở vị trí tuyệt đối */
+    right: 10px; /* Cách từ bên phải */
+    top: 10px; /* Cách từ trên cùng */
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer; /* Thay đổi con trỏ khi hover */
+}
+
+.close:hover,
+.close:focus {
+    color: black; /* Thay đổi màu khi hover */
+    text-decoration: none;
+}
+
+.form-group {
+    margin-bottom: 15px; /* Khoảng cách giữa các trường */
+}
+
+.form-control {
+    width: 100%; /* Đảm bảo các trường nhập chiếm toàn bộ chiều rộng */
+    padding: 10px; /* Padding cho các trường nhập */
+    border: 1px solid #ccc; /* Viền cho các trường nhập */
+    border-radius: 4px; /* Bo tròn các góc */
+}
+#edit-post-content {
+    height: 150px; /* Đặt chiều cao cho textarea */
+}
+.profile-image,
+.post-image {
+    width: 500px;
+    height: auto;
+    object-fit: cover; /* Giúp ảnh không bị méo, cắt ảnh cho phù hợp */
+}
+.notification-modal {
+    display: none; /* Ẩn modal theo mặc định */
+    position: fixed; /* Vị trí cố định */
+    z-index: 1000; /* Đặt trên cùng */
+    left: 0;
+    top: 0;
+    width: 100%; /* Chiếm toàn bộ chiều rộng */
+    height: 100%; /* Chiếm toàn bộ chiều cao */
+    overflow: auto; /* Kích hoạt cuộn nếu cần */
+    background-color: rgba(0, 0, 0, 0.5); /* Nền tối với độ trong suốt */
+}
+
+.notification-modal .modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* Căn giữa modal */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Chiều rộng của modal */
+    max-width: 500px; /* Chiều rộng tối đa của modal */
+    border-radius: 5px; /* Bo tròn các góc */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Đổ bóng cho modal */
+}

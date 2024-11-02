@@ -114,7 +114,7 @@ $locations = $result_locations->fetchAll(PDO::FETCH_ASSOC);
                                     <?php foreach ($locations as $location): ?>
                                         <div class="col">
                                             <div class="card">
-                                                <img src="./asset/img/<?php echo htmlspecialchars($location['image']); ?>" class="card-img-top" alt="<?php echo htmlspecialchars($location['name']); ?>">
+                                                <img src="./<?php echo htmlspecialchars($location['image']); ?>" class="card-img-top" alt="<?php echo htmlspecialchars($location['name']); ?>">
                                                 <div class="card-body">
                                                     <h5 class="card-title"><?php echo htmlspecialchars($location['name']); ?></h5>
                                                     <p class="card-text"><?php echo htmlspecialchars($location['information']); ?></p>
