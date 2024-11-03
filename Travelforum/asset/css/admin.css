@@ -1,0 +1,302 @@
+ /* Reset */
+ * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+}
+/* Khung chính của trang */
+#main {
+    display: flex; /* Sử dụng flexbox */
+    min-height: calc(100% - 80px); /* Chiều cao tối thiểu bằng chiều cao viewport trừ chiều cao footer (60px) + padding (20px) */
+    padding-bottom: 80px; /* Thêm padding dưới cùng để tránh chồng lên footer */
+}
+.header-search input[type="text"] {
+    height: 40px; /* Điều chỉnh chiều cao */
+}
+.header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+.header img {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+}
+.header h1 {
+    font-size: 24px;
+    font-weight: bold;
+}
+/* Định dạng cho thanh điều hướng bên */
+.aside-nav {
+    display: flex; /* Sử dụng flexbox */
+    flex-direction: column; /* Đặt chiều hướng là cột */
+    padding: 20px; /* Khoảng cách xung quanh nav */
+    background-color: #34495e; /* Màu nền cho nav */
+    border: 1px solid #ddd; /* Đường viền cho nav */
+    border-radius: 20px; /* Bo tròn góc cho nav */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Đổ bóng cho nav */
+    width: 220px; /* Đặt chiều rộng cho nav */
+    margin-top: 80px; /* Khoảng cách từ trên cùng */
+    margin-left: 10px; /* Khoảng cách từ bên trái */
+    position: fixed; /* Giữ nav cố định */
+}
+
+/* Định dạng cho nội dung chính */
+.content {
+    flex: 1; /* Chiếm không gian còn lại */
+    margin-left: 300px; /* Để tránh chồng lên thanh nav (220px + margin) */
+    padding: 20px; /* Khoảng cách cho nội dung */
+}
+
+/* Định dạng cho các mục của nav */
+.aside-nav a {
+    text-decoration: none; /* Không có gạch chân */
+    color: #333; /* Màu chữ */
+    padding: 10px 15px; /* Khoảng cách cho các mục */
+    margin: 5px 0; /* Khoảng cách giữa các mục */
+    transition: background-color 0.3s, color 0.3s; /* Hiệu ứng chuyển đổi cho nền và màu chữ */
+}
+
+/* Hiệu ứng khi hover */
+.aside-nav a:hover {
+    background-color: #007bff; /* Nền khi hover */
+    color: white; /* Màu chữ khi hover */
+    border-radius: 5px; /* Bo tròn góc */
+}
+
+/* Định dạng cho các mục mới */
+.aside-nav a.new-item {
+    color: white; /* Màu sắc cho các mục mới */
+    font-weight: bold; /* Độ đậm cho các mục mới */
+}
+
+.aside-nav a.new-item:hover {
+    color: white; /* Màu chữ khi hover trên mục mới */
+    background-color: #007bff; /* Nền khi hover trên mục mới */
+}
+
+.content {
+    margin-left: 220px;
+}
+.search-bar {
+    display: flex;
+    margin-bottom: 20px;
+}
+.search-bar input[type="text"] {
+    flex: 1;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-right: 10px;
+}
+.search-bar button {
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    color: white;
+    background-color: #333;
+    cursor: pointer;
+}
+.filter-buttons {
+    margin-bottom: 20px;
+}
+.filter-buttons button {
+    padding: 10px 15px;
+    margin-right: 10px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    background-color: #ccc;
+    cursor: pointer;
+}
+.filter-buttons button.active {
+    background-color: #aaa;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+table th, table td {
+    padding: 15px;
+    text-align: left;
+    border: 1px solid #ccc;
+}
+table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+table tr:nth-child(even) {
+    background-color: #fafafa;
+}
+/* Căn chỉnh và phong cách cho ô cấm và nút cấm */
+.ban-cell {
+    gap: 10px;
+    width: 260px;
+}
+
+.ban-cell input[type="number"] {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 162px;
+    font-size: 14px;
+}
+
+.ban-button {
+    padding: 8px 12px;
+    background-color: #ff6961;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.ban-button:hover {
+    background-color: #ff5a50;
+}
+.unban-button {
+    background-color: #f44336; /* Màu đỏ cho nút hủy cấm */
+    color: white; /* Màu chữ trắng */
+    border: none; /* Không có viền */
+    padding: 10px 20px; /* Khoảng cách bên trong */
+    text-align: center; /* Căn giữa nội dung */
+    text-decoration: none; /* Không có gạch chân */
+    display: inline-block; /* Hiển thị inline-block để có thể định dạng */
+    font-size: 16px; /* Kích thước chữ */
+    margin: 4px 2px; /* Khoảng cách giữa các nút */
+    cursor: pointer; /* Hiển thị con trỏ chuột là pointer khi hover */
+    border-radius: 4px; /* Bo tròn các góc */
+    transition: background-color 0.3s; /* Hiệu ứng chuyển màu */
+}
+
+.unban-button:hover {
+    background-color: #d32f2f; /* Màu đỏ đậm khi hover */
+}
+
+/* Căn chỉnh và phong cách cho ô xóa và nút xóa */
+.delete-cell {
+    text-align: center;
+    width: 140px; 
+}
+
+.delete-button {
+    padding: 8px 12px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.delete-button:hover {
+    background-color: #d32f2f;
+}
+.hidden {
+    display: none;
+}
+/* Định dạng cho cột Xem bài viết */
+.view-cell {
+    text-align: center; /* Căn giữa nội dung */
+    padding: 10px; /* Khoảng cách bên trong */
+    width: 160px; 
+
+}
+
+.view-cell a button {
+    background-color: #007bff; /* Màu nền của nút */
+    color: white; /* Màu chữ */
+    border: none; /* Xóa đường viền */
+    padding: 8px 15px; /* Khoảng cách trong nút */
+    font-size: 14px; /* Kích thước chữ */
+    border-radius: 5px; /* Bo tròn góc */
+    cursor: pointer; /* Thay đổi con trỏ khi hover */
+    transition: background-color 0.3s ease; /* Hiệu ứng chuyển màu */
+}
+
+.view-cell a button:hover {
+    background-color: #0056b3; /* Màu nền khi hover */
+}
+
+/* Định dạng cho cột Duyệt bài viết */
+.approve-cell {
+    text-align: center; /* Căn giữa nội dung */
+    padding: 10px; /* Khoảng cách bên trong */
+    width: 140px; 
+
+}
+
+.approve-button {
+    background-color: #28a745; /* Màu nền của nút */
+    color: white; /* Màu chữ */
+    border: none; /* Xóa đường viền */
+    padding: 8px 15px; /* Khoảng cách trong nút */
+    font-size: 14px; /* Kích thước chữ */
+    border-radius: 5px; /* Bo tròn góc */
+    cursor: pointer; /* Thay đổi con trỏ khi hover */
+    transition: background-color 0.3s ease; /* Hiệu ứng chuyển màu */
+}
+
+.approve-button:hover {
+    background-color: #218838; /* Màu nền khi hover */
+}
+
+/* Định dạng chung cho các cột nút nếu cần */
+.view-cell, .approve-cell {
+    vertical-align: middle; /* Căn giữa theo chiều dọc */
+}
+/* CSS cho modal */
+.modal {
+    display: none; /* Ẩn modal theo mặc định */
+    position: fixed; /* Vị trí cố định */
+    z-index: 1000; /* Đặt trên cùng */
+    left: 0;
+    top: 0;
+    width: 100%; /* Chiếm toàn bộ chiều rộng */
+    height: 100%; /* Chiếm toàn bộ chiều cao */
+    overflow: auto; /* Kích hoạt cuộn nếu cần */
+    background-color: rgba(0, 0, 0, 0.5); /* Nền tối với độ trong suốt */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* Căn giữa modal */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Chiều rộng của modal */
+    max-width: 500px; /* Chiều rộng tối đa của modal */
+    border-radius: 5px; /* Bo tròn các góc */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Đổ bóng cho modal */
+    max-height: 90vh;
+}
+
+.close {
+    position: absolute; /* Đặt nút đóng ở vị trí tuyệt đối */
+    right: 10px; /* Cách từ bên phải */
+    top: 10px; /* Cách từ trên cùng */
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer; /* Thay đổi con trỏ khi hover */
+}
+
+.close:hover,
+.close:focus {
+    color: black; /* Thay đổi màu khi hover */
+    text-decoration: none;
+}
+.section {
+    display: none; /* Ẩn tất cả các phần nội dung khi trang vừa tải */
+}
+
+.section.visible {
+    display: block; /* Chỉ phần có lớp .visible mới được hiển thị */
+}

@@ -72,6 +72,33 @@ function time_elapsed_string($datetime, $full = false) {
     if (!$full) $string = array_slice($string, 0, 1);
     return $string ? implode(', ', $string) . ' trước' : 'vừa xong';
 }
+// Kiểm tra xem có thông tin người dùng trong session không
+if (isset($_SESSION['user_id'])) {
+    $userId = $_SESSION['user_id']; // Lấy ID người dùng từ session
+
+    // Lấy trạng thái người dùng từ cơ sở dữ liệu
+    $userQuery = "SELECT status FROM users WHERE id = ?";
+    $userStmt = $conn->prepare($userQuery); // Thay $pdo bằng $conn
+    $userStmt->execute([$userId]);
+    $user = $userStmt->fetch(PDO::FETCH_ASSOC);
+
+    // Biến để lưu trạng thái, chỉ cập nhật nếu người dùng tồn tại
+    $userStatus = $user['status'] ?? '';
+
+    // Kiểm tra nếu trạng thái là banned
+    if ($userStatus === 'banned') {
+        // Xóa thông tin người dùng khỏi session
+        session_unset();
+        session_destroy();
+        
+        // Chuyển hướng đến trang đăng nhập hoặc thông báo
+        header("Location: login.php"); // Thay đổi link đến trang bạn muốn chuyển hướng
+        exit();
+    }
+} else {
+    // Nếu không có thông tin người dùng trong session, đặt trạng thái là rỗng
+    $userStatus = '';
+}
 ?>
 
 <!DOCTYPE html>

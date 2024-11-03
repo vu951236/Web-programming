@@ -312,3 +312,10 @@ html, body {
     border-radius: 5px; /* Bo tròn các góc */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Đổ bóng cho modal */
 }
+.section {
+    display: none; /* Ẩn tất cả các phần nội dung khi trang vừa tải */
+}
+
+.section.visible {
+    display: block; /* Chỉ phần có lớp .visible mới được hiển thị */
+}

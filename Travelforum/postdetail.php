@@ -124,7 +124,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rating'])) {
         echo "Bài viết không tồn tại.";
     }
 }
-// Kiểm tra nếu có nội dung comment và người dùng đã đăng nhập
+
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment'])) {
     if (isset($_SESSION['user_id'])) {
         $commentContent = trim($_POST['comment']);
@@ -132,6 +133,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment'])) {
         $username = $_SESSION['username'];
         $date = date('Y-m-d H:i:s'); // Lấy thời gian hiện tại
         $userid = $_SESSION['user_id'];
+
+        // Danh sách từ khóa spam
+        $spamKeywords = ['quảng cáo', 'mua ngay', 'giảm giá', 'khuyến mãi'];
+
+        // Kiểm tra nếu bình luận chứa từ khóa spam
+        foreach ($spamKeywords as $keyword) {
+            if (stripos($commentContent, $keyword) !== false) {
+                // Cập nhật trạng thái người dùng
+                $stmt = $pdo->prepare("UPDATE users SET status = 'warned', warned_until = :warned_until WHERE id = :userid");
+                $warnedUntil = (new DateTime($date))->add(new DateInterval('PT10M'))->format('Y-m-d H:i:s'); // Cộng 10 phút
+                $stmt->execute([
+                    'warned_until' => $warnedUntil,
+                    'userid' => $userid
+                ]);
+
+                // Chuyển hướng về trang chi tiết bài viết sau khi cảnh báo
+                header("Location: postdetail.php?id=" . $post_id);
+                exit;
+            }
+        }
+
+        // Kiểm tra bình luận gần nhất của người dùng
+        $stmt = $pdo->prepare("SELECT date FROM postcomment WHERE userid = :userid ORDER BY date DESC LIMIT 1");
+        $stmt->execute(['userid' => $userid]);
+        $lastComment = $stmt->fetchColumn();
+
+        // Nếu có bình luận gần nhất, kiểm tra thời gian
+        if ($lastComment) {
+            $lastCommentTime = new DateTime($lastComment);
+            $currentTime = new DateTime($date);
+            $timeDifference = $currentTime->getTimestamp() - $lastCommentTime->getTimestamp();
+
+            // Nếu bình luận gần nhất được đăng trong vòng 10 giây
+            if ($timeDifference < 10) {
+                // Cập nhật trạng thái người dùng
+                $stmt = $pdo->prepare("UPDATE users SET status = 'warned', warned_until = :warned_until WHERE id = :userid");
+                $warnedUntil = $currentTime->add(new DateInterval('PT10M'))->format('Y-m-d H:i:s'); // Cộng 10 phút
+                $stmt->execute([
+                    'warned_until' => $warnedUntil,
+                    'userid' => $userid
+                ]);
+
+                // Chuyển hướng về trang chi tiết bài viết sau khi cảnh báo
+                header("Location: postdetail.php?id=" . $post_id);
+                exit;
+            }
+        }
 
         // Chuẩn bị câu lệnh SQL để chèn bình luận vào bảng postcomment
         $stmt = $pdo->prepare("INSERT INTO postcomment (idpost, date, content, username, userid) VALUES (:idpost, :date, :content, :username, :userid)");
@@ -150,6 +198,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment'])) {
     // Nếu người dùng chưa đăng nhập, không làm gì cả
 }
 
+
+// Kiểm tra xem có thông tin người dùng trong session không
+if (isset($_SESSION['user_id'])) {
+    $userId = $_SESSION['user_id']; // Lấy ID người dùng từ session
+
+    // Lấy trạng thái người dùng từ cơ sở dữ liệu
+    $userQuery = "SELECT status FROM users WHERE id = ?";
+    $userStmt = $pdo->prepare($userQuery); // Thay $pdo bằng $conn
+    $userStmt->execute([$userId]);
+    $user = $userStmt->fetch(PDO::FETCH_ASSOC);
+
+    // Biến để lưu trạng thái, chỉ cập nhật nếu người dùng tồn tại
+    $userStatus = $user['status'] ?? '';
+
+    // Kiểm tra nếu trạng thái là banned
+    if ($userStatus === 'banned') {
+        // Xóa thông tin người dùng khỏi session
+        session_unset();
+        session_destroy();
+        
+        // Chuyển hướng đến trang đăng nhập hoặc thông báo
+        header("Location: login.php"); // Thay đổi link đến trang bạn muốn chuyển hướng
+        exit();
+    }
+} else {
+    // Nếu không có thông tin người dùng trong session, đặt trạng thái là rỗng
+    $userStatus = '';
+}
 ?>
 
 <!DOCTYPE html>
@@ -339,5 +415,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment'])) {
             </div>
         </div>
     </div>
+    <!-- Modal -->
+    <div id="warningModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-button" id="closeModal">&times;</span>
+            <h2>Thông báo</h2>
+            <p>Vui lòng chú ý hành vi của mình.</p>
+            <button id="confirmButton">Xác nhận</button>
+        </div>
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Kiểm tra xem người dùng có trạng thái là warned không
+        const userStatus = '<?php echo $userStatus; ?>';
+        const modal = document.getElementById('warningModal');
+        const closeModalButton = document.getElementById('closeModal');
+        const confirmButton = document.getElementById('confirmButton');
+
+        if (userStatus === 'warned') {
+            modal.style.display = 'flex'; // Hiển thị modal
+        }
+
+        // Đóng modal khi nhấn nút đóng
+        closeModalButton.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+
+        // Đóng modal khi nhấn nút xác nhận
+        confirmButton.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+    });
+    </script>
+
 </body>
 </html>

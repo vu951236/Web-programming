@@ -30,7 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['username']) && !empt
         if ($user) {
             $current_time = new DateTime();
             $banned_until = $user['banned_until'] ? new DateTime($user['banned_until']) : null;
-        
+
+            // Kiểm tra xem người dùng có bị cấm không
             if ($banned_until && $banned_until > $current_time) {
                 $error_message = "Bạn đã bị cấm đến " . $banned_until->format('Y-m-d H:i:s') . ".";
             } elseif (password_verify($password, $user['password'])) {
@@ -38,6 +39,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['username']) && !empt
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['username'] = $user['username'];
                 $_SESSION['isadmin'] = $user['isadmin'];
+
+                // Ghi nhận thời gian đăng nhập
+                $logLoginQuery = "INSERT INTO login_attempts (user_id) VALUES (:user_id)";
+                $logLoginStmt = $conn->prepare($logLoginQuery);
+                $logLoginStmt->execute(['user_id' => $user['id']]);
+
+                // Kiểm tra số lần đăng nhập trong 30 phút
+                $thirtyMinutesAgo = (new DateTime())->modify('-30 minutes');
+                $loginCountQuery = "SELECT COUNT(*) FROM login_attempts WHERE user_id = :user_id AND login_time >= :login_time";
+                $loginCountStmt = $conn->prepare($loginCountQuery);
+                $loginCountStmt->execute([
+                    'user_id' => $user['id'],
+                    'login_time' => $thirtyMinutesAgo->format('Y-m-d H:i:s')
+                ]);
+                $loginCount = $loginCountStmt->fetchColumn();
+
+                // Nếu người dùng đã đăng nhập 5 lần trong 30 phút
+                if ($loginCount >= 5) {
+                    // Cập nhật status và warned_until
+                    $warnedUntilTime = (new DateTime())->modify('+30 minutes')->format('Y-m-d H:i:s');
+                    $statusUpdateQuery = "UPDATE users SET status = 'warned', warned_until = ? WHERE id = ?";
+                    $statusUpdateStmt = $conn->prepare($statusUpdateQuery);
+                    $statusUpdateStmt->execute([$warnedUntilTime, $user['id']]);
+                }
+
                 header("Location: index.php");
                 exit;
             } else {
@@ -50,6 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['username']) && !empt
         $error_message = "Lỗi khi thực hiện truy vấn: " . $e->getMessage();
     }
 }
+
 ?>
 
 <!DOCTYPE html>

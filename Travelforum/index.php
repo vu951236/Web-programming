@@ -1,6 +1,64 @@
 <?php
 session_start(); 
+
+$config = include('config.php');
+
+// Kiểm tra cấu hình có đầy đủ không
+if (!isset($config['db'])) {
+    die("Thiếu thông tin cấu hình cơ sở dữ liệu.");
+}
+
+$dbConfig = $config['db'];
+$dsn = "pgsql:host={$dbConfig['host']};port={$dbConfig['port']};dbname={$dbConfig['dbname']}";
+
+try {
+    $conn = new PDO($dsn, $dbConfig['user'], $dbConfig['password']);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Kết nối đến cơ sở dữ liệu thất bại: " . $e->getMessage());
+}
+
+// Lấy dữ liệu từ bảng locationdetail
+$sql_locations = "SELECT * FROM locationdetail ORDER BY point DESC LIMIT 9";
+$result_locations = $conn->query($sql_locations);
+
+// Lấy dữ liệu từ bảng users
+$sql_users = "SELECT * FROM users ORDER BY point DESC LIMIT 5";
+$result_users = $conn->query($sql_users);
+
+// Xử lý kết quả
+$locations = $result_locations->fetchAll(PDO::FETCH_ASSOC);
+$users = $result_users->fetchAll(PDO::FETCH_ASSOC);
+
+// Kiểm tra xem có thông tin người dùng trong session không
+if (isset($_SESSION['user_id'])) {
+    $userId = $_SESSION['user_id']; // Lấy ID người dùng từ session
+
+    // Lấy trạng thái người dùng từ cơ sở dữ liệu
+    $userQuery = "SELECT status FROM users WHERE id = ?";
+    $userStmt = $conn->prepare($userQuery); // Thay $pdo bằng $conn
+    $userStmt->execute([$userId]);
+    $user = $userStmt->fetch(PDO::FETCH_ASSOC);
+
+    // Biến để lưu trạng thái, chỉ cập nhật nếu người dùng tồn tại
+    $userStatus = $user['status'] ?? '';
+
+    // Kiểm tra nếu trạng thái là banned
+    if ($userStatus === 'banned') {
+        // Xóa thông tin người dùng khỏi session
+        session_unset();
+        session_destroy();
+        
+        // Chuyển hướng đến trang đăng nhập hoặc thông báo
+        header("Location: login.php"); // Thay đổi link đến trang bạn muốn chuyển hướng
+        exit();
+    }
+} else {
+    // Nếu không có thông tin người dùng trong session, đặt trạng thái là rỗng
+    $userStatus = '';
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,36 +75,6 @@ session_start();
     <script src="./asset/js/index.js"></script>
 </head>
 <body>
-    <?php
-    $config = include('config.php');
-
-    // Kiểm tra cấu hình có đầy đủ không
-    if (!isset($config['db'])) {
-        die("Thiếu thông tin cấu hình cơ sở dữ liệu.");
-    }
-
-    $dbConfig = $config['db'];
-    $dsn = "pgsql:host={$dbConfig['host']};port={$dbConfig['port']};dbname={$dbConfig['dbname']}";
-
-    try {
-        $conn = new PDO($dsn, $dbConfig['user'], $dbConfig['password']);
-        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    } catch (PDOException $e) {
-        die("Kết nối đến cơ sở dữ liệu thất bại: " . $e->getMessage());
-    }
-
-    // Lấy dữ liệu từ bảng locationdetail
-    $sql_locations = "SELECT * FROM locationdetail ORDER BY point DESC LIMIT 9";
-    $result_locations = $conn->query($sql_locations);
-
-    // Lấy dữ liệu từ bảng users
-    $sql_users = "SELECT * FROM users ORDER BY point DESC LIMIT 5";
-    $result_users = $conn->query($sql_users);
-
-    // Xử lý kết quả
-    $locations = $result_locations->fetchAll(PDO::FETCH_ASSOC);
-    $users = $result_users->fetchAll(PDO::FETCH_ASSOC);
-    ?>
 
     <div id="header">
         <div class="header-logo">Logo</div>
@@ -187,6 +215,38 @@ session_start();
         </div>
     </div>
 
-    <?php $conn = null; // Đóng kết nối ?>
+    <!-- Modal -->
+    <div id="warningModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-button" id="closeModal">&times;</span>
+            <h2>Thông báo</h2>
+            <p>Vui lòng chú ý hành vi của mình.</p>
+            <button id="confirmButton">Xác nhận</button>
+        </div>
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Kiểm tra xem người dùng có trạng thái là warned không
+        const userStatus = '<?php echo $userStatus; ?>';
+        const modal = document.getElementById('warningModal');
+        const closeModalButton = document.getElementById('closeModal');
+        const confirmButton = document.getElementById('confirmButton');
+
+        if (userStatus === 'warned') {
+            modal.style.display = 'flex'; // Hiển thị modal
+        }
+
+        // Đóng modal khi nhấn nút đóng
+        closeModalButton.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+
+        // Đóng modal khi nhấn nút xác nhận
+        confirmButton.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+    });
+    </script>
+
 </body>
 </html>

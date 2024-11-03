@@ -17,7 +17,32 @@ try {
     $pdo = new PDO($dsn, $dbConfig['user'], $dbConfig['password']);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    if (!isset($_SESSION['user_id'])) {
+    // Kiểm tra xem có thông tin người dùng trong session không
+    if (isset($_SESSION['user_id'])) {
+        $userId = $_SESSION['user_id']; // Lấy ID người dùng từ session
+
+        // Lấy trạng thái người dùng từ cơ sở dữ liệu
+        $userQuery = "SELECT status FROM users WHERE id = ?";
+        $userStmt = $pdo->prepare($userQuery); 
+        $userStmt->execute([$userId]);
+        $user = $userStmt->fetch(PDO::FETCH_ASSOC);
+
+        // Biến để lưu trạng thái, chỉ cập nhật nếu người dùng tồn tại
+        $userStatus = $user['status'] ?? '';
+
+        // Kiểm tra nếu trạng thái là banned
+        if ($userStatus === 'banned') {
+            // Xóa thông tin người dùng khỏi session
+            session_unset();
+            session_destroy();
+            
+            // Chuyển hướng đến trang đăng nhập hoặc thông báo
+            header("Location: login.php"); // Thay đổi link đến trang bạn muốn chuyển hướng
+            exit();
+        }
+    } else {
+        // Nếu không có thông tin người dùng trong session, đặt trạng thái là rỗng
+        $userStatus = '';
         header("Location: login.php");
         exit();
     }
@@ -648,25 +673,48 @@ try {
         document.addEventListener('DOMContentLoaded', loadPolicyContent);
 
 
-        // Cập nhật hàm hiển thị phần nội dung tương ứng
         function showSection(sectionId) {
             // Ẩn tất cả các phần nội dung
             document.querySelectorAll('.section').forEach(function(section) {
-                section.classList.add('hidden');
+                section.classList.add('hidden'); // Thêm lớp hidden để ẩn
+                section.classList.remove('visible'); // Loại bỏ lớp visible nếu có
             });
-            
+
             // Hiển thị phần nội dung được chọn
             const selectedSection = document.getElementById(sectionId);
-            selectedSection.classList.remove('hidden');
+            selectedSection.classList.remove('hidden'); // Loại bỏ lớp hidden để hiển thị
+            selectedSection.classList.add('visible'); // Thêm lớp visible
+
+
+            // Cập nhật session trên server
+            fetch('update_section_user.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ section: sectionId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data.message); // Hiển thị thông báo từ server
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
 
             // Tải nội dung chính sách khi nhấn vào liên kết
             if (sectionId === 'policyContent') {
-                loadPolicyContent();
+                loadPolicyContent(); // Giả sử đây là hàm tải nội dung chính sách
             }
         }
 
-        const sectionId = "<?php echo $_SESSION['section'] ?? 'accountSettings'; ?>"; // Mặc định là accountSettings nếu không có phần nào được lưu
-        showSection(sectionId);
+        // Khi tải trang, kiểm tra xem có giá trị trong Local Storage không
+        window.onload = function() {
+            const savedSection = localStorage.getItem('currentSection');
+            const sectionId = savedSection || "<?php echo $_SESSION['section_user'] ?? 'accountSettings'; ?>"; // Nếu không có giá trị trong Local Storage, sử dụng giá trị từ session
+            showSection(sectionId);
+        };
+
 
          // Hiển thị ảnh mới ngay khi người dùng chọn
          document.getElementById("profile_picture").addEventListener("change", function(event) {

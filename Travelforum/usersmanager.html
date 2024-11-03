@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin TravelTalk</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="./asset/css/admin.css">
+</head>
+<body>
+    <div id="main" class="d-flex">
+
+        <!-- Sidebar -->
+        <nav class="aside-nav">
+            <a href="#" class="new-item" onclick="showSection('dashboard')">Dash Board</a>
+            <a href="#" class="new-item" onclick="showSection('userManagement')">Quản lý người dùng</a>
+            <a href="#" class="new-item" onclick="showSection('postManagement')">Quản lý bài viết</a>
+        </nav>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="section hidden">
+                <h2>Dash Board</h2>
+                <!-- Nội dung Dashboard -->
+            </div>
+        
+            <!-- User Management Section -->
+            <div id="userManagement" class="section hidden">
+                <h2>Quản lý người dùng</h2>
+                <!-- Filter Buttons -->
+                <div class="filter-buttons">
+                    <button class="active">Tất cả người dùng</button>
+                    <button>Bị cảnh cáo</button>
+                    <button>Bị cấm</button>
+                </div>
+        
+                <!-- User Table -->
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên</th>
+                            <th>Trạng thái</th>
+                            <th>Cấm tài khoản</th>
+                            <th>Xóa tài khoản</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>ID1111</td>
+                            <td>Tên người dùng</td>
+                            <td>Bình thường</td>
+                            <td class="ban-cell">
+                                <input type="number" placeholder="Thời gian cấm (phút)">
+                                <button class="ban-button">Cấm</button>
+                            </td>
+                            <td class="delete-cell">
+                                <button class="delete-button">Xóa</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        
+            <!-- Post Management Section -->
+            <div id="postManagement" class="section hidden">
+                <h2>Quản lý bài viết</h2>
+                <!-- Filter Buttons -->
+                <div class="filter-buttons">
+                    <button class="active">Tất cả bài viết</button>
+                    <button>Chưa duyệt</button>
+                    <button>Đã duyệt</button>
+                </div>
+        
+                <!-- Post Table -->
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên</th>
+                            <th>Trạng thái</th>
+                            <th>Xem chi tiết</th>
+                            <th>Duyệt bài viết</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>ID1111</td>
+                            <td>Tên bài viết</td>
+                            <td>Chưa duyệt</td>
+                            <td class="view-cell">
+                                <a href="/Travelforum/Travelforum/postdetail.php?id=<?php echo htmlspecialchars($post['id']); ?>">
+                                    <button><i class="fa-regular fa-eye"></i> Xem bài viết</button>
+                                </a>
+                            </td>
+                            <td class="approve-cell">
+                                <button class="approve-button">Duyệt</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>   
+        </div>   
+    </div>
+    <script>
+         // Cập nhật hàm hiển thị phần nội dung tương ứng
+         function showSection(sectionId) {
+            // Ẩn tất cả các phần nội dung
+            document.querySelectorAll('.section').forEach(function(section) {
+                section.classList.add('hidden');
+            });
+            
+            // Hiển thị phần nội dung được chọn
+            const selectedSection = document.getElementById(sectionId);
+            selectedSection.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
