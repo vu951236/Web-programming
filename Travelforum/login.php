@@ -116,15 +116,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['username']) && !empt
     </script>
 </head>
 <body class="fade">
-    <div id="header">
-        <div class="header-logo">
-            Logo
-        </div>
-        <div class="header-account">
-            <a class="btn-account" href="./login.php">Đăng nhập</a>
-            <a class="btn-account activee" href="./register.php">Đăng ký</a>
-        </div>
-    </div>
+    <?php
+        include 'header.php'; 
+    ?>
 
     <div class="container-fluid" style="height: 100vh;">
         <div class="row">

@@ -18,6 +18,7 @@ try {
 
 // Kiểm tra lựa chọn 'view'
 $view = isset($_GET['view']) ? $_GET['view'] : 'forum';
+$status = 'approve';
 
 if ($view === 'my_posts' && isset($_SESSION['user_id'])) {
     // Hiển thị bài viết của tôi
@@ -26,10 +27,11 @@ if ($view === 'my_posts' && isset($_SESSION['user_id'])) {
                    (SELECT COUNT(*) FROM postcomment WHERE postcomment.idpost = postdetail.id) AS comment_count 
             FROM postdetail 
             JOIN users ON postdetail.userid = users.id 
-            WHERE postdetail.userid = :user_id 
+            WHERE postdetail.userid = :user_id AND postdetail.status = :status 
             ORDER BY postdetail.date DESC";
     $stmt = $conn->prepare($sql);
     $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+    $stmt->bindParam(':status', $status, PDO::PARAM_STR);
     $stmt->execute();
 } else {
     // Hiển thị tất cả bài viết
@@ -37,9 +39,13 @@ if ($view === 'my_posts' && isset($_SESSION['user_id'])) {
                    (SELECT COUNT(*) FROM postcomment WHERE postcomment.idpost = postdetail.id) AS comment_count 
             FROM postdetail 
             JOIN users ON postdetail.userid = users.id 
+            WHERE postdetail.status = :status 
             ORDER BY postdetail.date DESC";
-    $stmt = $conn->query($sql);
+    $stmt = $conn->prepare($sql); // Sử dụng prepare cho bảo mật
+    $stmt->bindParam(':status', $status, PDO::PARAM_STR); // Ràng buộc biến trạng thái
+    $stmt->execute(); // Thực hiện truy vấn
 }
+
 
 $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -99,6 +105,16 @@ if (isset($_SESSION['user_id'])) {
     // Nếu không có thông tin người dùng trong session, đặt trạng thái là rỗng
     $userStatus = '';
 }
+// Truy vấn để lấy 3 người dùng có điểm cao nhất
+$sql = "
+    SELECT avatar, username
+    FROM users
+    ORDER BY point DESC
+    LIMIT 3
+";
+$stmt = $conn->prepare($sql);
+$stmt->execute();
+$topUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -118,33 +134,9 @@ if (isset($_SESSION['user_id'])) {
     <script src="./asset/js/post.js"></script>
 </head>
 <body>
-    <div id="header">
-        <div class="header-logo">Logo</div>
-        <div class="header-search">
-            <form action="search.php" method="GET">
-                <input type="text" name="keyword" placeholder="Tìm kiếm..." required />
-                <button class="btn-header" type="submit">Tìm kiếm</button>
-            </form>
-        </div>
-        <nav class="header-nav">
-            <a href="post.php">Bài viết</a>
-            <a href="explore.php">Khám phá</a>
-            <a href="aboutus.html">Về chúng tôi</a>
-        </nav>
-        <div class="header-account">
-            <?php
-            // Kiểm tra xem có username trong session không
-            if (isset($_SESSION['username'])) {
-                // Nếu có username, hiển thị nút Đăng xuất
-                echo '<a class="btn-account" href="logout.php">Đăng xuất</a>';
-            } else {
-                // Nếu không có username, hiển thị nút Đăng nhập và Đăng ký
-                echo '<a class="btn-account activee" href="login.php">Đăng nhập</a>';
-                echo '<a class="btn-account" href="register.php">Đăng ký</a>';
-            }
-            ?>
-        </div>
-    </div>
+    <?php
+        include 'header.php'; 
+    ?>
 
     <div id="main">
         <div class="main-content">
@@ -200,20 +192,14 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                     <div class="col">
                         <div class="active-person">
-                            <h4 style="font-size: 16px;">Người đang hoạt động</h4>
+                            <h4 style="font-size: 16px;">Thành viên ưu tú</h4>
                             <ul class="active-users">
-                                <li class="active-user">
-                                    <img src="./asset/img/test.jpg" alt="User 1" class="user-avatar">
-                                    <span class="user-name">Nguyễn Văn A</span>
-                                </li>
-                                <li class="active-user">
-                                    <img src="./asset/img/test.jpg" alt="User 2" class="user-avatar">
-                                    <span class="user-name">Trần Thị B</span>
-                                </li>
-                                <li class="active-user">
-                                    <img src="./asset/img/test.jpg" alt="User 3" class="user-avatar">
-                                    <span class="user-name">Lê Văn C</span>
-                                </li>
+                                <?php foreach ($topUsers as $user): ?>
+                                    <li class="active-user">
+                                    <img src="<?php echo htmlspecialchars($user['avatar'] ?? 'asset/img/test.jpg'); ?>" alt="<?php echo htmlspecialchars($user['username']); ?>" class="user-avatar">
+                                        <span class="user-name"><?php echo htmlspecialchars($user['username']); ?></span>
+                                    </li>
+                                <?php endforeach; ?>
                             </ul>
                         </div>
                     </div>

@@ -26,7 +26,7 @@ if (isset($_GET['keyword'])) {
     }
 
     // Tìm kiếm tỉnh thành phù hợp
-    $location_sql = "SELECT name, location, information, image FROM locationdetail WHERE name ILIKE ? LIMIT 20";
+    $location_sql = "SELECT name, location, information, image FROM locationdetail WHERE name ILIKE ?";
     $location_stmt = $conn->prepare($location_sql);
     $like_keyword = '%' . $keyword . '%';
     $location_stmt->bindParam(1, $like_keyword);
@@ -42,17 +42,50 @@ if (isset($_GET['keyword'])) {
             ];
         }
     }
+    
+    $status = 'approve';
+    // Tìm kiếm theo cả tên bài viết và tên tỉnh thành trong một truy vấn
+    $post_sql = "
+        SELECT pd.name, pd.description, pd.image, u.username AS author_name, u.avatar AS author_avatar 
+        FROM postdetail pd
+        JOIN users u ON pd.userid = u.id
+        LEFT JOIN locationdetail ld ON pd.location = ld.location
+        WHERE (pd.name ILIKE :keyword OR ld.name ILIKE :keyword) AND pd.status = :status
+    ";
 
-    // Nếu có các tỉnh thành, tìm kiếm bài viết
-    if (!empty($locations)) {
-        $location_placeholders = implode(',', array_fill(0, count($locations), '?')); // Tạo placeholder cho truy vấn
-        $post_sql = "SELECT pd.name, pd.description, pd.image, u.username AS author_name, u.avatar AS author_avatar 
-                     FROM postdetail pd 
-                     JOIN users u ON pd.userid = u.id 
-                     WHERE pd.location IN ($location_placeholders) LIMIT 20";
-        $post_stmt = $conn->prepare($post_sql);
-        $post_stmt->execute(array_column($locations, 'location')); // Truyền mảng locations vào
-        $posts = $post_stmt->fetchAll(PDO::FETCH_ASSOC);
+    // Chuẩn bị và thực thi truy vấn với từ khóa tìm kiếm
+    $post_stmt = $conn->prepare($post_sql);
+    $post_stmt->execute([':keyword' => '%' . $keyword . '%', ':status' => $status]);
+
+    // Lấy tất cả các kết quả bài viết
+    $posts = $post_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Kiểm tra xem có thông tin người dùng trong session không
+    if (isset($_SESSION['user_id'])) {
+        $userId = $_SESSION['user_id']; // Lấy ID người dùng từ session
+
+        // Lấy trạng thái người dùng từ cơ sở dữ liệu
+        $userQuery = "SELECT status FROM users WHERE id = ?";
+        $userStmt = $conn->prepare($userQuery); // Thay $pdo bằng $conn
+        $userStmt->execute([$userId]);
+        $user = $userStmt->fetch(PDO::FETCH_ASSOC);
+
+        // Biến để lưu trạng thái, chỉ cập nhật nếu người dùng tồn tại
+        $userStatus = $user['status'] ?? '';
+
+        // Kiểm tra nếu trạng thái là banned
+        if ($userStatus === 'banned') {
+            // Xóa thông tin người dùng khỏi session
+            session_unset();
+            session_destroy();
+            
+            // Chuyển hướng đến trang đăng nhập hoặc thông báo
+            header("Location: login.php"); // Thay đổi link đến trang bạn muốn chuyển hướng
+            exit();
+        }
+    } else {
+        // Nếu không có thông tin người dùng trong session, đặt trạng thái là rỗng
+        $userStatus = '';
     }
 
     // Đóng kết nối
@@ -60,33 +93,7 @@ if (isset($_GET['keyword'])) {
     $post_stmt = null;
     $conn = null;
 }
-// Kiểm tra xem có thông tin người dùng trong session không
-if (isset($_SESSION['user_id'])) {
-    $userId = $_SESSION['user_id']; // Lấy ID người dùng từ session
 
-    // Lấy trạng thái người dùng từ cơ sở dữ liệu
-    $userQuery = "SELECT status FROM users WHERE id = ?";
-    $userStmt = $conn->prepare($userQuery); // Thay $pdo bằng $conn
-    $userStmt->execute([$userId]);
-    $user = $userStmt->fetch(PDO::FETCH_ASSOC);
-
-    // Biến để lưu trạng thái, chỉ cập nhật nếu người dùng tồn tại
-    $userStatus = $user['status'] ?? '';
-
-    // Kiểm tra nếu trạng thái là banned
-    if ($userStatus === 'banned') {
-        // Xóa thông tin người dùng khỏi session
-        session_unset();
-        session_destroy();
-        
-        // Chuyển hướng đến trang đăng nhập hoặc thông báo
-        header("Location: login.php"); // Thay đổi link đến trang bạn muốn chuyển hướng
-        exit();
-    }
-} else {
-    // Nếu không có thông tin người dùng trong session, đặt trạng thái là rỗng
-    $userStatus = '';
-}
 ?>
 
 <!DOCTYPE html>
@@ -105,34 +112,9 @@ if (isset($_SESSION['user_id'])) {
     <script src="./asset/js/index.js"></script>
 </head>
 <body>
-<div id="header">
-        <div class="header-logo">Logo</div>
-        <div class="header-search">
-            <form action="search.php" method="GET">
-                <input type="text" name="keyword" placeholder="Tìm kiếm..." required />
-                <button class="btn-header" type="submit">Tìm kiếm</button>
-            </form>
-        </div>
-
-        <nav class="header-nav">
-            <a href="post.php">Bài viết</a>
-            <a href="explore.php">Khám phá</a>
-            <a href="aboutus.html">Về chúng tôi</a>
-        </nav>
-        <div class="header-account">
-            <?php
-            // Kiểm tra xem có username trong session không
-            if (isset($_SESSION['username'])) {
-                // Nếu có username, hiển thị nút Đăng xuất
-                echo '<a class="btn-account" href="logout.php">Đăng xuất</a>';
-            } else {
-                // Nếu không có username, hiển thị nút Đăng nhập và Đăng ký
-                echo '<a class="btn-account activee" href="login.php">Đăng nhập</a>';
-                echo '<a class="btn-account" href="register.php">Đăng ký</a>';
-            }
-            ?>
-        </div>
-    </div>
+    <?php
+        include 'header.php'; 
+    ?>
     <div id="main">
         <div class="main-content">
             <div class="container text-center">

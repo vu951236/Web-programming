@@ -24,6 +24,42 @@ try {
     // Nếu có lỗi xảy ra, lưu thông báo lỗi
     $message = "Kết nối thất bại: " . $e->getMessage();
 }
+// Kiểm tra xem có thông tin người dùng trong session không
+if (isset($_SESSION['user_id'])) {
+    $userId = $_SESSION['user_id']; // Lấy ID người dùng từ session
+
+    // Lấy thông tin người dùng từ cơ sở dữ liệu
+    $userQuery = "SELECT status, isadmin FROM users WHERE id = ?";
+    $userStmt = $pdo->prepare($userQuery); 
+    $userStmt->execute([$userId]);
+    $user = $userStmt->fetch(PDO::FETCH_ASSOC);
+
+    // Biến để lưu trạng thái, chỉ cập nhật nếu người dùng tồn tại
+    $userStatus = $user['status'] ?? '';
+
+    // Kiểm tra nếu trạng thái là banned
+    if ($userStatus === 'banned') {
+        // Xóa thông tin người dùng khỏi session
+        session_unset();
+        session_destroy();
+        
+        // Chuyển hướng đến trang đăng nhập hoặc thông báo
+        header("Location: login.php"); // Thay đổi link đến trang bạn muốn chuyển hướng
+        exit();
+    }
+
+    // Kiểm tra quyền admin
+    if (!isset($user['isadmin']) || $user['isadmin'] == false) {
+        // Nếu không phải là admin, chuyển hướng đến login
+        header("Location: login.php");
+    }
+    
+} else {
+    // Nếu không có thông tin người dùng trong session, đặt trạng thái là rỗng
+    $userStatus = '';
+    header("Location: login.php");
+    exit();
+}
 
 // Biến để lưu phần nội dung
 $section = '';
@@ -31,30 +67,40 @@ $section = '';
 // Tiến hành truy vấn nếu kết nối thành công
 if ($message === "Kết nối đến cơ sở dữ liệu thành công.") {
     // Kiểm tra status từ GET
-    $status = $_GET['status'] ?? 'all';
+    $userstatus = $_GET['status'] ?? 'all';
+    $poststatus = $_GET['status'] ?? 'all';
 
     // Lọc theo status
-    if ($status === 'warned') {
-        $userQuery = "SELECT * FROM users WHERE isadmin = FALSE AND status = 'warned'";
-    } elseif ($status === 'banned') {
-        $userQuery = "SELECT * FROM users WHERE isadmin = FALSE AND status = 'banned'";
+    if ($userstatus === 'warned') {
+        $userQuery = "SELECT * FROM users WHERE isadmin = FALSE AND status = 'warned' Order by id";
+    } elseif ($userstatus === 'banned') {
+        $userQuery = "SELECT * FROM users WHERE isadmin = FALSE AND status = 'banned' Order by id";
     } else {
-        $userQuery = "SELECT * FROM users WHERE isadmin = FALSE";
+        $userQuery = "SELECT * FROM users WHERE isadmin = FALSE Order by id";
     }
 
     $userStmt = $pdo->prepare($userQuery);
     $userStmt->execute();
     $users = $userStmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Truy vấn bảng postdetail
-    $postQuery = "SELECT * FROM postdetail";
+    // Lọc theo status
+    if ($poststatus === 'cancel') {
+        $postQuery = "SELECT * FROM postdetail WHERE status = 'canceled' Order by id";
+    } elseif ($poststatus === 'notapproved') {
+        $postQuery = "SELECT * FROM postdetail WHERE status = 'notapproved' Order by id";
+    } elseif ($poststatus === 'approved') {
+        $postQuery = "SELECT * FROM postdetail WHERE status = 'approve' Order by id";
+    } else {
+        $postQuery = "SELECT * FROM postdetail Order by id";
+    }
+
     $postStmt = $pdo->prepare($postQuery);
     $postStmt->execute();
     $posts = $postStmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['action'] == 'ban') {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] === 'ban') {
     $userId = $_POST['user_id'];
     $banTime = $_POST['ban_time']; // Thời gian cấm tính bằng phút
 
@@ -75,6 +121,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['action'] == 'ban') {
     header("Location: admin.php"); // Đổi thành trang trước đó
     exit();
 }
+
 // Xử lý yêu cầu hủy cấm người dùng
 if (isset($_POST['action']) && $_POST['action'] == 'unban') {
     $userId = $_POST['user_id'];
@@ -93,6 +140,20 @@ if (isset($_POST['action']) && $_POST['action'] == 'unban') {
     header("Location: admin.php");
     exit();
 }
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
+    $postId = $_POST['post_id'];
+    $status = $_POST['status'] === 'approve' ? 'approve' : 'canceled';
+
+    // Cập nhật trạng thái bài viết
+    $updateQuery = "UPDATE postdetail SET status = :status WHERE id = :id";
+    $stmt = $pdo->prepare($updateQuery);
+    $stmt->execute([':status' => $status, ':id' => $postId]);
+
+    // Tải lại trang sau khi cập nhật
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'deleteaccount') {
     $userId = $_POST['acount_id']; // Lấy ID tài khoản từ biểu mẫu thay vì từ session
 
@@ -121,7 +182,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     header("Location: admin.php"); // Chuyển hướng về trang chính hoặc trang đăng nhập
     exit;
 }
+// Xử lý tạo mã admin
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adminCode'])) {
+    $adminCode = $_POST['adminCode'];
 
+    // Kiểm tra tính hợp lệ của mã
+    if (!empty($adminCode)) {
+        // Thời gian hết hạn là 5 phút sau
+        $expirationTime = date('Y-m-d H:i:s', strtotime('+5 minutes'));
+
+        // Chuẩn bị câu SQL để lưu mã admin vào cơ sở dữ liệu
+        $sql = "INSERT INTO admincode (code, expiration_time) VALUES (?, ?)";
+        $stmt = $pdo->prepare($sql);
+
+        // Thực thi truy vấn
+        if ($stmt->execute([$adminCode, $expirationTime])) {
+            $message = "Mã admin đã được tạo thành công!";
+        } else {
+            $message = "Có lỗi xảy ra khi tạo mã admin.";
+        }
+    } else {
+        $message = "Vui lòng nhập mã admin.";
+    }
+}
 
 ?>
 
@@ -140,39 +223,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     <link rel="stylesheet" href="./asset/css/base.css">
 </head>
 <body>
-    <div id="header">
-        <div class="header-logo">Logo</div>
-        <div class="header-search">
-            <form action="search.php" method="GET">
-                <input type="text" name="keyword" placeholder="Tìm kiếm..." required />
-                <button class="btn-header" type="submit">Tìm kiếm</button>
-            </form>
-        </div>
-        <nav class="header-nav">
-            <a href="post.php">Bài viết</a>
-            <a href="explore.php">Khám phá</a>
-            <a href="aboutus.html">Về chúng tôi</a>
-        </nav>
-        <div class="header-account">
-            <?php
-            // Kiểm tra xem có username trong session không
-            if (isset($_SESSION['username'])) {
-                // Nếu có username, hiển thị nút Đăng xuất
-                echo '<a class="btn-account" href="logout.php">Đăng xuất</a>';
-            } else {
-                // Nếu không có username, hiển thị nút Đăng nhập và Đăng ký
-                echo '<a class="btn-account activee" href="login.php">Đăng nhập</a>';
-                echo '<a class="btn-account" href="register.php">Đăng ký</a>';
-            }
-            ?>
-        </div>
-    </div>
+    <?php
+        include 'header.php'; 
+    ?>
     <div id="main" class="d-flex">
         <!-- Sidebar -->
         <nav class="aside-nav">
             <a href="#" class="new-item" onclick="showSection('dashboard')">Dash Board</a>
             <a href="#" class="new-item" onclick="showSection('userManagement')">Quản lý người dùng</a>
             <a href="#" class="new-item" onclick="showSection('postManagement')">Quản lý bài viết</a>
+            <a href="#" class="new-item" onclick="showSection('adminCodeCreation')">Tạo mã admin</a> 
         </nav>
 
         <!-- Content -->
@@ -210,7 +270,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             <tr>
                                 <td><?php echo htmlspecialchars($user['id']); ?></td>
                                 <td><?php echo htmlspecialchars($user['username']); ?></td>
-                                <td><?php echo htmlspecialchars($user['status']); ?></td>
+                                <td><p class="post-status" 
+                                        style="
+                                            color: <?php
+                                                if ($user['status'] === 'banned') {
+                                                    echo '#dc3545'; // Màu đỏ cho 'Không được duyệt'
+                                                } elseif ($user['status'] === 'exemplary') {
+                                                    echo '#28a745'; // Màu xanh lá cây cho 'Đã duyệt'
+                                                } else {
+                                                    echo '#ffc107'; // Màu cam cho 'Chưa duyệt'
+                                                }
+                                            ?>;
+                                        ">
+                                        <?php
+                                            if ($user['status'] === 'banned') {
+                                                echo "Đang cấm";
+                                            } elseif ($user['status'] === 'exemplary') {
+                                                echo "Hoạt động tốt";
+                                            } else {
+                                                echo "Đang cảnh cáo";
+                                            }
+                                        ?>
+                                    </p></td>
                                 <td class="ban-cell">
                                     <?php if ($user['status'] === 'banned'): ?>
                                         <form method="POST" action="admin.php" style="display:inline;">
@@ -241,9 +322,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 <h2>Quản lý bài viết</h2>
                 <!-- Filter Buttons -->
                 <div class="filter-buttons">
-                    <button class="active">Tất cả bài viết</button>
-                    <button>Chưa duyệt</button>
-                    <button>Đã duyệt</button>
+                    <button class="active" onclick="filterUsers('all')">Tất cả bài viết</button>
+                    <button onclick="filterUsers('notapproved')">Chưa duyệt</button>
+                    <button onclick="filterUsers('approved')">Đã duyệt</button>
+                    <button onclick="filterUsers('cancel')">Bị hủy</button>
                 </div>
         
                 <!-- Post Table -->
@@ -262,20 +344,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             <tr>
                                 <td><?php echo htmlspecialchars($post['id']); ?></td>
                                 <td><?php echo htmlspecialchars($post['name']); ?></td>
-                                <td><?php echo htmlspecialchars($post['status']); ?></td>
+                                <td><p class="post-status" 
+                                        style="
+                                            color: <?php
+                                                if ($post['status'] === 'canceled') {
+                                                    echo '#dc3545'; // Màu đỏ cho 'Không được duyệt'
+                                                } elseif ($post['status'] === 'approve') {
+                                                    echo '#28a745'; // Màu xanh lá cây cho 'Đã duyệt'
+                                                } else {
+                                                    echo '#ffc107'; // Màu cam cho 'Chưa duyệt'
+                                                }
+                                            ?>;
+                                        ">
+                                        <?php
+                                            if ($post['status'] === 'canceled') {
+                                                echo "Không được duyệt";
+                                            } elseif ($post['status'] === 'approve') {
+                                                echo "Đã duyệt";
+                                            } else {
+                                                echo "Chưa duyệt";
+                                            }
+                                        ?>
+                                    </p></td>
                                 <td class="view-cell">
                                     <a href="/Travelforum/Travelforum/postdetail.php?id=<?php echo htmlspecialchars($post['id']); ?>">
                                         <button><i class="fa-regular fa-eye"></i> Xem bài viết</button>
                                     </a>
                                 </td>
                                 <td class="approve-cell">
-                                    <button class="approve-button">Duyệt</button>
+                                    <?php if ($post['status'] === 'notapproved'): ?>
+                                        <!-- Form Duyệt -->
+                                        <form method="POST" action="">
+                                            <input type="hidden" name="post_id" value="<?php echo htmlspecialchars($post['id']); ?>">
+                                            <input type="hidden" name="status" value="approve">
+                                            <button type="submit" name="update_status" class="approve-button">Duyệt</button>
+                                        </form>
+                                        <!-- Form Hủy duyệt -->
+                                        <form method="POST" action="">
+                                            <input type="hidden" name="post_id" value="<?php echo htmlspecialchars($post['id']); ?>">
+                                            <input type="hidden" name="status" value="canceled">
+                                            <button type="submit" name="update_status" class="cancel-button">Hủy</button>
+                                        </form>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                      <?php endforeach; ?>
                     </tbody>
                 </table>
-            </div>   
+            </div>  
+
+            <!-- Form tạo mã admin -->
+            <div id="adminCodeCreation" class="section">
+                <h2>Tạo mã admin</h2>
+                <form action="admin.php" method="post">
+                    <label for="adminCode">Nhập mã admin:</label>
+                    <input type="text" id="adminCode" name="adminCode" required>
+                    <button type="submit">Tạo mã</button>
+                </form>
+            </div>
         </div>   
     </div>
      <!-- Modal xác nhận xóa -->
@@ -339,9 +465,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             showSection(sectionId);
         };
 
-
-
         function filterUsers(status) {
+            // Chuyển hướng đến trang hiện tại với tham số status
+            window.location.href = `admin.php?status=${status}`;
+        }
+
+        function filterPosts(status) {
             // Chuyển hướng đến trang hiện tại với tham số status
             window.location.href = `admin.php?status=${status}`;
         }

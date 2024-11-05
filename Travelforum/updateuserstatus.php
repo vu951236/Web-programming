@@ -28,7 +28,7 @@ try {
 
     // Kiểm tra các người dùng có trạng thái 'warned' để chuyển sang 'exemplary' khi hết thời gian
     $updateQuery3 = "UPDATE users 
-    SET status = 'exemplary' 
+    SET status = 'exemplary', warned_until = NULL  
     WHERE status = 'warned' 
     AND (warned_until < :current_time OR warned_until IS NULL)";
 
@@ -39,4 +39,4 @@ try {
     // Nếu có lỗi xảy ra, lưu thông báo lỗi
     error_log("Kết nối thất bại: " . $e->getMessage());
 }
-?>
+

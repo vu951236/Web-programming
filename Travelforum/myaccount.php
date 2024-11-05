@@ -288,7 +288,21 @@ try {
         header("Location: index.php"); // Chuyển hướng về trang chính hoặc trang đăng nhập
         exit;
     }
+    // Xử lý yêu cầu đăng lại bài viết
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new_status'])) {
+        $postId = $_POST['post_id'] ?? null;
+        $newStatus = $_POST['new_status'] ?? null;
 
+        if ($postId && $newStatus) {
+            $stmt = $pdo->prepare("UPDATE postdetail SET status = ? WHERE id = ?");
+            $stmt->execute([$newStatus, $postId]);
+            
+            // Thêm thông báo thành công
+            $_SESSION['message'] = "Bài viết đã được đăng lại thành công!";
+        }
+        header("Location: myaccount.php");
+        exit();
+    }
 
 } catch (PDOException $e) {
     $message = "Lỗi kết nối: " . $e->getMessage();
@@ -315,33 +329,9 @@ try {
     </style>
 </head>
 <body>
-    <div id="header">
-        <div class="header-logo">Logo</div>
-        <div class="header-search">
-            <form action="search.php" method="GET">
-                <input type="text" name="keyword" placeholder="Tìm kiếm..." required />
-                <button class="btn-header" type="submit">Tìm kiếm</button>
-            </form>
-        </div>
-        <nav class="header-nav">
-            <a href="post.php">Bài viết</a>
-            <a href="explore.php">Khám phá</a>
-            <a href="aboutus.html">Về chúng tôi</a>
-        </nav>
-        <div class="header-account">
-            <?php
-            // Kiểm tra xem có username trong session không
-            if (isset($_SESSION['username'])) {
-                // Nếu có username, hiển thị nút Đăng xuất
-                echo '<a class="btn-account" href="logout.php">Đăng xuất</a>';
-            } else {
-                // Nếu không có username, hiển thị nút Đăng nhập và Đăng ký
-                echo '<a class="btn-account activee" href="login.php">Đăng nhập</a>';
-                echo '<a class="btn-account" href="register.php">Đăng ký</a>';
-            }
-            ?>
-        </div>
-    </div>
+    <?php
+        include 'header.php'; 
+    ?>
 
 
     <div id="main" class="d-flex">
@@ -403,6 +393,36 @@ try {
                                     <h3><?php echo htmlspecialchars($post['name']); ?></h3>
                                     <p><?php echo htmlspecialchars($post['description']); ?></p>
                                     <small><?php echo htmlspecialchars($post['date']); ?></small>
+                                    <p class="post-status" 
+                                        style="
+                                            color: <?php
+                                                if ($post['status'] === 'canceled') {
+                                                    echo '#dc3545'; // Màu đỏ cho 'Không được duyệt'
+                                                } elseif ($post['status'] === 'approve') {
+                                                    echo '#28a745'; // Màu xanh lá cây cho 'Đã duyệt'
+                                                } else {
+                                                    echo '#ffc107'; // Màu cam cho 'Chưa duyệt'
+                                                }
+                                            ?>;
+                                        ">
+                                        Trạng thái: 
+                                        <?php
+                                            if ($post['status'] === 'canceled') {
+                                                echo "Không được duyệt";
+                                                // Hiển thị nút "Đăng lại" nếu trạng thái là "canceled"
+                                                echo '
+                                                    <button type="button" class="repost-btn" onclick="openRepostModal(' . $post['id'] . ')">
+                                                        <i class="fa fa-rotate-left"></i> Đăng lại
+                                                    </button>
+                                                    ';
+                                            } elseif ($post['status'] === 'approve') {
+                                                echo "Đã duyệt";
+                                            } else {
+                                                echo "Chưa duyệt";
+                                            }
+                                        ?>
+                                    </p>
+
                                 </div>
                                 <!-- Nút chỉnh sửa và xóa -->
                                 <div class="post-actions">
@@ -593,7 +613,18 @@ try {
         </div>
     </div>
 
-
+    <!-- Modal đăng lại bài viết -->
+    <div id="repostModal" class="repost-modal">
+        <div class="repost-modal-content">
+            <form id="repostForm" method="post" action="myaccount.php">
+                <input type="hidden" name="post_id" value="" id="repostPostId">
+                <input type="hidden" name="new_status" value="notapproved">
+                <p>Bạn có chắc muốn đăng lại bài viết?</p>
+                <button type="submit">Xác nhận</button>
+                <button type="button" onclick="closeRepostModal()">Hủy</button>
+            </form>
+        </div>
+    </div>
 
     <div id="footer">
         <div class="footer-container">
@@ -791,13 +822,20 @@ try {
             }
         }
 
-
-
         <?php if (isset($_SESSION['message'])): ?>
             showNotification("<?php echo htmlspecialchars($_SESSION['message']); ?>");
             // Xóa thông báo sau khi hiển thị
             <?php unset($_SESSION['message']); ?>
         <?php endif; ?>
+
+        function openRepostModal(postId) {
+            document.getElementById("repostPostId").value = postId; // Gán ID bài viết vào input ẩn
+            document.getElementById("repostModal").style.display = "block"; // Mở modal
+        }
+
+        function closeRepostModal() {
+            document.getElementById("repostModal").style.display = "none"; // Đóng modal
+        }
 
     </script>
 </body>

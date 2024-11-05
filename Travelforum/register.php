@@ -67,7 +67,7 @@ if (!$error_message) {
     // Kiểm tra mã admin nếu có
     if (!$error_message && $admin_code) {
         try {
-            $stmt = $conn->prepare("SELECT * FROM Idadmin WHERE id = ?");
+            $stmt = $conn->prepare("SELECT * FROM admincode WHERE code = ?");
             $stmt->execute([$admin_code]);
             if ($stmt->fetch()) {
                 $is_admin = 1;
@@ -86,7 +86,7 @@ if (!$error_message) {
 
             // Xóa mã admin nếu người dùng đã sử dụng
             if ($is_admin) {
-                $stmt = $conn->prepare("DELETE FROM Idadmin WHERE id = ?");
+                $stmt = $conn->prepare("DELETE FROM admincode WHERE code = ?");
                 $stmt->execute([$admin_code]);
             }
 
@@ -151,15 +151,9 @@ if (!$error_message) {
     </script>
 </head>
 <body class="fade">
-    <div id="header">
-        <div class="header-logo">
-            Logo
-        </div>
-        <div class="header-account">
-            <a class="btn-account activee" href="./login.php">Đăng nhập</a>
-            <a class="btn-account" href="./register.php">Đăng ký</a>
-        </div>
-    </div>
+    <?php
+        include 'header.php'; 
+    ?>
 
     <div class="container-fluid" style="height: 100vh;">
         <div class="row">

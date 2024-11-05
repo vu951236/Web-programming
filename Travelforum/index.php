@@ -75,35 +75,9 @@ if (isset($_SESSION['user_id'])) {
     <script src="./asset/js/index.js"></script>
 </head>
 <body>
-
-    <div id="header">
-        <div class="header-logo">Logo</div>
-        <div class="header-search">
-            <form action="search.php" method="GET">
-                <input type="text" name="keyword" placeholder="Tìm kiếm..." required />
-                <button class="btn-header" type="submit">Tìm kiếm</button>
-            </form>
-        </div>
-
-        <nav class="header-nav">
-            <a href="post.php">Bài viết</a>
-            <a href="explore.php">Khám phá</a>
-            <a href="aboutus.html">Về chúng tôi</a>
-        </nav>
-        <div class="header-account">
-            <?php
-            // Kiểm tra xem có username trong session không
-            if (isset($_SESSION['username'])) {
-                // Nếu có username, hiển thị nút Đăng xuất
-                echo '<a class="btn-account" href="logout.php">Đăng xuất</a>';
-            } else {
-                // Nếu không có username, hiển thị nút Đăng nhập và Đăng ký
-                echo '<a class="btn-account activee" href="login.php">Đăng nhập</a>';
-                echo '<a class="btn-account" href="register.php">Đăng ký</a>';
-            }
-            ?>
-        </div>
-    </div>
+    <?php
+        include 'header.php'; 
+    ?>
 
     <div id="main">
         <div class="banner">

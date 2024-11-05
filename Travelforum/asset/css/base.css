@@ -57,6 +57,7 @@ input:focus {
     margin: 0 10px;
     border-radius: 20px;
     padding: 0 20px;
+    height: 40px;
 }
 
 .header-nav a {
@@ -85,6 +86,9 @@ input:focus {
 
 .header-nav a:hover::after {
     transform: scaleX(1);
+}
+.header-account .btn-account {
+    margin-right: 10px; /* Tạo khoảng cách giữa các nút */
 }
 
 /* End Header */

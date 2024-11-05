@@ -210,6 +210,7 @@ html, body {
 }
 
 .post {
+    position: relative; /* Đặt position: relative để làm gốc cho các phần tử con tuyệt đối */
     border: 1px solid #ccc;
     border-radius: 5px;
     padding: 15px;
@@ -228,6 +229,71 @@ html, body {
     width: 500px; /* Cố định chiều rộng ảnh */
     height: auto;
     margin-bottom: 10px;
+}
+.post-actions {
+    display: flex;
+    gap: 10px;
+    position: absolute;
+    bottom: 10px; /* Khoảng cách từ lề dưới */
+    left: 0px;
+}
+.repost-btn {
+    background: none; /* Bỏ nền */
+    border: none; /* Bỏ đường viền */
+    cursor: pointer; /* Thay đổi con trỏ khi di chuột qua nút */
+    padding: 0; /* Bỏ padding, có thể tùy chỉnh theo ý muốn */
+}/* CSS cho Modal */
+.repost-modal {
+    display: none; /* Mặc định ẩn modal */
+    position: fixed; /* Đặt vị trí cố định */
+    z-index: 1000; /* Đưa modal lên trên các phần tử khác */
+    left: 0;
+    top: 0;
+    width: 100%; /* Chiếm toàn bộ chiều rộng màn hình */
+    height: 100%; /* Chiếm toàn bộ chiều cao màn hình */
+    overflow: auto; /* Thêm cuộn nếu cần */
+    background-color: rgba(0, 0, 0, 0.5); /* Nền mờ cho modal */
+}
+
+.repost-modal-content {
+    background-color: #fefefe; /* Màu nền cho nội dung modal */
+    margin: 15% auto; /* Căn giữa modal theo chiều dọc và ngang */
+    padding: 20px; /* Padding bên trong modal */
+    border: 1px solid #888; /* Đường viền cho modal */
+    width: 300px; /* Chiều rộng cố định cho modal */
+    border-radius: 5px; /* Bo tròn các góc */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Đổ bóng cho modal */
+}
+
+.repost-modal-content p {
+    margin: 0 0 15px; /* Căn chỉnh khoảng cách cho đoạn văn */
+    font-size: 16px; /* Kích thước chữ */
+}
+
+.repost-modal button {
+    background-color: #007BFF; /* Màu nền cho nút xác nhận */
+    color: white; /* Màu chữ cho nút xác nhận */
+    border: none; /* Bỏ đường viền */
+    padding: 10px 15px; /* Padding cho nút */
+    text-align: center; /* Căn giữa chữ */
+    text-decoration: none; /* Bỏ gạch chân */
+    display: inline-block; /* Hiển thị nút inline */
+    margin: 5px 2px; /* Khoảng cách giữa các nút */
+    cursor: pointer; /* Thay đổi con trỏ khi di chuột qua nút */
+    border-radius: 5px; /* Bo tròn các góc */
+}
+
+.repost-modal button:hover {
+    background-color: #0056b3; /* Thay đổi màu khi di chuột qua */
+}
+
+.repost-modal button[type="button"] {
+    background-color: #ccc; /* Màu nền cho nút hủy */
+    color: #333; /* Màu chữ cho nút hủy */
+}
+
+.repost-modal button[type="button"]:hover {
+    background-color: #999; /* Thay đổi màu khi di chuột qua nút hủy */
 }
 
 /* CSS cho modal */
@@ -312,10 +378,77 @@ html, body {
     border-radius: 5px; /* Bo tròn các góc */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Đổ bóng cho modal */
 }
+/* CSS cho Nút trong Modal Thông Báo */
+.notification-modal button {
+    background-color: #28a745; /* Màu nền xanh cho nút xác nhận */
+    color: white; /* Màu chữ trắng */
+    border: none; /* Bỏ đường viền */
+    padding: 10px 15px; /* Padding cho nút */
+    text-align: center; /* Căn giữa chữ */
+    text-decoration: none; /* Bỏ gạch chân */
+    display: inline-block; /* Hiển thị nút inline */
+    margin-top: 10px; /* Khoảng cách từ trên xuống */
+    cursor: pointer; /* Thay đổi con trỏ khi di chuột qua nút */
+    border-radius: 5px; /* Bo tròn các góc */
+    font-size: 16px; /* Kích thước chữ */
+    transition: background-color 0.3s; /* Hiệu ứng chuyển màu nền */
+}
+
+.notification-modal button:hover {
+    background-color: #218838; /* Thay đổi màu khi di chuột qua */
+}
+
 .section {
     display: none; /* Ẩn tất cả các phần nội dung khi trang vừa tải */
 }
 
 .section.visible {
     display: block; /* Chỉ phần có lớp .visible mới được hiển thị */
+}
+/* CSS cho form tạo mã admin */
+#adminCodeCreation {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+#adminCodeCreation h2 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+#adminCodeCreation label {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 8px;
+    display: block;
+}
+
+#adminCodeCreation input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* CSS cho nút "Tạo mã" */
+#adminCodeCreation button[type="submit"] {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #4CAF50; /* Màu xanh lá đậm */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#adminCodeCreation button[type="submit"]:hover {
+    background-color: #45a049; /* Đổi màu khi hover */
 }

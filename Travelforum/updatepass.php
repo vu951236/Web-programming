@@ -117,15 +117,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </script>
 </head>
 <body class="fade">
-    <div id="header">
-        <div class="header-logo">
-            Logo
-        </div>
-        <div class="header-account">
-            <a class="btn-account" href="./login.html">Đăng nhập</a>
-            <a class="btn-account activee" href="./register.html">Đăng ký</a>
-        </div>
-    </div>
+    <?php
+        include 'header.php'; 
+    ?>
     <div class="container-fluid d-flex flex-column justify-content-center align-items-center" style="height: 100vh;">
         <img src="./asset/img/login_register/resetpass.png" alt="Reset Password" class="img-fluid mb-4" style="max-width: 20%; height: auto;">
         <div class="forgot-password-form text-center">
