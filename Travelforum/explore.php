@@ -29,6 +29,9 @@ if (in_array($filter, $valid_filters)) {
         case 'mountain':
             $sql = "SELECT * FROM locationdetail WHERE type = 'nui' ORDER BY point DESC";
             break;
+        case 'delta':
+            $sql = "SELECT * FROM locationdetail WHERE type = 'dongbang' ORDER BY point DESC";
+            break;
         case 'high-rated':
         default:
             $sql = "SELECT * FROM locationdetail ORDER BY point DESC LIMIT 20";
@@ -101,6 +104,9 @@ if (isset($_SESSION['user_id'])) {
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link <?php echo $filter === 'beach' ? 'active' : ''; ?>" href="explore.php?filter=beach">Du lịch biển</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link <?php echo $filter === 'delta' ? 'active' : ''; ?>" href="explore.php?filter=delta">Du lịch đồng bằng</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link <?php echo $filter === 'mountain' ? 'active' : ''; ?>" href="explore.php?filter=mountain">Du lịch núi</a>

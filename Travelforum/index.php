@@ -140,8 +140,10 @@ if (isset($_SESSION['user_id'])) {
                         <?php foreach ($users as $row): ?>
                             <div class="col">
                                 <div class="team-mem">
-                                    <img class="member-img" src="./<?php echo $row['avatar'] ?: 'asset/img/test.jpg'; ?>">
-                                    <h4 class="member-name"><?php echo $row['username']; ?></h4>
+                                    <a href="profile.php?userId=<?php echo htmlspecialchars($row['id']); ?>" class="text-decoration-none text-dark">
+                                        <img class="member-img" src="./<?php echo $row['avatar'] ?: 'asset/img/test.jpg'; ?>">
+                                        <h4 class="member-name"><?php echo $row['username']; ?></h4>
+                                    </a>
                                 </div>
                             </div>
                         <?php endforeach; ?>
@@ -149,7 +151,6 @@ if (isset($_SESSION['user_id'])) {
                 </div>
             </div>
         </div>
-
     </div>
 
     <div id="footer">

@@ -1,107 +1,169 @@
-/* Đặt cấu trúc chung */
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    color: #333;
+/* General Reset */
+body, h1, h2, h3, p, ul, li {
     margin: 0;
     padding: 0;
+    font-family: 'Arial', sans-serif;
 }
 
-/* Thông tin tài khoản */
-#main {
-    max-width: 800px;
+.profile-container {
+    max-width: 1200px;
     margin: 0 auto;
-    background-color: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    margin-top: 100px;
 }
 
-/* Phần đầu thông tin tài khoản */
+/* Phần trên: Avatar và thông tin người dùng */
 .profile-header {
     display: flex;
     align-items: center;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 2px solid #ddd;
     padding-bottom: 20px;
+    margin-bottom: 30px;
 }
 
-.profile-image-container {
-    width: 70px; /* Thu nhỏ kích thước */
-    height: 70px;
-    overflow: hidden;
-    border-radius: 50%;
-    margin-right: 20px; /* Tạo khoảng cách giữa ảnh và thông tin */
-}
-
-.profile-image-container {
-    width: 50px; /* Giảm kích thước xuống */
-    height: 50px;
-    overflow: hidden;
+.profile-avatar {
+    width: 150px;
+    height: 150px;
     border-radius: 50%;
     margin-right: 20px;
-}
-
-.profile-image {
-    width: 100%;
-    height: 100%;
     object-fit: cover;
-    border: 2px solid #007bff;
 }
 
-.profile-info h2 {
-    margin: 0;
-    font-size: 1.8em;
-    color: #007bff;
+.profile-info h1 {
+    font-size: 28px;
+    color: #333;
 }
 
 .profile-info p {
-    margin: 5px 0;
-    font-size: 0.95em;
-    color: #555;
+    font-size: 18px;
+    color: #777;
 }
 
-/* Bài viết của người dùng */
-.user-posts {
-    margin-top: 20px;
+/* Phần dưới: Layout */
+.profile-content {
+    display: flex;
+    gap: 30px;
 }
 
-.user-posts h3 {
-    font-size: 1.5em;
-    color: #333;
-    border-bottom: 2px solid #007bff;
-    padding-bottom: 10px;
+/* Sidebar */
+.profile-sidebar {
+    flex: 1;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.user-posts ul {
+.sidebar ul {
     list-style-type: none;
-    padding: 0;
+    padding-left: 0;
 }
 
-.user-posts li {
-    margin: 10px 0;
+.sidebar .nav-link {
+    font-size: 18px;
+    padding: 10px;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #333;
 }
 
-.user-posts a {
+.sidebar .nav-link.active {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.sidebar .nav-link:hover {
+    background-color: #f0f0f0;
+}
+
+/* Main Content */
+.profile-main {
+    flex: 2;
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.profile-main h2 {
+    font-size: 24px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.profile-main ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.profile-main ul li {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.profile-main ul li a {
     text-decoration: none;
     color: #007bff;
-    font-weight: 500;
+    transition: color 0.3s ease;
 }
 
-.user-posts a:hover {
-    text-decoration: underline;
-}
-/* Container của bài viết */
-.post-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px; /* Tạo khoảng cách giữa các bài viết */
+.profile-main ul li a:hover {
+    color: #0056b3;
 }
 
-/* Mỗi bài viết */
-.post {
-    width: calc(50% - 10px); /* Giảm chiều rộng mỗi bài viết xuống 50% */
-    background-color: #f8f9fa;
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+/* Thêm các phần tử nổi bật */
+.featured-posts, .featured-forums {
+    margin-top: 30px;
+}
+
+.featured-posts h3, .featured-forums h3 {
+    font-size: 22px;
+    margin-bottom: 10px;
+}
+
+.featured-posts ul, .featured-forums ul {
+    padding-left: 0;
+}
+
+.featured-posts ul li, .featured-forums ul li {
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+
+.featured-posts ul li a, .featured-forums ul li a {
+    text-decoration: none;
+    color: #007bff;
+}
+
+.featured-posts ul li a:hover, .featured-forums ul li a:hover {
+    color: #0056b3;
+}
+
+/* Cải tiến về responsive */
+@media (max-width: 768px) {
+    .profile-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+    }
+
+    .profile-content {
+        flex-direction: column;
+    }
+
+    .profile-sidebar {
+        margin-bottom: 20px;
+    }
+
+    .profile-main {
+        padding: 20px;
+    }
+}
+.container.profile-container {
+    padding-top: 80px !important;
+    margin-top: 0 !important;
 }

@@ -17,7 +17,8 @@ try {
 }
 
 // Kiểm tra lựa chọn 'view'
-$view = isset($_GET['view']) ? $_GET['view'] : 'forum';
+$view = isset($_GET['view']) ? $_GET['view'] : 'all_post';
+// Xác định trạng thái của bài viết
 $status = 'approve';
 
 if ($view === 'my_posts' && isset($_SESSION['user_id'])) {
@@ -33,6 +34,20 @@ if ($view === 'my_posts' && isset($_SESSION['user_id'])) {
     $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
     $stmt->bindParam(':status', $status, PDO::PARAM_STR);
     $stmt->execute();
+
+} elseif ($view === 'anuong' || $view === 'nghiduong' || $view === 'dulichmuasam') {
+    // Hiển thị bài viết theo danh mục
+    $sql = "SELECT postdetail.*, users.avatar, users.username, 
+                   (SELECT COUNT(*) FROM postcomment WHERE postcomment.idpost = postdetail.id) AS comment_count 
+            FROM postdetail 
+            JOIN users ON postdetail.userid = users.id 
+            WHERE postdetail.typepost = :typepost AND postdetail.status = :status 
+            ORDER BY postdetail.date DESC";
+    $stmt = $conn->prepare($sql);
+    $stmt->bindParam(':typepost', $view, PDO::PARAM_STR);
+    $stmt->bindParam(':status', $status, PDO::PARAM_STR);
+    $stmt->execute();
+
 } else {
     // Hiển thị tất cả bài viết
     $sql = "SELECT postdetail.*, users.avatar, users.username, 
@@ -41,13 +56,13 @@ if ($view === 'my_posts' && isset($_SESSION['user_id'])) {
             JOIN users ON postdetail.userid = users.id 
             WHERE postdetail.status = :status 
             ORDER BY postdetail.date DESC";
-    $stmt = $conn->prepare($sql); // Sử dụng prepare cho bảo mật
-    $stmt->bindParam(':status', $status, PDO::PARAM_STR); // Ràng buộc biến trạng thái
-    $stmt->execute(); // Thực hiện truy vấn
+    $stmt = $conn->prepare($sql);
+    $stmt->bindParam(':status', $status, PDO::PARAM_STR);
+    $stmt->execute();
 }
 
-
 $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 
 // Hàm tính thời gian trôi qua
 function time_elapsed_string($datetime, $full = false) {
@@ -107,7 +122,7 @@ if (isset($_SESSION['user_id'])) {
 }
 // Truy vấn để lấy 3 người dùng có điểm cao nhất
 $sql = "
-    SELECT avatar, username
+    SELECT id, avatar, username
     FROM users
     ORDER BY point DESC
     LIMIT 3
@@ -146,10 +161,19 @@ $topUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <div class="nav-wrapper">
                             <ul class="nav flex-column">
                                 <li class="nav-item">
-                                    <a class="nav-link <?php echo $view === 'forum' ? 'active' : ''; ?>" href="post.php?view=forum">Diễn đàn chung</a>
+                                    <a class="nav-link <?php echo $view === 'all_post' ? 'active' : ''; ?>" href="post.php?view=all_post">Tất cả bài viết</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link <?php echo $view === 'my_posts' ? 'active' : ''; ?>" href="post.php?view=my_posts">Bài viết của tôi</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link <?php echo $view === 'anuong' ? 'active' : ''; ?>" href="post.php?view=anuong">Bài viết về ăn uống</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link <?php echo $view === 'nghiduong' ? 'active' : ''; ?>" href="post.php?view=nghiduong">Bài viết về kì nghỉ</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link <?php echo $view === 'dulichmuasam' ? 'active' : ''; ?>" href="post.php?view=dulichmuasam">Bài viết về du lịch</a>
                                 </li>
                             </ul>
                         </div>
@@ -162,7 +186,9 @@ $topUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <div class="wrapper">
                                     <div class="post">
                                         <div class="post-header">
-                                            <img src="<?php echo htmlspecialchars($post['avatar'] ?? 'asset/img/test.jpg'); ?>" alt="Avatar" class="post-avatar">
+                                            <a href="profile.php?userId=<?php echo htmlspecialchars($post['userid']); ?>" class="text-decoration-none">
+                                                <img src="<?php echo htmlspecialchars($post['avatar'] ?? 'asset/img/test.jpg'); ?>" alt="Avatar" class="post-avatar">
+                                            </a>
                                             <div>
                                                 <div class="post-author"><?php echo htmlspecialchars($post['username']); ?></div>
                                                 <div class="post-time"><?php echo time_elapsed_string($post['date']); ?></div>
@@ -196,8 +222,10 @@ $topUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <ul class="active-users">
                                 <?php foreach ($topUsers as $user): ?>
                                     <li class="active-user">
-                                    <img src="<?php echo htmlspecialchars($user['avatar'] ?? 'asset/img/test.jpg'); ?>" alt="<?php echo htmlspecialchars($user['username']); ?>" class="user-avatar">
+                                    <a href="profile.php?userId=<?php echo htmlspecialchars($user['id']); ?>" class="d-flex align-items-center text-decoration-none text-dark">
+                                      <img src="<?php echo htmlspecialchars($user['avatar'] ?? 'asset/img/test.jpg'); ?>" alt="<?php echo htmlspecialchars($user['username']); ?>" class="user-avatar">
                                         <span class="user-name"><?php echo htmlspecialchars($user['username']); ?></span>
+                                    </a>
                                     </li>
                                 <?php endforeach; ?>
                             </ul>

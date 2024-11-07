@@ -13,6 +13,7 @@
     <nav class="header-nav">
         <a href="post.php">Bài viết</a>
         <a href="explore.php">Khám phá</a>
+        <a href="forum.php">Diễn đàn</a>
         <a href="aboutus.php">Về chúng tôi</a>
     </nav>
 
@@ -20,13 +21,7 @@
     <?php
         // Kiểm tra xem có username trong session không
         if (isset($_SESSION['username'])) {
-            // Kiểm tra ID người dùng
-            if ($_SESSION['user_id'] == 1) {
-                // Nếu ID người dùng là 1
-                echo '<a class="btn-account" href="logout.php">Đăng xuất</a>';
-                echo '<a class="btn-account" href="admin.php">Quản lí</a>';
-                echo '<a class="btn-account" href="myaccount.php">Tài khoản</a>';
-            } elseif (isset($_SESSION['isadmin']) && $_SESSION['isadmin'] == true) {
+            if (isset($_SESSION['isadmin']) && $_SESSION['isadmin'] == true) {
                 // Nếu là admin, hiển thị nút Quản lí
                 echo '<a class="btn-account" href="logout.php">Đăng xuất</a>';
                 echo '<a class="btn-account" href="admin.php">Quản lí</a>';

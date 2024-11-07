@@ -69,6 +69,7 @@ if ($message === "Kết nối đến cơ sở dữ liệu thành công.") {
     // Kiểm tra status từ GET
     $userstatus = $_GET['status'] ?? 'all';
     $poststatus = $_GET['status'] ?? 'all';
+    $forumstatus = $_GET['status'] ?? 'all';
 
     // Lọc theo status
     if ($userstatus === 'warned') {
@@ -97,6 +98,22 @@ if ($message === "Kết nối đến cơ sở dữ liệu thành công.") {
     $postStmt = $pdo->prepare($postQuery);
     $postStmt->execute();
     $posts = $postStmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Lọc theo status của bài đăng
+    if ($forumstatus === 'cancel') {
+        $forumQuery = "SELECT * FROM forumdetail WHERE status = 'canceled' ORDER BY id";
+    } elseif ($forumstatus === 'notapproved') {
+        $forumQuery = "SELECT * FROM forumdetail WHERE status = 'notapproved' ORDER BY id";
+    } elseif ($forumstatus === 'approved') {
+        $forumQuery = "SELECT * FROM forumdetail WHERE status = 'approve' ORDER BY id";
+    } else {
+        $forumQuery = "SELECT * FROM forumdetail ORDER BY id";
+    }
+
+    $forumStmt = $pdo->prepare($forumQuery);
+    $forumStmt->execute();
+    $forums = $forumStmt->fetchAll(PDO::FETCH_ASSOC);
+
 }
 
 
@@ -140,14 +157,27 @@ if (isset($_POST['action']) && $_POST['action'] == 'unban') {
     header("Location: admin.php");
     exit();
 }
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
-    $postId = $_POST['post_id'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_statusf'])) {
+    $forumId = $_POST['forum_id'];
     $status = $_POST['status'] === 'approve' ? 'approve' : 'canceled';
 
     // Cập nhật trạng thái bài viết
-    $updateQuery = "UPDATE postdetail SET status = :status WHERE id = :id";
+    $updateQuery = "UPDATE forumdetail SET status = :status WHERE id = :id";
     $stmt = $pdo->prepare($updateQuery);
-    $stmt->execute([':status' => $status, ':id' => $postId]);
+    $stmt->execute([':status' => $status, ':id' => $forumId]);
+
+    // Tải lại trang sau khi cập nhật
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
+    $forumId = $_POST['forum_id']; // Lấy ID bài đăng từ form
+    $status = $_POST['status'] === 'approve' ? 'approve' : 'canceled'; // Xác định trạng thái
+
+    // Cập nhật trạng thái bài đăng trong bảng forumdetail
+    $updateQuery = "UPDATE forumdetail SET status = :status WHERE id = :id";
+    $stmt = $pdo->prepare($updateQuery);
+    $stmt->execute([':status' => $status, ':id' => $forumId]);
 
     // Tải lại trang sau khi cập nhật
     header("Location: " . $_SERVER['PHP_SELF']);
@@ -232,6 +262,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adminCode'])) {
             <a href="#" class="new-item" onclick="showSection('dashboard')">Dash Board</a>
             <a href="#" class="new-item" onclick="showSection('userManagement')">Quản lý người dùng</a>
             <a href="#" class="new-item" onclick="showSection('postManagement')">Quản lý bài viết</a>
+            <a href="#" class="new-item" onclick="showSection('forumManagement')">Quản lý bài đăng</a>
             <a href="#" class="new-item" onclick="showSection('adminCodeCreation')">Tạo mã admin</a> 
         </nav>
 
@@ -377,13 +408,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adminCode'])) {
                                         <form method="POST" action="">
                                             <input type="hidden" name="post_id" value="<?php echo htmlspecialchars($post['id']); ?>">
                                             <input type="hidden" name="status" value="approve">
-                                            <button type="submit" name="update_status" class="approve-button">Duyệt</button>
+                                            <button type="submit" name="update_statusf" class="approve-button">Duyệt</button>
                                         </form>
                                         <!-- Form Hủy duyệt -->
                                         <form method="POST" action="">
                                             <input type="hidden" name="post_id" value="<?php echo htmlspecialchars($post['id']); ?>">
                                             <input type="hidden" name="status" value="canceled">
-                                            <button type="submit" name="update_status" class="cancel-button">Hủy</button>
+                                            <button type="submit" name="update_statusf" class="cancel-button">Hủy</button>
                                         </form>
                                     <?php endif; ?>
                                 </td>
@@ -392,6 +423,76 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adminCode'])) {
                     </tbody>
                 </table>
             </div>  
+            <!-- Forum Management Section -->
+            <div id="forumManagement" class="section">
+                <h2>Quản lý bài đăng</h2>
+                <div class="filter-buttons">
+                    <button class="active" onclick="filterUsers('all')">Tất cả bài đăng</button>
+                    <button onclick="filterUsers('notapproved')">Chưa duyệt</button>
+                    <button onclick="filterUsers('approved')">Đã duyệt</button>
+                    <button onclick="filterUsers('cancel')">Bị hủy</button>
+                </div>
+
+                <!-- Forum Table -->
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nội dung</th>
+                            <th>Trạng thái</th>
+                            <th>Xem chi tiết</th>
+                            <th>Duyệt bài đăng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($forums as $forum): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($forum['id']); ?></td>
+                                <td><?php echo htmlspecialchars($forum['content']); ?></td>
+                                <td><p class="forum-status" 
+                                        style="color: <?php
+                                            if ($forum['status'] === 'canceled') {
+                                                echo '#dc3545'; 
+                                            } elseif ($forum['status'] === 'approve') {
+                                                echo '#28a745'; 
+                                            } else {
+                                                echo '#ffc107'; 
+                                            }
+                                        ?>">
+                                        <?php
+                                            if ($forum['status'] === 'canceled') {
+                                                echo "Không được duyệt";
+                                            } elseif ($forum['status'] === 'approve') {
+                                                echo "Đã duyệt";
+                                            } else {
+                                                echo "Chưa duyệt";
+                                            }
+                                        ?>
+                                    </p></td>
+                                <td class="view-cell">
+                                    <a href="/Travelforum/Travelforum/forum.php?#post-<?php echo htmlspecialchars($forum['id']); ?>">
+                                        <button><i class="fa-regular fa-eye"></i> Xem bài đăng</button>
+                                    </a>
+                                </td>
+                                <td class="approve-cell">
+                                    <?php if ($forum['status'] === 'notapproved'): ?>
+                                        <form method="POST" action="">
+                                            <input type="hidden" name="forum_id" value="<?php echo htmlspecialchars($forum['id']); ?>">
+                                            <input type="hidden" name="status" value="approve">
+                                            <button type="submit" name="update_status" class="approve-button">Duyệt</button>
+                                        </form>
+                                        <form method="POST" action="">
+                                            <input type="hidden" name="forum_id" value="<?php echo htmlspecialchars($forum['id']); ?>">
+                                            <input type="hidden" name="status" value="canceled">
+                                            <button type="submit" name="update_status" class="cancel-button">Hủy</button>
+                                        </form>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
 
             <!-- Form tạo mã admin -->
             <div id="adminCodeCreation" class="section">
