@@ -24,6 +24,56 @@ try {
     // Nếu có lỗi xảy ra, lưu thông báo lỗi
     $message = "Kết nối thất bại: " . $e->getMessage();
 }
+
+// 1. Đếm tổng số user
+$userCountQuery = "SELECT COUNT(*) as total_users FROM users";
+$userCountStmt = $pdo->query($userCountQuery);
+$userCount = $userCountStmt->fetch(PDO::FETCH_ASSOC)['total_users'];
+
+// 2. Truy vấn tổng số bài viết
+$totalPostCountQuery = "SELECT COUNT(*) as total_posts FROM postdetail";
+$totalPostCountStmt = $pdo->query($totalPostCountQuery);
+$totalPostCount = $totalPostCountStmt->fetch(PDO::FETCH_ASSOC)['total_posts'];
+
+// 3. Số người đăng nhập theo tháng và năm
+$loginCountQuery = "
+    SELECT 
+        YEAR(login_time) AS year,
+        MONTH(login_time) AS month,
+        COUNT(*) AS login_count
+    FROM login_attempts
+    GROUP BY YEAR(login_time), MONTH(login_time)
+    ORDER BY year DESC, month DESC";
+$loginCountStmt = $pdo->query($loginCountQuery);
+$loginCounts = $loginCountStmt->fetchAll(PDO::FETCH_ASSOC);
+
+// 4. Đếm số bài post theo tháng và năm
+$postCountQuery = "
+    SELECT 
+        YEAR(date) AS year,
+        MONTH(date) AS month,
+        COUNT(*) AS post_count
+    FROM postdetail
+    GROUP BY YEAR(date), MONTH(date)
+    ORDER BY year DESC, month DESC";
+$postCountStmt = $pdo->query($postCountQuery);
+$postCounts = $postCountStmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Dữ liệu cho biểu đồ
+$loginCounts = array_map(function($row) {
+    $row['month_year'] = $row['year'] . '-' . $row['month'];
+    return $row;
+}, $loginCounts);
+
+$postCounts = array_map(function($row) {
+    $row['month_year'] = $row['year'] . '-' . $row['month'];
+    return $row;
+}, $postCounts);
+
+
+
+
+
 // Kiểm tra xem có thông tin người dùng trong session không
 if (isset($_SESSION['user_id'])) {
     $userId = $_SESSION['user_id']; // Lấy ID người dùng từ session
@@ -248,9 +298,132 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adminCode'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="./asset/css/admin.css">
     <link rel="stylesheet" href="./asset/css/base.css">
+    <style>
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        /* Đảm bảo các phần tử nằm trên cùng một hàng */
+        .dashboard-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap; /* Cho phép các phần tử xuống dòng nếu không đủ không gian */
+        }
+
+        /* Bố cục riêng cho top row */
+        .top-row {
+            margin-bottom: 30px; /* Tạo khoảng cách giữa top và bottom row */
+        }
+
+        /* Bố cục riêng cho bottom row */
+        .bottom-row {
+            margin-top: 30px;
+        }
+
+        /* Kiểu cho phần Tổng số người dùng */
+        .user-count, .post-count {
+            display: flex;             /* Sử dụng Flexbox */
+            flex-direction: column;    /* Đặt các phần tử theo chiều dọc */
+            justify-content: center;   /* Căn giữa theo chiều dọc */
+            align-items: center;       /* Căn giữa theo chiều ngang */
+            height: 150px;             /* Đảm bảo div có chiều cao đủ để căn giữa nội dung */
+            padding: 20px;             /* Khoảng cách xung quanh */
+            background-color: #f0f0f0; /* Màu nền cho div */
+            border-radius: 8px;        /* Bo góc div */
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Thêm bóng mờ */
+            flex: 1;                   /* Cho phép phần tử chiếm 1 phần không gian trong flex container */
+            min-width: 250px;          /* Đảm bảo phần tử không nhỏ hơn 250px */
+        }
+
+        .user-count h3, .post-count h3 {
+            font-size: 24px; /* Tăng kích thước chữ cho tiêu đề */
+            color: #333;     /* Màu chữ tiêu đề */
+            margin-bottom: 10px; /* Khoảng cách giữa tiêu đề và số người dùng */
+            text-align: center;  /* Căn giữa tiêu đề */
+        }
+
+        .user-count p, .post-count p {
+            font-size: 36px; /* Tăng kích thước chữ cho số người dùng */
+            color: #007bff;  /* Màu chữ cho số người dùng */
+            font-weight: bold; /* Làm đậm số lượng */
+            text-align: center;  /* Căn giữa số lượng */
+        }
+
+        /* Kiểu cho các phần thống kê khác */
+        .dashboard-item {
+            width: 48%; /* Điều chỉnh các phần tử còn lại chiếm 48% chiều rộng */
+            margin-bottom: 20px;
+        }
+
+        .dashboard-item h3 {
+            text-align: center;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .dashboard-item p {
+            font-size: 2em;  /* Tăng kích thước chữ cho số lượng */
+            color: #007bff;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* Kiểu cho Số bài viết theo tỉnh */
+        .location-stats {
+            width: 48%; /* Đảm bảo biểu đồ số bài viết theo tỉnh có chiều rộng vừa phải */
+            margin-bottom: 20px;
+        }
+
+        /* Kiểu cho Số bài post theo tháng và năm và Số người đăng nhập theo tháng và năm */
+        .post-stats,
+        .login-stats {
+            width: 48%; /* Đảm bảo các biểu đồ có chiều rộng hợp lý */
+            margin-bottom: 20px;
+        }
+
+        /* Kiểu cho các biểu đồ */
+        .chart-container {
+            width: 100%;
+            height: 350px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Thêm bóng mờ cho biểu đồ */
+        }
+
+        /* Kiểu cho các dòng trong bảng */
+        .dashboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .dashboard-table th, .dashboard-table td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        .dashboard-table th {
+            background-color: #f4f4f4;
+            font-weight: bold;
+        }
+
+        /* Kiểu cho các biểu đồ chính */
+        .chart {
+            height: 100%;
+            width: 100%;
+            border-radius: 8px;
+            background-color: #ffffff;
+        }
+
+    </style>
+
 </head>
 <body>
     <?php
@@ -271,9 +444,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adminCode'])) {
             <!-- Dashboard Section -->
             <div id="dashboard" class="section">
                 <h2>Dash Board</h2>
-                <!-- Nội dung Dashboard -->
+
+                <!-- Hàng ngang chứa Tổng số người dùng và Số bài viết theo tỉnh -->
+                <div class="dashboard-row top-row">
+                    <!-- Tổng số người dùng -->
+                    <div class="dashboard-item user-count">
+                        <h3>Tổng số người dùng:</h3>
+                        <p><?php echo $userCount; ?></p>
+                    </div>
+                    
+                    <div class="dashboard-item post-count">
+                        <h3>Tổng số bài viết:</h3>
+                        <p><?php echo $totalPostCount; ?></p>
+                    </div>
+                </div>
+
+                <!-- Hàng ngang chứa Số người đăng nhập theo tháng và năm và Số bài post theo tháng và năm -->
+                <div class="dashboard-row bottom-row">
+                    <!-- Số người đăng nhập theo tháng và năm -->
+                    <div class="dashboard-item login-stats">
+                        <h3>Số lượt đăng nhập</h3>
+                        <canvas id="loginChart"></canvas>
+                    </div>
+
+                    <!-- Số bài post theo tháng và năm -->
+                    <div class="dashboard-item post-stats">
+                        <h3>Số bài post</h3>
+                        <canvas id="postChart"></canvas>
+                    </div>
+                </div>
             </div>
-        
+
             <!-- User Management Section -->
             <div id="userManagement" class="section">
                 <h2>Quản lý người dùng</h2>
@@ -520,6 +721,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adminCode'])) {
     </div>
 
     <script>
+        // Dashboard
+        // Dữ liệu số người đăng nhập theo tháng và năm
+        // Biểu đồ số người đăng nhập theo tháng và năm
+        const loginData = {
+            labels: <?php echo json_encode(array_column($loginCounts, 'month_year')); ?>,
+            datasets: [{
+                label: 'Số lượt đăng nhập',
+                data: <?php echo json_encode(array_column($loginCounts, 'login_count')); ?>,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        };
+
+        const loginCtx = document.getElementById('loginChart').getContext('2d');
+        new Chart(loginCtx, {
+            type: 'bar',
+            data: loginData,
+            options: {
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Biểu đồ số bài post theo tháng và năm
+        const postData = {
+            labels: <?php echo json_encode(array_column($postCounts, 'month_year')); ?>,
+            datasets: [{
+                label: 'Số bài post',
+                data: <?php echo json_encode(array_column($postCounts, 'post_count')); ?>,
+                backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                borderColor: 'rgba(153, 102, 255, 1)',
+                borderWidth: 1
+            }]
+        };
+
+        const postCtx = document.getElementById('postChart').getContext('2d');
+        new Chart(postCtx, {
+            type: 'bar',
+            data: postData,
+            options: {
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        
+        // Dashboard
+
+
+
+
+
+
+
+
       function openDeleteModal(accountId) {
             document.getElementById('account_id_to_delete').value = accountId; // Gán ID tài khoản vào input
             document.getElementById('deleteModal').style.display = 'block'; // Mở modal
@@ -575,6 +834,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adminCode'])) {
             // Chuyển hướng đến trang hiện tại với tham số status
             window.location.href = `admin.php?status=${status}`;
         }
+
+
 
     </script>
 </body>

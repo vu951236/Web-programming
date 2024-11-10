@@ -1,0 +1,8 @@
+#header {
+    position: fixed;
+    top: 0;
+    z-index: 1000;
+}
+#main {
+    margin-top: 80px; /* Đặt giá trị bằng với chiều cao của header */
+}

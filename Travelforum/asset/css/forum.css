@@ -310,3 +310,63 @@
 #errorModal button:hover {
     background-color: #c82333;
 }
+/* CSS cho modal */
+#warningModal {
+    display: none; /* Ẩn modal theo mặc định */
+    position: fixed; /* Vị trí cố định */
+    z-index: 1000; /* Đặt trên cùng */
+    left: 0;
+    top: 0;
+    width: 100%; /* Chiếm toàn bộ chiều rộng */
+    height: 100%; /* Chiếm toàn bộ chiều cao */
+    overflow: auto; /* Kích hoạt cuộn nếu cần */
+    background-color: rgba(0, 0, 0, 0.5); /* Nền tối với độ trong suốt */
+}
+
+#warningModal .modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* Căn giữa modal */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Chiều rộng của modal */
+    height: 190px; /* Chiếm toàn bộ chiều cao */
+    max-width: 500px; /* Chiều rộng tối đa của modal */
+    border-radius: 5px; /* Bo tròn các góc */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Đổ bóng cho modal */
+    max-height: 90vh; /* Chiều cao tối đa */
+}
+
+#warningModal .close-button {
+    position: absolute; /* Đặt nút đóng ở vị trí tuyệt đối */
+    right: 10px; /* Cách từ bên phải */
+    top: 10px; /* Cách từ trên cùng */
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer; /* Thay đổi con trỏ khi hover */
+}
+
+#warningModal .close-button:hover,
+#warningModal .close-button:focus {
+    color: black; /* Thay đổi màu khi hover */
+    text-decoration: none;
+}
+
+/* Thêm kiểu cho nút xác nhận */
+#warningModal #confirmButton {
+    background-color: #4CAF50; /* Màu nền xanh */
+    color: white; /* Màu chữ trắng */
+    border: none; /* Không có đường viền */
+    padding: 10px 20px; /* Padding cho nút */
+    text-align: center; /* Căn giữa văn bản */
+    text-decoration: none; /* Không có gạch chân */
+    display: inline-block; /* Hiển thị dưới dạng inline-block */
+    font-size: 16px; /* Kích thước chữ */
+    margin-top: 15px; /* Khoảng cách phía trên */
+    border-radius: 5px; /* Bo tròn góc */
+    cursor: pointer; /* Con trỏ thay đổi khi hover */
+}
+
+#warningModal #confirmButton:hover {
+    background-color: #45a049; /* Đổi màu khi hover */
+}

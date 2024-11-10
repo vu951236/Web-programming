@@ -18,6 +18,7 @@ try {
 // Hủy bỏ tất cả dữ liệu phiên
 if (isset($_SESSION)) {
     session_destroy(); // Hủy bỏ session nếu nó tồn tại
+    session_unset();
 }
 
 // Chuyển hướng đến trang chính hoặc trang mong muốn

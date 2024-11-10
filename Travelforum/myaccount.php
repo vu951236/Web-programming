@@ -303,7 +303,6 @@ try {
         header("Location: myaccount.php");
         exit();
     }
-
 } catch (PDOException $e) {
     $message = "Lỗi kết nối: " . $e->getMessage();
 }
@@ -626,6 +625,16 @@ try {
         </div>
     </div>
 
+    <!-- Modal -->
+    <div id="warningModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-button" id="closeModal">&times;</span>
+            <h2>Thông báo</h2>
+            <p>Vui lòng chú ý hành vi của mình.</p>
+            <button id="confirmButton">Xác nhận</button>
+        </div>
+    </div>
+
     <div id="footer">
         <div class="footer-container">
             <div class="footer-section">
@@ -836,6 +845,27 @@ try {
         function closeRepostModal() {
             document.getElementById("repostModal").style.display = "none"; // Đóng modal
         }
+        document.addEventListener('DOMContentLoaded', function() {
+            // Kiểm tra xem người dùng có trạng thái là warned không
+            const userStatus = '<?php echo $userStatus; ?>';
+            const modal = document.getElementById('warningModal');
+            const closeModalButton = document.getElementById('closeModal');
+            const confirmButton = document.getElementById('confirmButton');
+
+            if (userStatus === 'warned') {
+                modal.style.display = 'flex'; // Hiển thị modal
+            }
+
+            // Đóng modal khi nhấn nút đóng
+            closeModalButton.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+
+            // Đóng modal khi nhấn nút xác nhận
+            confirmButton.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+        });
 
     </script>
 </body>

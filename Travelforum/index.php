@@ -110,7 +110,7 @@ if (isset($_SESSION['user_id'])) {
                                                     <div class="card-body">
                                                         <h5 class="card-title"><?php echo $locations[$index]['name']; ?></h5>
                                                         <p class="card-text"><?php echo $locations[$index]['information']; ?></p>
-                                                        <a href="#" class="btn-card">Chi tiết</a>
+                                                        <a href="locationdetail.php?id=<?php echo $locations[$index]['id']; ?>" class="btn-card">Chi tiết</a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -122,6 +122,7 @@ if (isset($_SESSION['user_id'])) {
                     <?php endfor; ?>
                 <?php endif; ?>
             </div>
+
             <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="prev">
                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                 <span class="visually-hidden">Previous</span>

@@ -122,7 +122,9 @@ if (isset($_SESSION['user_id'])) {
                                     <?php foreach ($locations as $location): ?>
                                         <div class="col">
                                             <div class="card">
-                                                <img src="./<?php echo htmlspecialchars($location['image']); ?>" class="card-img-top" alt="<?php echo htmlspecialchars($location['name']); ?>">
+                                                <a href="locationdetail.php?id=<?php echo $location['id']; ?>">
+                                                    <img src="./<?php echo htmlspecialchars($location['image']); ?>" class="card-img-top" alt="<?php echo htmlspecialchars($location['name']); ?>">
+                                                </a>
                                                 <div class="card-body">
                                                     <h5 class="card-title"><?php echo htmlspecialchars($location['name']); ?></h5>
                                                     <p class="card-text"><?php echo htmlspecialchars($location['information']); ?></p>
@@ -178,7 +180,5 @@ if (isset($_SESSION['user_id'])) {
             <p>&copy; 2024 Diễn đàn của chúng tôi. Bảo lưu mọi quyền.</p>
         </div>
     </div>
-    
-    <?php pg_close($conn); ?>
 </body>
 </html>
