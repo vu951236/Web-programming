@@ -7,7 +7,7 @@ if (!isset($config['db'])) {
 }
 
 $dbConfig = $config['db'];
-$dsn = "pgsql:host={$dbConfig['host']};port={$dbConfig['port']};dbname={$dbConfig['dbname']}";
+$dsn = "mysql:host={$dbConfig['host']};port={$dbConfig['port']};dbname={$dbConfig['dbname']}";
 
 $message = ''; // Biến để lưu thông báo
 $section = '';

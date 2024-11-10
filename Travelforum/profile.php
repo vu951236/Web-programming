@@ -8,7 +8,7 @@ if (!isset($config['db'])) {
 }
 
 $dbConfig = $config['db'];
-$dsn = "pgsql:host={$dbConfig['host']};port={$dbConfig['port']};dbname={$dbConfig['dbname']}";
+$dsn = "mysql:host={$dbConfig['host']};port={$dbConfig['port']};dbname={$dbConfig['dbname']}";
 
 try {
     // Kết nối đến cơ sở dữ liệu

@@ -6,7 +6,7 @@ $config = include('config.php');
 
 // Kết nối cơ sở dữ liệu
 $dbConfig = $config['db'];
-$dsn = "pgsql:host={$dbConfig['host']};port={$dbConfig['port']};dbname={$dbConfig['dbname']}";
+$dsn = "mysql:host={$dbConfig['host']};port={$dbConfig['port']};dbname={$dbConfig['dbname']}";
 
 try {
     $pdo = new PDO($dsn, $dbConfig['user'], $dbConfig['password']);

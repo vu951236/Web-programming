@@ -4,7 +4,7 @@ session_start();
 $config = include('config.php');
 // Kết nối cơ sở dữ liệu
 $dbConfig = $config['db'];
-$dsn = "pgsql:host={$dbConfig['host']};port={$dbConfig['port']};dbname={$dbConfig['dbname']}";
+$dsn = "mysql:host={$dbConfig['host']};port={$dbConfig['port']};dbname={$dbConfig['dbname']}";
 
 try {
     $conn = new PDO($dsn, $dbConfig['user'], $dbConfig['password']);
@@ -64,7 +64,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['username']) && !empt
                     $statusUpdateStmt->execute([$warnedUntilTime, $user['id']]);
                 }
 
-                header("Location: index.php");
+                if ($_SESSION['isadmin'] == 1) {
+                    header("Location: admin.php");
+                } else {
+                    header("Location: index.php");
+                }
                 exit;
             } else {
                 $error_message = "Sai mật khẩu. Vui lòng thử lại.";
