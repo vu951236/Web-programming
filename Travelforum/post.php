@@ -204,7 +204,7 @@ $topUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         </div>
                                         <div class="post-footer">
                                             <div class="post-actions">
-                                                <a href="/Travelforum/Travelforum/postdetail.php?id=<?php echo htmlspecialchars($post['id']); ?>">
+                                                <a href="./postdetail.php?id=<?php echo htmlspecialchars($post['id']); ?>">
                                                     <button><i class="fa-regular fa-eye"></i> Xem bài viết</button>
                                                 </a>
                                             </div>

@@ -81,7 +81,6 @@ if (isset($_SESSION['user_id'])) {
 
     <div id="main">
         <div class="banner">
-            <p>Đây là banner quần què gì đó</p>
         </div>
         
         <h3 style="padding: 10px 20px; font-size: 24px;">Địa điểm nổi bật</h3>

@@ -336,7 +336,7 @@ if (isset($_SESSION['user_id'])) {
                             <form class="add-comment-form" method="POST" action="postdetail.php">
                                 <textarea name="comment" placeholder="Add your comment here..." required></textarea>
                                 <input type="hidden" name="idpost" value="<?php echo $post_id; ?>">
-                                <button type="submit" class="btn btn-primary mt-2">Submit</button>
+                                <button type="submit" class="btn btn-primary mt-2">Gửi bình luận</button>
                             </form>
                         <?php else: ?>
                             <p class="text-danger">Vui lòng <a href="login.php">đăng nhập</a> để bình luận.</p>
@@ -345,7 +345,7 @@ if (isset($_SESSION['user_id'])) {
 
 
                     <div class="rating-section">
-                        <h3>Rate this post</h3>
+                        <h3>Đánh giá bài viết</h3>
                         <div class="star-rating">
                             <?php
                             $rate = $post['rate'];
@@ -371,7 +371,7 @@ if (isset($_SESSION['user_id'])) {
 
                         <form method="POST" action="">
                             <input type="hidden" name="rating" id="ratingInput" value="<?php echo $rate; ?>"> <!-- Giá trị đánh giá sẽ được cập nhật -->
-                            <button type="submit" class="btn btn-primary mt-2">Submit Rating</button>
+                            <button type="submit" class="btn btn-primary mt-2">Gửi đánh giá</button>
                         </form>
                     </div>
            

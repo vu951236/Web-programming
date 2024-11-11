@@ -273,7 +273,7 @@ if (isset($_GET['post_id'])) {
                             <a class="nav-link active" href="forum.php?filter=all">Diễn đàn chung</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="forum.php?filter=my_posts">Bài viết của tôi</a>
+                            <a class="nav-link" href="forum.php?filter=my_posts">Bài đăng của tôi</a>
                         </li>
                     </ul>
                 </div>
@@ -311,7 +311,13 @@ if (isset($_GET['post_id'])) {
                         <div class="form-group mt-2">
                             <input type="file" name="post_image" accept="image/*" class="form-control-file">
                         </div>
-                        <button type="submit" class="btn btn-primary mt-3">Đăng</button>
+                        <?php if (isset($_SESSION['user_id'])): ?>
+                          <button type="submit" class="btn btn-primary mt-3">Đăng</button>
+                        <?php else: ?>
+                            <p class="text-center">
+                                Vui lòng <a href="login.php">đăng nhập</a> để đăng bài.
+                            </p>
+                        <?php endif; ?>
                     </form>
                 </div>
             </div>

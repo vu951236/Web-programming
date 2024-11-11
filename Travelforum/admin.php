@@ -207,14 +207,14 @@ if (isset($_POST['action']) && $_POST['action'] == 'unban') {
     header("Location: admin.php");
     exit();
 }
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_statusf'])) {
-    $forumId = $_POST['forum_id'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_statusp'])) {
+    $postId = $_POST['post_id'];
     $status = $_POST['status'] === 'approve' ? 'approve' : 'canceled';
 
     // Cập nhật trạng thái bài viết
-    $updateQuery = "UPDATE forumdetail SET status = :status WHERE id = :id";
+    $updateQuery = "UPDATE postdetail SET status = :status WHERE id = :id";
     $stmt = $pdo->prepare($updateQuery);
-    $stmt->execute([':status' => $status, ':id' => $forumId]);
+    $stmt->execute([':status' => $status, ':id' => $postId]);
 
     // Tải lại trang sau khi cập nhật
     header("Location: " . $_SERVER['PHP_SELF']);
@@ -432,7 +432,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adminCode'])) {
     <div id="main" class="d-flex">
         <!-- Sidebar -->
         <nav class="aside-nav">
-            <a href="#" class="new-item" onclick="showSection('dashboard')">Dash Board</a>
+            <a href="#" class="new-item" onclick="showSection('dashboard')">DashBoard</a>
             <a href="#" class="new-item" onclick="showSection('userManagement')">Quản lý người dùng</a>
             <a href="#" class="new-item" onclick="showSection('postManagement')">Quản lý bài viết</a>
             <a href="#" class="new-item" onclick="showSection('forumManagement')">Quản lý bài đăng</a>
@@ -443,7 +443,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adminCode'])) {
         <div class="content">
             <!-- Dashboard Section -->
             <div id="dashboard" class="section">
-                <h2>Dash Board</h2>
+                <h2>DashBoard</h2>
 
                 <!-- Hàng ngang chứa Tổng số người dùng và Số bài viết theo tỉnh -->
                 <div class="dashboard-row top-row">
@@ -609,13 +609,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adminCode'])) {
                                         <form method="POST" action="">
                                             <input type="hidden" name="post_id" value="<?php echo htmlspecialchars($post['id']); ?>">
                                             <input type="hidden" name="status" value="approve">
-                                            <button type="submit" name="update_statusf" class="approve-button">Duyệt</button>
+                                            <button type="submit" name="update_statusp" class="approve-button">Duyệt</button>
                                         </form>
                                         <!-- Form Hủy duyệt -->
                                         <form method="POST" action="">
                                             <input type="hidden" name="post_id" value="<?php echo htmlspecialchars($post['id']); ?>">
                                             <input type="hidden" name="status" value="canceled">
-                                            <button type="submit" name="update_statusf" class="cancel-button">Hủy</button>
+                                            <button type="submit" name="update_statusp" class="cancel-button">Hủy</button>
                                         </form>
                                     <?php endif; ?>
                                 </td>

@@ -177,3 +177,12 @@ input:focus {
 }
 
 /* End Footer */
+.header-logo {
+    max-height: 100%;
+}
+
+.header-logo img{
+    height: 50px;
+    width: auto;
+    display: block;
+}

@@ -209,6 +209,7 @@ try {
             $postDescription = $_POST['postDescription'] ?? ''; // Nhận trường mô tả
             $postContent = $_POST['postContent'] ?? '';
             $postLocation = $_POST['postLocation'] ?? ''; // Nhận tỉnh thành
+            $typepost = $_POST['postType'] ?? ''; // Nhận tỉnh thành
             $newImage = null;
 
             // Xử lý hình ảnh
@@ -232,7 +233,7 @@ try {
             }
 
             // Thêm bài viết vào cơ sở dữ liệu
-            $sql = "INSERT INTO postdetail (userid, name, description, content, image, location, date) VALUES (:userid, :name, :description, :content, :image, :location, NOW())";
+            $sql = "INSERT INTO postdetail (userid, name, description, content, image, location, date, typepost) VALUES (:userid, :name, :description, :content, :image, :location, NOW(), :typepost)";
             $stmt = $pdo->prepare($sql);
             $stmt->bindParam(':userid', $_SESSION['user_id']);
             $stmt->bindParam(':name', $postTitle);
@@ -240,6 +241,8 @@ try {
             $stmt->bindParam(':content', $postContent);
             $stmt->bindParam(':image', $newImage);
             $stmt->bindParam(':location', $postLocation); 
+            $stmt->bindParam(':typepost', $typepost); 
+
             $stmt->execute();
 
             $_SESSION['message'] = "Thêm bài viết thành công!";
@@ -546,6 +549,15 @@ try {
                                         <option value="vinhphuc">Vĩnh Phúc</option>
                                         <option value="vinhlong">Vĩnh Long</option>
                                         <option value="yenbai">Yên Bái</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="postType" class="form-label">Chọn chủ đề bài viết</label>
+                                    <select class="form-select" id="postType" name="postType" required>
+                                        <option value="">Chọn Chủ Đề</option>
+                                        <option value="anuong">Ăn uống</option>
+                                        <option value="nghiduong">Nghỉ dưỡng</option>
+                                        <option value="dulichmuasam">Du lịch</option>                   
                                     </select>
                                 </div>
                                 <button type="submit" class="btn btn-success" name="action" value="addpost">Tạo Bài Viết</button>

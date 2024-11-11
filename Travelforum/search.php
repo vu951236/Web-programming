@@ -26,7 +26,7 @@ if (isset($_GET['keyword'])) {
     }
 
     // Tìm kiếm tỉnh thành phù hợp
-    $location_sql = "SELECT name, location, information, image FROM locationdetail WHERE name ILIKE ?";
+    $location_sql = "SELECT id, name, location, information, image FROM locationdetail WHERE name LIKE ?";
     $location_stmt = $conn->prepare($location_sql);
     $like_keyword = '%' . $keyword . '%';
     $location_stmt->bindParam(1, $like_keyword);
@@ -35,6 +35,7 @@ if (isset($_GET['keyword'])) {
     if ($location_stmt->rowCount() > 0) {
         while ($row = $location_stmt->fetch(PDO::FETCH_ASSOC)) {
             $locations[] = [
+                'id' => $row['id'],
                 'name' => $row['name'],
                 'location' => $row['location'],
                 'information' => $row['information'],
@@ -46,11 +47,11 @@ if (isset($_GET['keyword'])) {
     $status = 'approve';
     // Tìm kiếm theo cả tên bài viết và tên tỉnh thành trong một truy vấn
     $post_sql = "
-        SELECT pd.name, pd.description, pd.image, u.username AS author_name, u.avatar AS author_avatar 
+        SELECT pd.id, pd.name, pd.description, pd.image, pd.userid, u.username AS author_name, u.avatar AS author_avatar 
         FROM postdetail pd
         JOIN users u ON pd.userid = u.id
         LEFT JOIN locationdetail ld ON pd.location = ld.location
-        WHERE (pd.name ILIKE :keyword OR ld.name ILIKE :keyword) AND pd.status = :status
+        WHERE (pd.name LIKE :keyword OR ld.name LIKE :keyword) AND pd.status = :status
     ";
 
     // Chuẩn bị và thực thi truy vấn với từ khóa tìm kiếm
@@ -65,7 +66,7 @@ if (isset($_GET['keyword'])) {
         $userId = $_SESSION['user_id']; // Lấy ID người dùng từ session
 
         // Lấy trạng thái người dùng từ cơ sở dữ liệu
-        $userQuery = "SELECT status FROM users WHERE id = ?";
+        $userQuery = "SELECT id, status FROM users WHERE id = ?";
         $userStmt = $conn->prepare($userQuery); // Thay $pdo bằng $conn
         $userStmt->execute([$userId]);
         $user = $userStmt->fetch(PDO::FETCH_ASSOC);
@@ -119,7 +120,7 @@ if (isset($_GET['keyword'])) {
         <div class="main-content">
             <div class="container text-center">
                 <div id="locations">
-                    <h4>Địa điểm</h4>
+                `   <h4>Địa điểm</h4>
                     <div class="explore-content">
                         <div class="row row-cols-1 row-cols-md-3 g-4">
                             <?php
@@ -128,11 +129,14 @@ if (isset($_GET['keyword'])) {
                                     foreach ($locations as $location) {
                                         echo '<div class="col">';
                                         echo '  <div class="card">';
-                                        echo '    <img src="./' . htmlspecialchars($location['image']) . '" class="card-img-top" alt="...">'; // Hiển thị hình ảnh với đường dẫn mới
-                                        echo '    <div class="card-body">';
-                                        echo '      <h5 class="card-title">' . htmlspecialchars($location['name']) . '</h5>';
-                                        echo '      <p class="card-text">' . htmlspecialchars($location['information']) . '</p>'; // Sử dụng information
-                                        echo '    </div>';
+                                        // Thêm thẻ <a> xung quanh phần hình ảnh và nội dung của địa điểm
+                                        echo '    <a href="locationdetail.php?id=' . urlencode($location['id']) . '">';
+                                        echo '      <img src="./' . htmlspecialchars($location['image']) . '" class="card-img-top" alt="...">'; 
+                                        echo '      <div class="card-body">';
+                                        echo '        <h5 class="card-title">' . htmlspecialchars($location['name']) . '</h5>';
+                                        echo '        <p class="card-text">' . htmlspecialchars($location['information']) . '</p>';
+                                        echo '      </div>';
+                                        echo '    </a>'; // đóng thẻ <a>
                                         echo '  </div>';
                                         echo '</div>'; // close col
                                     }
@@ -143,8 +147,7 @@ if (isset($_GET['keyword'])) {
                             ?>
                         </div>
                     </div> <!-- Kết thúc explore-content -->
-                </div>
-
+                </div>`
                 <div id="posts">
                     <?php
                     if (isset($posts) && !empty($posts)) {
@@ -155,12 +158,18 @@ if (isset($_GET['keyword'])) {
                             echo '<div class="col center">';
                             echo '    <div class="small-post">';
                             echo '      <div class="post-header">';
-                            echo '        <img src="' . htmlspecialchars($row['author_avatar']?? 'asset/img/test.jpg') . '" alt="Avatar" class="post-avatar">'; // Sửa đường dẫn đến ảnh
-                            echo '        <div class="post-author">' . htmlspecialchars($row['author_name']) . '</div>';
+                            // Bao bọc ảnh avatar và tên tác giả trong thẻ <a> để chuyển đến trang chi tiết tác giả
+                            echo '        <a href="profile.php?userId=' . urlencode($row['userid']) . '">';
+                            echo '          <img src="' . htmlspecialchars($row['author_avatar'] ?? 'asset/img/test.jpg') . '" alt="Avatar" class="post-avatar">';
+                            echo '          <div class="post-author">' . htmlspecialchars($row['author_name']) . '</div>';
+                            echo '        </a>';
                             echo '      </div>';
-                            echo '      <img src="' . htmlspecialchars($row['image']) . '" class="card-img-top" alt="...">';
-                            echo '      <h5 class="card-title">' . htmlspecialchars($row['name']) . '</h5>';
-                            echo '      <div class="post-content">' . htmlspecialchars($row['description']) . '</div>';
+                            // Bao bọc hình ảnh và nội dung bài viết trong thẻ <a> để chuyển đến trang chi tiết bài viết
+                            echo '      <a href="postdetail.php?id=' . urlencode($row['id']) . '">';
+                            echo '        <img src="' . htmlspecialchars($row['image']) . '" class="card-img-top" alt="...">';
+                            echo '        <h5 class="card-title">' . htmlspecialchars($row['name']) . '</h5>';
+                            echo '        <div class="post-content">' . htmlspecialchars($row['description']) . '</div>';
+                            echo '      </a>';
                             echo '    </div>'; // close small-post
                             echo '</div>'; // close col
                         }

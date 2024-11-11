@@ -1,7 +1,9 @@
 <div id="header">
-    <nav class="header-nav">
-        <a href="index.php">Logo</a>
-    </nav>
+    <div class="header-logo">
+        <a href="index.php">
+            <img src="./asset/img/ECHO.png" alt="">
+        </a>
+    </div>
 
     <div class="header-search">
         <form action="search.php" method="GET">

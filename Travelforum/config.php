@@ -11,7 +11,7 @@ return [
         'smtp_host' => 'smtp.gmail.com',
         'smtp_port' => '587',
         'username' => 'hoangvuvo907@gmail.com',
-        'password' => 'zkav ovua ugpg ptlk'
+        'password' => 'aefv exyk zqpw tcan'
     ]
 ];
 ?>
