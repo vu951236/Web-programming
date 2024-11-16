@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
 
         // Thông báo và làm mới trang
-        $_SESSION['message'] = "Đăng bài thành công!";
+        $_SESSION['message'] = "Đăng bài thành công! Bài đăng đang chờ duyệt.";
         header("Location: forum.php");
         exit();
     }
@@ -265,7 +265,7 @@ if (isset($_GET['post_id'])) {
 <div class="container">
     <div class="row">
         <!-- Cột trái: Sidebar - Bộ lọc -->
-        <div class="col-md-4">
+        <div class="col-md-4 left">
             <div class="sidebar card mb-4 shadow-sm">
                 <div class="card-body">
                     <ul class="nav flex-column">
@@ -299,7 +299,7 @@ if (isset($_GET['post_id'])) {
         </div>
 
         <!-- Cột phải: Bài viết của người dùng -->
-        <div class="col-md-8">
+        <div class="col-md-8 right">
             <!-- Khu vực đăng bài viết mới -->
             <div class="new-post card mb-4 shadow-sm">
                 <div class="card-body">
@@ -391,7 +391,15 @@ if (isset($_GET['post_id'])) {
         </div>
     </div>
 </div>
-
+<!-- Modal thông báo -->
+<div id="notificationModal" class="notification-modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeNotificationModal()">&times;</span>
+            <h2>Thông báo</h2>
+            <p id="notificationMessage">Nội dung thông báo ở đây</p>
+            <button onclick="closeNotificationModal()">Xác nhận</button>
+        </div>
+    </div>
 <!-- Modal Xác Nhận Xóa -->
 <div id="confirmModal" class="modal">
     <div class="modal-content">
@@ -424,26 +432,13 @@ if (isset($_GET['post_id'])) {
             <button id="confirmButton">Xác nhận</button>
         </div>
     </div>
+
+<?php
+include 'footer.php'; 
+?>
+
 <script>
-function copyLink(postId) {
-    // Tạo đường dẫn URL của bài viết
-    const postUrl = window.location.origin + '/Travelforum/Travelforum/forum.php#post-' + postId;
 
-    // Tạo một thẻ input tạm thời để chứa URL
-    const tempInput = document.createElement('input');
-    tempInput.value = postUrl;
-    document.body.appendChild(tempInput);
-
-    // Chọn và sao chép giá trị của input
-    tempInput.select();
-    document.execCommand('copy');
-
-    // Xóa thẻ input tạm thời
-    document.body.removeChild(tempInput);
-
-    // Hiển thị thông báo sao chép thành công
-    alert('Đã sao chép liên kết bài viết!');
-}
 function showCommentsModal(postId) {
     // Kiểm tra xem có modal nào đang mở không
     const openModal = document.querySelector('.modal.show');
@@ -490,6 +485,17 @@ function showCommentsModal(postId) {
                 <span>${data.comments.length} bình luận</span>
             `;
 
+            // Nút xóa bài viết (chỉ hiển thị nếu là bài viết của người dùng hiện tại)
+            const isOwner = data.post.userid === data.user.id;
+            let deletePostButton = '';
+            if (isOwner) {
+                deletePostButton = `
+                    <button class="btn btn-danger btn-sm" onclick="deletePost(${postId})">
+                        <i class="fas fa-trash-alt"></i> Xóa bài viết
+                    </button>
+                `;
+            }
+
             document.getElementById('modal-post-actions').innerHTML = `
                 <button class="btn btn-outline-primary btn-sm like-button ${data.hasLiked ? 'liked' : ''}" id="like-btn-${postId}" data-post-id="${postId}" onclick="toggleLike(${postId})">
                     <i class="far fa-thumbs-up"></i> Thích
@@ -497,9 +503,10 @@ function showCommentsModal(postId) {
                 <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#commentFormContainer">
                     <i class="far fa-comment"></i> Bình luận
                 </button>
-                <button class="btn btn-outline-success btn-sm">
+                <button class="btn btn-outline-success btn-sm" onclick="copyLink(${data.post.id})">
                     <i class="fas fa-share"></i> Chia sẻ
                 </button>
+                ${deletePostButton}
             `;
 
             // Hiển thị bình luận
@@ -535,6 +542,96 @@ function showCommentsModal(postId) {
         })
         .catch(error => console.error('Error:', error));
 }
+function copyLink(postId) {
+    // Lấy URL hiện tại và tách phần thư mục chứa file
+    const currentPath = window.location.pathname;
+    const directoryPath = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
+
+    // Tạo URL động đến file forum.php
+    const postUrl = window.location.origin + directoryPath + 'forum.php#post-' + postId;
+
+    console.log("URL bài viết:", postUrl);
+
+    // Sử dụng API Clipboard để sao chép liên kết
+    navigator.clipboard.writeText(postUrl)
+        .then(() => {
+            // Hiển thị thông báo sao chép thành công
+            alert('Đã sao chép liên kết bài viết!');
+        })
+        .catch(error => {
+            console.error('Không thể sao chép:', error);
+            alert('Có lỗi khi sao chép liên kết.');
+        });
+}
+
+function deletePost(postId) {
+    // Mở modal xác nhận xóa
+    const modal = document.getElementById('confirmModal');
+    const modalMessage = document.getElementById('modalMessage');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+
+    modalMessage.innerText = 'Bạn có chắc chắn muốn xóa bài viết này không?';
+    modal.style.display = 'block'; // Hiển thị modal xác nhận
+
+    // Đóng modal khi nhấn vào nút đóng (X)
+    document.getElementById('modalCloseBtn').onclick = function () {
+        modal.style.display = 'none';
+    };
+
+    // Xử lý khi nhấn "Xóa bài viết"
+    confirmDeleteBtn.onclick = function () {
+        fetch('delete_forum.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ post_id: postId }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                modal.style.display = 'none'; // Đóng modal xác nhận sau khi xử lý
+
+                if (data.success) {
+                    const successModal = document.getElementById('successModal');
+                    const successMessage = document.getElementById('successModalMessage');
+                    successMessage.innerText = 'Xóa bài viết thành công';
+                    successModal.style.display = 'block';
+
+                    // Ẩn modal thành công sau 1 giây và reload trang
+                    setTimeout(function () {
+                        successModal.style.display = 'none';
+                        location.reload();
+                    }, 1000);
+                } else {
+                    const errorModal = document.getElementById('errorModal');
+                    const errorMessage = document.getElementById('errorModalMessage');
+                    errorMessage.innerText = 'Không thể xóa bài viết: ' + data.message;
+                    errorModal.style.display = 'block';
+
+                    document.getElementById('errorModalCloseBtn').onclick = function () {
+                        errorModal.style.display = 'none';
+                    };
+                }
+            })
+            .catch(error => {
+                console.error('Lỗi:', error);
+                const errorModal = document.getElementById('errorModal');
+                const errorMessage = document.getElementById('errorModalMessage');
+                errorMessage.innerText = 'Lỗi: ' + error.message;
+                errorModal.style.display = 'block';
+
+                document.getElementById('errorModalCloseBtn').onclick = function () {
+                    errorModal.style.display = 'none';
+                };
+                modal.style.display = 'none'; // Đóng modal xác nhận nếu có lỗi
+            });
+    };
+
+    // Đóng modal khi nhấn "Hủy bỏ"
+    cancelDeleteBtn.onclick = function () {
+        modal.style.display = 'none';
+    };
+}
+
 function deleteComment(commentId, postId) {
     // Mở modal xác nhận xóa
     const modal = document.getElementById('confirmModal');
@@ -642,6 +739,7 @@ function toggleLike(postId) {
     })
     .catch(error => console.error('Error:', error));
 }
+
 
 // Cập nhật trạng thái "liked" trong modal và số lượng like, bình luận
 function updateModal(postId, likesCount, commentCount, hasLiked) {
@@ -765,6 +863,19 @@ document.addEventListener('DOMContentLoaded', function() {
         modal.style.display = 'none';
     });
 });
+function showNotification(message) {
+    document.getElementById('notificationMessage').innerText = message;
+    document.getElementById('notificationModal').style.display = 'block';
+}
+
+function closeNotificationModal() {
+    document.getElementById('notificationModal').style.display = 'none';
+}
+<?php if (isset($_SESSION['message'])): ?>
+    showNotification("<?php echo htmlspecialchars($_SESSION['message']); ?>");
+    // Xóa thông báo sau khi hiển thị
+    <?php unset($_SESSION['message']); ?>
+<?php endif; ?>
 </script>
 
 </body>

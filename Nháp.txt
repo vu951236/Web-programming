@@ -1,4 +1,9 @@
 +Thành viên nổi bật: Sau khi một người dùng bất kì đánh giá bài post thì tính toán cột rate của bài post và kiểm tra tên người tạo post sau đó tính lại cột point cho user đó bằng cách cộng tất cả cột rate của các bài post của user đó lại và chia cho số bài post của user và sau đó với mỗi bài post của người dùng cộng thêm 0.1 điểm. Hiển thị 5 người dùng cao điểm nhất. 
 +Địa điểm nổi bật: Sau khi một người dùng đánh giá một bài post thì tính toán cột rate của bài post và kiểm tra cột location sau đó tính lại cột point của hàng có cột location trùng với nó trong bảng locationdetail bằng cách cộng tất cả cột rate của các bài post của cột location đó lại và chia cho số bài post của location và sau đó với mỗi bài post của location cộng thêm 0.1 điểm. Hiển thị 9 địa điểm cao điểm nhất.
-*pg_dump -U postgres -h localhost -p 5432 Webphp > output.sql
-*git push origin main --force
+#Bug:
+User
+***3. Post Detail, forum, location detail không có nút để trở ra (dùng ajax hoặc fetch api)
+21.footer
+ADMIN
+9. [improvement] thêm hộp thoại thông báo đã tạo mã (Tạo modal giống myaccount.php)
+10. [improvement]  người dùng đã đăng ký tài khoản sẽ không thể thành admin mà phải đăng ký một tài khoản mới.

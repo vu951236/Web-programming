@@ -48,83 +48,128 @@ $comment_stmt->execute(['idpost' => $post_id]);
 $comments = $comment_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Lấy 3 bài viết gần đây
-$recentPostsStmt = $pdo->prepare("SELECT * FROM postdetail ORDER BY date DESC LIMIT 3");
-$recentPostsStmt->execute();
+$recentPostsStmt = $pdo->prepare("SELECT * FROM postdetail WHERE status = :status AND id != :currentPostId  ORDER BY date DESC LIMIT 3");
+$recentPostsStmt->execute(['status' => 'approve', 'currentPostId' => $post_id]);
 $recentPosts = $recentPostsStmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Xử lý đánh giá mới
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rating'])) {
     $newRating = (int) $_POST['rating'];
-    
-    // Kiểm tra nếu bài viết tồn tại
-    if ($post) {
-        $currentRate = $post['rate'];
-        $currentAmongRate = $post['amongrate'];
-        $postCreatorId = $post['userid'];
-        $postLocation = $post['location'];
+    $userId = $_SESSION['user_id']; // Lấy ID người dùng từ session (hoặc từ đâu bạn lưu trữ)
 
-        // Tính toán đánh giá mới
-        $updatedRate = (($currentRate * $currentAmongRate) + $newRating) / ($currentAmongRate + 1);
-        $updatedAmongRate = $currentAmongRate + 1;
+    // Kiểm tra nếu người dùng đã đánh giá bài viết này chưa
+    $checkRatingStmt = $pdo->prepare("SELECT * FROM post_ratings WHERE user_id = :user_id AND post_id = :post_id");
+    $checkRatingStmt->execute(['user_id' => $userId, 'post_id' => $post_id]);
+    $existingRating = $checkRatingStmt->fetch(PDO::FETCH_ASSOC);
 
-        // Cập nhật cột rate và amongrate trong cơ sở dữ liệu
-        $updateStmt = $pdo->prepare("UPDATE postdetail SET rate = :rate, amongrate = :amongrate WHERE id = :id");
-        $updateStmt->execute([
-            'rate' => $updatedRate,
-            'amongrate' => $updatedAmongRate,
-            'id' => $post_id
-        ]);
-
-        // Cập nhật điểm cho người tạo bài viết
-        $userPostsStmt = $pdo->prepare("SELECT rate, view FROM postdetail WHERE userid = :userid");
-        $userPostsStmt->execute(['userid' => $postCreatorId]);
-        $userPosts = $userPostsStmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $totalUserRate = 0;
-        $totalUserViews = 0;
-        $numUserPosts = count($userPosts);
-        
-        foreach ($userPosts as $userPost) {
-            $totalUserRate += $userPost['rate'];
-            $totalUserViews += $userPost['view'];
-        }
-
-        $userPoint = ($totalUserRate / max($numUserPosts, 1)) + ($numUserPosts * 0.5) + ($totalUserViews * 0.1);
-        $updateUserPointStmt = $pdo->prepare("UPDATE users SET point = :point WHERE id = :userid");
-        $updateUserPointStmt->execute([
-            'point' => $userPoint,
-            'userid' => $postCreatorId
-        ]);
-
-        // Cập nhật điểm cho địa điểm trong bảng locationdetail
-        $locationPostsStmt = $pdo->prepare("SELECT rate, view FROM postdetail WHERE location = :location");
-        $locationPostsStmt->execute(['location' => $postLocation]);
-        $locationPosts = $locationPostsStmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $totalLocationRate = 0;
-        $totalLocationViews = 0;
-        $numLocationPosts = count($locationPosts);
-        
-        foreach ($locationPosts as $locationPost) {
-            $totalLocationRate += $locationPost['rate'];
-            $totalLocationViews += $locationPost['view'];
-        }
-
-        $locationPoint = ($totalLocationRate / max($numLocationPosts, 1)) + ($numLocationPosts * 0.5) + ($totalLocationViews * 0.1);
-        $updateLocationPointStmt = $pdo->prepare("UPDATE locationdetail SET point = :point WHERE location = :location");
-        $updateLocationPointStmt->execute([
-            'point' => $locationPoint,
-            'location' => $postLocation
-        ]);
-
-        // Tải lại trang sau khi cập nhật
-        header("Location: " . $_SERVER['REQUEST_URI']);
-        exit;
+    if ($existingRating) {
+        // Người dùng đã đánh giá, không cho phép đánh giá lại
+        $_SESSION['message'] = "Bạn đã đánh giá bài viết này rồi.";
     } else {
-        echo "Bài viết không tồn tại.";
+        // Kiểm tra nếu bài viết tồn tại
+        if ($post) {
+            $currentRate = $post['rate'];
+            $currentAmongRate = $post['amongrate'];
+            $postCreatorId = $post['userid'];
+            $postLocation = $post['location'];
+
+            // Tính toán đánh giá mới
+            $updatedRate = (($currentRate * $currentAmongRate) + $newRating) / ($currentAmongRate + 1);
+            $updatedAmongRate = $currentAmongRate + 1;
+
+            // Cập nhật cột rate và amongrate trong cơ sở dữ liệu
+            $updateStmt = $pdo->prepare("UPDATE postdetail SET rate = :rate, amongrate = :amongrate WHERE id = :id");
+            $updateStmt->execute([
+                'rate' => $updatedRate,
+                'amongrate' => $updatedAmongRate,
+                'id' => $post_id
+            ]);
+
+            // Lưu đánh giá mới vào bảng ratings
+            $insertRatingStmt = $pdo->prepare("INSERT INTO post_ratings (user_id, post_id, rating) VALUES (:user_id, :post_id, :rating)");
+            $insertRatingStmt->execute(['user_id' => $userId, 'post_id' => $post_id, 'rating' => $newRating]);
+
+            // Lấy thông tin bài viết của người dùng từ postdetail
+            $userPostsStmt = $pdo->prepare("SELECT rate, view FROM postdetail WHERE userid = :userid AND status = :status");
+            $userPostsStmt->execute(['userid' => $postCreatorId, ':status' => 'approve']);
+            $userPosts = $userPostsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Lấy tổng số like của tất cả bài viết trong forumdetail
+            $totalLikesStmt = $pdo->prepare("SELECT COALESCE(SUM(likes_count), 0) AS totalLikes FROM forumdetail WHERE userid = :userid");
+            $totalLikesStmt->execute(['userid' => $postCreatorId]);
+            $totalLikes = $totalLikesStmt->fetchColumn();
+
+            $totalUserRate = 0;
+            $totalUserViews = 0;
+            $numUserPosts = count($userPosts);
+
+            foreach ($userPosts as $userPost) {
+                $totalUserRate += $userPost['rate'];
+                $totalUserViews += $userPost['view'];
+            }
+
+            // Tính toán điểm của người dùng
+            $userPoint = 0;
+
+            // Công thức: (Tổng rate - Tổng like * 0.1) / Số bài post
+            if ($numUserPosts > 0) {
+                $userPoint = ($totalUserRate - ($totalLikes * 0.1)) / $numUserPosts;
+            }
+
+            // Cộng thêm điểm dựa trên số bài post, số view và tổng số like
+            $userPoint += ($numUserPosts * 0.5) + ($totalUserViews * 0.1) + ($totalLikes * 0.1);
+
+            // Cập nhật điểm của người dùng trong bảng users
+            $updateUserPointStmt = $pdo->prepare("UPDATE users SET point = :point WHERE id = :userid");
+            $updateUserPointStmt->execute([
+                'point' => $userPoint,
+                'userid' => $postCreatorId
+            ]);
+
+            // Lấy thông tin rate hiện tại từ bảng locationdetail
+            $currentRateStmt = $pdo->prepare("SELECT rate FROM locationdetail WHERE location = :location");
+            $currentRateStmt->execute(['location' => $postLocation]);
+            $currentRate = $currentRateStmt->fetchColumn();
+
+            // Nếu không có giá trị, đặt mặc định là 0
+            $currentRate = $currentRate !== false ? $currentRate : 0;
+
+            // Lấy thông tin từ bảng postdetail
+            $locationPostsStmt = $pdo->prepare("SELECT rate, view FROM postdetail WHERE location = :location");
+            $locationPostsStmt->execute(['location' => $postLocation]);
+            $locationPosts = $locationPostsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $totalLocationRate = 0;
+            $totalLocationViews = 0;
+            $numLocationPosts = count($locationPosts);
+
+            foreach ($locationPosts as $locationPost) {
+                $totalLocationRate += $locationPost['rate'];
+                $totalLocationViews += $locationPost['view'];
+            }
+
+            // Tính điểm locationPoint
+            $locationPoint = ($totalLocationRate / max($numLocationPosts, 1)) + ($numLocationPosts * 0.5) + ($totalLocationViews * 0.1);
+
+            // Cộng thêm giá trị rate hiện tại của bảng locationdetail
+            $locationPoint += $currentRate;
+
+            // Cập nhật điểm trong bảng locationdetail
+            $updateLocationPointStmt = $pdo->prepare("UPDATE locationdetail SET point = :point WHERE location = :location");
+            $updateLocationPointStmt->execute([
+                'point' => $locationPoint,
+                'location' => $postLocation
+            ]);
+
+
+            // Tải lại trang sau khi cập nhật
+            $_SESSION['message'] = "Đánh giá bài viết thành công.";
+            header("Location: " . $_SERVER['REQUEST_URI']);
+            exit;
+        } else {
+            echo "Bài viết không tồn tại.";
+        }
     }
 }
-
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment'])) {
     if (isset($_SESSION['user_id'])) {
@@ -315,7 +360,6 @@ if (isset($_SESSION['user_id'])) {
     <div id="main">
         <div class="post-detail">
             <div class="navbar text-center">
-                <h2>POST</h2>
             </div>
             <div class="post-layout d-flex">
                 <div class="post-content flex-grow-1">
@@ -325,7 +369,7 @@ if (isset($_SESSION['user_id'])) {
                     <p><?php echo nl2br(htmlspecialchars($post['content'])); ?></p>
 
                     <div class="comments-section mt-4">
-                        <h3>Comments</h3>
+                        <h3>Bình luận</h3>
                         <?php foreach ($comments as $comment): ?>
                             <div class="comment">
                                 <p><strong><?php echo htmlspecialchars($comment['username']); ?>:</strong> <?php echo nl2br(htmlspecialchars($comment['content'])); ?></p>
@@ -391,6 +435,15 @@ if (isset($_SESSION['user_id'])) {
             </div>
         </div>
     </div>
+    <!-- Modal thông báo -->
+    <div id="notificationModal" class="notification-modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeNotificationModal()">&times;</span>
+            <h2>Thông báo</h2>
+            <p id="notificationMessage">Nội dung thông báo ở đây</p>
+            <button onclick="closeNotificationModal()">Xác nhận</button>
+        </div>
+    </div>
     <!-- Modal -->
     <div id="warningModal" class="modal" style="display: none;">
         <div class="modal-content">
@@ -400,6 +453,9 @@ if (isset($_SESSION['user_id'])) {
             <button id="confirmButton">Xác nhận</button>
         </div>
     </div>
+    <?php
+        include 'footer.php'; 
+    ?>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Kiểm tra xem người dùng có trạng thái là warned không
@@ -422,6 +478,19 @@ if (isset($_SESSION['user_id'])) {
             modal.style.display = 'none';
         });
     });
+    function showNotification(message) {
+        document.getElementById('notificationMessage').innerText = message;
+        document.getElementById('notificationModal').style.display = 'block';
+    }
+
+    function closeNotificationModal() {
+        document.getElementById('notificationModal').style.display = 'none';
+    }
+    <?php if (isset($_SESSION['message'])): ?>
+        showNotification("<?php echo htmlspecialchars($_SESSION['message']); ?>");
+        // Xóa thông báo sau khi hiển thị
+        <?php unset($_SESSION['message']); ?>
+    <?php endif; ?>
     </script>
 
 </body>

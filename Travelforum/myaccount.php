@@ -142,10 +142,11 @@ try {
             $newImage = null; // Biến lưu đường dẫn hình ảnh mới
         
             // Cập nhật bài viết
-            $sql = "UPDATE postdetail SET name = :name, content = :content";
+            $sql = "UPDATE postdetail SET name = :name, content = :content, status = :status";
             $params = [
                 ':name' => $postName,
                 ':content' => $postContent,
+                ':status' => 'notapproved',
             ];
         
             // Kiểm tra xem có hình ảnh mới không
@@ -254,37 +255,93 @@ try {
 
     // Kiểm tra và xử lý yêu cầu xóa bài viết
     if (isset($_POST['action']) && $_POST['action'] === 'deletepost' && isset($_POST['post_id'])) {
-        $deletePostId = $_POST['post_id']; // Thay đổi từ $_GET sang $_POST
-        $stmt = $pdo->prepare("DELETE FROM postdetail WHERE id = :id AND userid = :user_id");
-        $stmt->bindParam(':id', $deletePostId);
-        $stmt->bindParam(':user_id', $_SESSION['user_id']);
-        $stmt->execute();
+        $deletePostId = $_POST['post_id']; // Lấy ID bài viết từ POST
+        $userId = $_SESSION['user_id']; // Lấy ID người dùng từ session
 
-        $affectedRows = $stmt->rowCount();
-        if ($affectedRows > 0) {
-            $_SESSION['message'] = "Xóa bài viết thành công!";
-        } else {
-            $_SESSION['message'] = "Không có thay đổi nào được thực hiện. Post ID: $deletePostId"; // Cập nhật ID đúng
+        try {
+            // Bắt đầu giao dịch
+            $pdo->beginTransaction();
+
+            // Xóa các bình luận liên quan trong bảng postcomment
+            $deleteCommentsQuery = "DELETE FROM postcomment WHERE post_id = :post_id";
+            $stmtComments = $pdo->prepare($deleteCommentsQuery);
+            $stmtComments->execute([':post_id' => $deletePostId]);
+
+            // Xóa các đánh giá liên quan trong bảng post_ratings
+            $deleteRatingsQuery = "DELETE FROM post_ratings WHERE post_id = :post_id";
+            $stmtRatings = $pdo->prepare($deleteRatingsQuery);
+            $stmtRatings->execute([':post_id' => $deletePostId]);
+
+            // Xóa bài viết trong bảng postdetail
+            $deletePostQuery = "DELETE FROM postdetail WHERE id = :id AND userid = :user_id";
+            $stmtPost = $pdo->prepare($deletePostQuery);
+            $stmtPost->execute([':id' => $deletePostId, ':user_id' => $userId]);
+
+            $affectedRows = $stmtPost->rowCount();
+
+            if ($affectedRows > 0) {
+                $_SESSION['message'] = "Xóa bài viết thành công!";
+            } else {
+                $_SESSION['message'] = "Không có thay đổi nào được thực hiện. Post ID: $deletePostId";
+            }
+
+            // Hoàn tất giao dịch
+            $pdo->commit();
+        } catch (Exception $e) {
+            // Hủy giao dịch nếu xảy ra lỗi
+            $pdo->rollBack();
+            $_SESSION['message'] = "Lỗi khi xóa bài viết: " . $e->getMessage();
         }
+
+        // Chuyển hướng về trang quản lý bài viết
         $_SESSION['section'] = 'myPosts';
         header("Location: myaccount.php");
         exit();
     }
+
     // Xử lý yêu cầu xóa tài khoản
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'deleteaccount') {
         $userId = $_SESSION['user_id']; // Lấy ID người dùng từ phiên làm việc
 
+        // Xóa tất cả rating của người dùng trong bảng location_ratings
+        $deleteLocationRatingStmt = $pdo->prepare("DELETE FROM location_ratings WHERE user_id = :userid");
+        $deleteLocationRatingStmt->execute(['userid' => $userId]);
+
+        // Xóa tất cả rating của người dùng trong bảng post_ratings
+        $deletePostRatingStmt = $pdo->prepare("DELETE FROM post_ratings WHERE user_id = :userid");
+        $deletePostRatingStmt->execute(['userid' => $userId]);
+
+        // Xóa tất cả like của người dùng trong bảng post_likes
+        $deletePostLikeStmt = $pdo->prepare("DELETE FROM post_likes WHERE user_id = :userid");
+        $deletePostLikeStmt->execute(['userid' => $userId]);
+
+        // Xóa tất cả bình luận của người dùng trong bảng locationcomment
+        $deleteLocationCommentsStmt = $pdo->prepare("DELETE FROM locationcomment WHERE userid = :userid");
+        $deleteLocationCommentsStmt->execute(['userid' => $userId]);
+
         // Xóa tất cả bình luận của người dùng trong bảng postcomment
-        $deleteCommentsStmt = $pdo->prepare("DELETE FROM postcomment WHERE userid = :userid");
-        $deleteCommentsStmt->execute(['userid' => $userId]);
+        $deletePostCommentsStmt = $pdo->prepare("DELETE FROM postcomment WHERE userid = :userid");
+        $deletePostCommentsStmt->execute(['userid' => $userId]);
+
+        // Xóa tất cả bình luận của người dùng trong bảng forumcomment
+        $deleteForumCommentsStmt = $pdo->prepare("DELETE FROM forumcomment WHERE user_id = :userid");
+        $deleteForumCommentsStmt->execute(['userid' => $userId]);
 
         // Xóa tất cả bài viết của người dùng trong bảng postdetail
         $deletePostsStmt = $pdo->prepare("DELETE FROM postdetail WHERE userid = :userid");
         $deletePostsStmt->execute(['userid' => $userId]);
 
-        // Xóa thông tin người dùng trong bảng users
-        $deleteUserStmt = $pdo->prepare("DELETE FROM users WHERE id = :userid");
-        $deleteUserStmt->execute(['userid' => $userId]);
+        // Xóa tất cả bài viết của người dùng trong bảng forumdetail
+        $deleteForumStmt = $pdo->prepare("DELETE FROM forumdetail WHERE userid = :userid");
+        $deleteForumStmt->execute(['userid' => $userId]);
+
+        // Xóa các bản ghi trong login_attempts trước
+        $deleteAttemptsStmt = $pdo->prepare("DELETE FROM login_attempts WHERE user_id = :user_id");
+        $deleteAttemptsStmt->execute([':user_id' => $userId]);
+
+        // Sau đó, xóa bản ghi trong bảng users
+        $deleteUserStmt = $pdo->prepare("DELETE FROM users WHERE id = :id");
+        $deleteUserStmt->execute([':id' => $userId]);
 
         // Hủy phiên làm việc và chuyển hướng về trang chính
         session_destroy();
@@ -647,42 +704,9 @@ try {
         </div>
     </div>
 
-    <div id="footer">
-        <div class="footer-container">
-            <div class="footer-section">
-                <h3>Liên hệ</h3>
-                <p>Email: contact@example.com</p>
-                <p>Điện thoại: +123 456 7890</p>
-            </div>
-            <div class="footer-section">
-                <h3>Thông tin</h3>
-                <ul>
-                    <li><a href="./aboutus.html">Về chúng tôi</a></li>
-                    <li><a href="./policy.html">Chính sách bảo mật</a></li>
-                    <li><a href="./policy.html">Điều khoản sử dụng</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>Liên kết hữu ích</h3>
-                <ul>
-                    <li><a href="#faq">Câu hỏi thường gặp</a></li>
-                    <li><a href="#support">Hỗ trợ</a></li>
-                    <li><a href="#forum">Diễn đàn</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>Mạng xã hội</h3>
-                <div class="social-icons">
-                    <a href="https://www.threads.net/@hvdien04" target="_blank"><i class="fa-brands fa-square-threads"></i></a>
-                    <a href="https://www.instagram.com/hvdien04/" target="_blank"><i class="fa-brands fa-square-instagram"></i></a>
-                    <a href="https://www.facebook.com/HoangVanDien.Profile" target="_blank"><i class="fa-brands fa-facebook"></i></a>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2024 Diễn đàn của chúng tôi. Bảo lưu mọi quyền.</p>
-        </div>
-    </div>
+    <?php
+        include 'footer.php'; 
+    ?>
     
     <script src="./asset/js/base.js"></script>
     <script src="./asset/js/index.js"></script>

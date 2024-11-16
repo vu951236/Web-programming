@@ -19,6 +19,14 @@
     margin-right: 20px;
     padding-top: 0px;
 }
+.left {
+    width: 300px; /* Đặt chiều rộng cứng cho cột trái */
+}
+
+.right {
+    width: 800px;
+}
+
 .sidebar {
     flex: 1;
 }
@@ -369,4 +377,60 @@
 
 #warningModal #confirmButton:hover {
     background-color: #45a049; /* Đổi màu khi hover */
+}
+.notification-modal {
+    display: none; /* Ẩn modal theo mặc định */
+    position: fixed; /* Vị trí cố định */
+    z-index: 1000; /* Đặt trên cùng */
+    left: 0;
+    top: 0;
+    width: 100%; /* Chiếm toàn bộ chiều rộng */
+    height: 100%; /* Chiếm toàn bộ chiều cao */
+    overflow: auto; /* Kích hoạt cuộn nếu cần */
+    background-color: rgba(0, 0, 0, 0.5); /* Nền tối với độ trong suốt */
+}
+
+.notification-modal .modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* Căn giữa modal */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Chiều rộng của modal */
+    max-width: 500px; /* Chiều rộng tối đa của modal */
+    border-radius: 5px; /* Bo tròn các góc */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Đổ bóng cho modal */
+}
+/* CSS cho Nút trong Modal Thông Báo */
+.notification-modal button {
+    background-color: #28a745; /* Màu nền xanh cho nút xác nhận */
+    color: white; /* Màu chữ trắng */
+    border: none; /* Bỏ đường viền */
+    padding: 10px 15px; /* Padding cho nút */
+    text-align: center; /* Căn giữa chữ */
+    text-decoration: none; /* Bỏ gạch chân */
+    display: inline-block; /* Hiển thị nút inline */
+    margin-top: 10px; /* Khoảng cách từ trên xuống */
+    cursor: pointer; /* Thay đổi con trỏ khi di chuột qua nút */
+    border-radius: 5px; /* Bo tròn các góc */
+    font-size: 16px; /* Kích thước chữ */
+    transition: background-color 0.3s; /* Hiệu ứng chuyển màu nền */
+}
+
+.notification-modal button:hover {
+    background-color: #218838; /* Thay đổi màu khi di chuột qua */
+}
+.close {
+    position: absolute; /* Đặt nút đóng ở vị trí tuyệt đối */
+    right: 10px; /* Cách từ bên phải */
+    top: 10px; /* Cách từ trên cùng */
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer; /* Thay đổi con trỏ khi hover */
+}
+
+.close:hover,
+.close:focus {
+    color: black; /* Thay đổi màu khi hover */
+    text-decoration: none;
 }

@@ -20,7 +20,7 @@ try {
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 'high-rated';
 $sql = '';
 
-$valid_filters = ['beach', 'mountain', 'high-rated'];
+$valid_filters = ['beach', 'mountain', 'delta', 'high-rated'];
 if (in_array($filter, $valid_filters)) {
     switch ($filter) {
         case 'beach':

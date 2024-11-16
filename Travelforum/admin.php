@@ -71,9 +71,6 @@ $postCounts = array_map(function($row) {
 }, $postCounts);
 
 
-
-
-
 // Kiểm tra xem có thông tin người dùng trong session không
 if (isset($_SESSION['user_id'])) {
     $userId = $_SESSION['user_id']; // Lấy ID người dùng từ session
@@ -117,22 +114,23 @@ $section = '';
 // Tiến hành truy vấn nếu kết nối thành công
 if ($message === "Kết nối đến cơ sở dữ liệu thành công.") {
     // Kiểm tra status từ GET
-    $userstatus = $_GET['status'] ?? 'all';
-    $poststatus = $_GET['status'] ?? 'all';
-    $forumstatus = $_GET['status'] ?? 'all';
+    $userstatus = $_GET['UserStatus'] ?? 'all';
+    $poststatus = $_GET['PostStatus'] ?? 'all';
+    $forumstatus = $_GET['ForumStatus'] ?? 'all';
 
     // Lọc theo status
     if ($userstatus === 'warned') {
-        $userQuery = "SELECT * FROM users WHERE isadmin = FALSE AND status = 'warned' Order by id";
+        $userQuery = "SELECT * FROM users WHERE id != :id AND status = 'warned' ORDER BY id";
     } elseif ($userstatus === 'banned') {
-        $userQuery = "SELECT * FROM users WHERE isadmin = FALSE AND status = 'banned' Order by id";
+        $userQuery = "SELECT * FROM users WHERE id != :id AND status = 'banned' ORDER BY id";
     } else {
-        $userQuery = "SELECT * FROM users WHERE isadmin = FALSE Order by id";
+        $userQuery = "SELECT * FROM users WHERE id != :id ORDER BY id";
     }
 
     $userStmt = $pdo->prepare($userQuery);
-    $userStmt->execute();
+    $userStmt->execute(['id' => $userId]); // Thay thế :id bằng $currentUserId
     $users = $userStmt->fetchAll(PDO::FETCH_ASSOC);
+
 
     // Lọc theo status
     if ($poststatus === 'cancel') {
@@ -207,43 +205,135 @@ if (isset($_POST['action']) && $_POST['action'] == 'unban') {
     header("Location: admin.php");
     exit();
 }
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_statusp'])) {
-    $postId = $_POST['post_id'];
-    $status = $_POST['status'] === 'approve' ? 'approve' : 'canceled';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Kết nối PDO giả định: $pdo đã được khởi tạo trước đó
 
-    // Cập nhật trạng thái bài viết
-    $updateQuery = "UPDATE postdetail SET status = :status WHERE id = :id";
-    $stmt = $pdo->prepare($updateQuery);
-    $stmt->execute([':status' => $status, ':id' => $postId]);
+    if (isset($_POST['update_statusp'])) {
+        $postId = $_POST['post_id'];
+        $status = $_POST['status']; // Lấy trạng thái từ form
 
-    // Tải lại trang sau khi cập nhật
-    header("Location: " . $_SERVER['PHP_SELF']);
-    exit();
+        // Cập nhật trạng thái bài viết
+        $updateQuery = "UPDATE postdetail SET status = :status WHERE id = :id";
+        $stmt = $pdo->prepare($updateQuery);
+        $stmt->execute([':status' => $status, ':id' => $postId]);
+
+        // Tải lại trang sau khi cập nhật
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
+    }
+
+    if (isset($_POST['delete_post'])) {
+        $postId = $_POST['post_id'];
+    
+        // Xóa các bình luận liên quan đến bài viết trong bảng postcomment
+        $deleteCommentsQuery = "DELETE FROM postcomment WHERE idpost = :post_id";
+        $stmtComments = $pdo->prepare($deleteCommentsQuery);
+        $stmtComments->execute([':post_id' => $postId]);
+    
+        // Xóa các đánh giá liên quan đến bài viết trong bảng post_ratings
+        $deleteRatingsQuery = "DELETE FROM post_ratings WHERE post_id = :post_id";
+        $stmtRatings = $pdo->prepare($deleteRatingsQuery);
+        $stmtRatings->execute([':post_id' => $postId]);
+    
+        // Xóa bài viết khỏi bảng postdetail
+        $deletePostQuery = "DELETE FROM postdetail WHERE id = :id";
+        $stmtPost = $pdo->prepare($deletePostQuery);
+        $stmtPost->execute([':id' => $postId]);
+    
+        // Tải lại trang sau khi xóa
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
+    }
+    
 }
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
-    $forumId = $_POST['forum_id']; // Lấy ID bài đăng từ form
-    $status = $_POST['status'] === 'approve' ? 'approve' : 'canceled'; // Xác định trạng thái
 
-    // Cập nhật trạng thái bài đăng trong bảng forumdetail
-    $updateQuery = "UPDATE forumdetail SET status = :status WHERE id = :id";
-    $stmt = $pdo->prepare($updateQuery);
-    $stmt->execute([':status' => $status, ':id' => $forumId]);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Kiểm tra xem yêu cầu là cập nhật trạng thái hay xóa
+    if (isset($_POST['update_status'])) {
+        $forumId = $_POST['forum_id']; // Lấy ID bài viết
+        $status = $_POST['status'];   // Trạng thái từ form
 
-    // Tải lại trang sau khi cập nhật
-    header("Location: " . $_SERVER['PHP_SELF']);
-    exit();
+        // Cập nhật trạng thái bài viết trong bảng forumdetail
+        $updateQuery = "UPDATE forumdetail SET status = :status WHERE id = :id";
+        $stmt = $pdo->prepare($updateQuery);
+        $stmt->execute([':status' => $status, ':id' => $forumId]);
+
+        // Tải lại trang sau khi cập nhật
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
+    }
+
+    if (isset($_POST['delete_forum'])) {
+        $forumId = $_POST['forum_id']; // Lấy ID bài viết
+    
+        try {
+            // Bắt đầu giao dịch
+            $pdo->beginTransaction();
+    
+            // Xóa các bình luận liên quan trong bảng forumcomment
+            $deleteCommentsQuery = "DELETE FROM forumcomment WHERE post_id = :forum_id";
+            $stmtComments = $pdo->prepare($deleteCommentsQuery);
+            $stmtComments->execute([':forum_id' => $forumId]);
+    
+            // Xóa các lượt thích liên quan trong bảng post_likes
+            $deleteLikesQuery = "DELETE FROM post_likes WHERE post_id = :forum_id";
+            $stmtLikes = $pdo->prepare($deleteLikesQuery);
+            $stmtLikes->execute([':forum_id' => $forumId]);
+    
+            // Xóa bài viết khỏi bảng forumdetail
+            $deleteQuery = "DELETE FROM forumdetail WHERE id = :id";
+            $stmt = $pdo->prepare($deleteQuery);
+            $stmt->execute([':id' => $forumId]);
+    
+            // Xác nhận giao dịch
+            $pdo->commit();
+    
+            // Tải lại trang sau khi xóa
+            header("Location: " . $_SERVER['PHP_SELF']);
+            exit();
+        } catch (Exception $e) {
+            // Hủy giao dịch nếu có lỗi
+            $pdo->rollBack();
+            echo "Lỗi khi xóa bài viết: " . $e->getMessage();
+        }
+    }
+    
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'deleteaccount') {
-    $userId = $_POST['acount_id']; // Lấy ID tài khoản từ biểu mẫu thay vì từ session
+    $userId = $_POST['account_id']; 
+    
+    // Xóa tất cả rating của người dùng trong bảng location_ratings
+    $deleteLocationRatingStmt = $pdo->prepare("DELETE FROM location_ratings WHERE user_id = :userid");
+    $deleteLocationRatingStmt->execute(['userid' => $userId]);
+
+    // Xóa tất cả rating của người dùng trong bảng post_ratings
+    $deletePostRatingStmt = $pdo->prepare("DELETE FROM post_ratings WHERE user_id = :userid");
+    $deletePostRatingStmt->execute(['userid' => $userId]);
+
+    // Xóa tất cả like của người dùng trong bảng post_likes
+    $deletePostLikeStmt = $pdo->prepare("DELETE FROM post_likes WHERE user_id = :userid");
+    $deletePostLikeStmt->execute(['userid' => $userId]);
+
+    // Xóa tất cả bình luận của người dùng trong bảng locationcomment
+    $deleteLocationCommentsStmt = $pdo->prepare("DELETE FROM locationcomment WHERE userid = :userid");
+    $deleteLocationCommentsStmt->execute(['userid' => $userId]);
 
     // Xóa tất cả bình luận của người dùng trong bảng postcomment
-    $deleteCommentsStmt = $pdo->prepare("DELETE FROM postcomment WHERE userid = :userid");
-    $deleteCommentsStmt->execute(['userid' => $userId]);
+    $deletePostCommentsStmt = $pdo->prepare("DELETE FROM postcomment WHERE userid = :userid");
+    $deletePostCommentsStmt->execute(['userid' => $userId]);
+
+    // Xóa tất cả bình luận của người dùng trong bảng forumcomment
+    $deleteForumCommentsStmt = $pdo->prepare("DELETE FROM forumcomment WHERE user_id = :userid");
+    $deleteForumCommentsStmt->execute(['userid' => $userId]);
 
     // Xóa tất cả bài viết của người dùng trong bảng postdetail
     $deletePostsStmt = $pdo->prepare("DELETE FROM postdetail WHERE userid = :userid");
     $deletePostsStmt->execute(['userid' => $userId]);
+
+    // Xóa tất cả bài viết của người dùng trong bảng forumdetail
+    $deleteForumStmt = $pdo->prepare("DELETE FROM forumdetail WHERE userid = :userid");
+    $deleteForumStmt->execute(['userid' => $userId]);
 
     // Xóa các bản ghi trong login_attempts trước
     $deleteAttemptsStmt = $pdo->prepare("DELETE FROM login_attempts WHERE user_id = :user_id");
@@ -285,7 +375,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adminCode'])) {
         $message = "Vui lòng nhập mã admin.";
     }
 }
-
+// Kiểm tra và lưu trạng thái nút vào session
+if (isset($_GET['UserStatus'])) {
+    $_SESSION['UserStatus'] = $_GET['UserStatus'];
+} else {
+    // Mặc định trạng thái là 'all'
+    if (!isset($_SESSION['UserStatus'])) {
+        $_SESSION['UserStatus'] = 'all';
+    }
+}
+// Kiểm tra và lưu trạng thái nút vào session
+if (isset($_GET['PostStatus'])) {
+    $_SESSION['PostStatus'] = $_GET['PostStatus'];
+} else {
+    // Mặc định trạng thái là 'all'
+    if (!isset($_SESSION['PostStatus'])) {
+        $_SESSION['PostStatus'] = 'all';
+    }
+}
+// Kiểm tra và lưu trạng thái nút vào session
+if (isset($_GET['ForumStatus'])) {
+    $_SESSION['ForumStatus'] = $_GET['ForumStatus'];
+} else {
+    // Mặc định trạng thái là 'all'
+    if (!isset($_SESSION['ForumStatus'])) {
+        $_SESSION['ForumStatus'] = 'all';
+    }
+}
 ?>
 
 
@@ -480,12 +596,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adminCode'])) {
                 <h2>Quản lý người dùng</h2>
                 <!-- Filter Buttons -->
                 <div class="filter-buttons">
-                    <button class="active" onclick="filterUsers('all')">Tất cả người dùng</button>
-                    <button onclick="filterUsers('warned')">Bị cảnh cáo</button>
-                    <button onclick="filterUsers('banned')">Bị cấm</button>
+                    <button class="<?php echo ($_SESSION['UserStatus'] == 'all') ? 'active' : ''; ?>" onclick="filterUsers('all')">Tất cả người dùng</button>
+                    <button class="<?php echo ($_SESSION['UserStatus'] == 'warned') ? 'active' : ''; ?>" onclick="filterUsers('warned')">Bị cảnh cáo</button>
+                    <button class="<?php echo ($_SESSION['UserStatus'] == 'banned') ? 'active' : ''; ?>" onclick="filterUsers('banned')">Bị cấm</button>
                 </div>
 
-        
                 <!-- User Table -->
                 <table>
                     <thead>
@@ -554,10 +669,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adminCode'])) {
                 <h2>Quản lý bài viết</h2>
                 <!-- Filter Buttons -->
                 <div class="filter-buttons">
-                    <button class="active" onclick="filterUsers('all')">Tất cả bài viết</button>
-                    <button onclick="filterUsers('notapproved')">Chưa duyệt</button>
-                    <button onclick="filterUsers('approved')">Đã duyệt</button>
-                    <button onclick="filterUsers('cancel')">Bị hủy</button>
+                    <button class="<?php echo ($_SESSION['PostStatus'] == 'all') ? 'active' : ''; ?>" onclick="filterPosts('all')">Tất cả bài viết</button>
+                    <button class="<?php echo ($_SESSION['PostStatus'] == 'notapproved') ? 'active' : ''; ?>" onclick="filterPosts('notapproved')">Chưa duyệt</button>
+                    <button class="<?php echo ($_SESSION['PostStatus'] == 'approved') ? 'active' : ''; ?>" onclick="filterPosts('approved')">Đã duyệt</button>
+                    <button class="<?php echo ($_SESSION['PostStatus'] == 'cancel') ? 'active' : ''; ?>" onclick="filterPosts('cancel')">Bị hủy</button>
                 </div>
         
                 <!-- Post Table -->
@@ -599,23 +714,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adminCode'])) {
                                         ?>
                                     </p></td>
                                 <td class="view-cell">
-                                    <a href="/Travelforum/Travelforum/postdetail.php?id=<?php echo htmlspecialchars($post['id']); ?>">
+                                    <a href="./postdetail.php?id=<?php echo htmlspecialchars($post['id']); ?>">
                                         <button><i class="fa-regular fa-eye"></i> Xem bài viết</button>
                                     </a>
                                 </td>
                                 <td class="approve-cell">
-                                    <?php if ($post['status'] === 'notapproved'): ?>
+                                     <?php if ($post['status'] === 'notapproved'): ?>
                                         <!-- Form Duyệt -->
                                         <form method="POST" action="">
                                             <input type="hidden" name="post_id" value="<?php echo htmlspecialchars($post['id']); ?>">
                                             <input type="hidden" name="status" value="approve">
                                             <button type="submit" name="update_statusp" class="approve-button">Duyệt</button>
                                         </form>
-                                        <!-- Form Hủy duyệt -->
+                                        <!-- Form Hủy -->
                                         <form method="POST" action="">
                                             <input type="hidden" name="post_id" value="<?php echo htmlspecialchars($post['id']); ?>">
                                             <input type="hidden" name="status" value="canceled">
                                             <button type="submit" name="update_statusp" class="cancel-button">Hủy</button>
+                                        </form>
+                                    <?php elseif ($post['status'] === 'approve'): ?>
+                                        <!-- Form Hủy duyệt -->
+                                        <form method="POST" action="">
+                                            <input type="hidden" name="post_id" value="<?php echo htmlspecialchars($post['id']); ?>">
+                                            <input type="hidden" name="status" value="notapproved">
+                                            <button type="submit" name="update_statusp" class="notapproved-button">Hủy duyệt</button>
+                                        </form>
+                                    <?php elseif ($post['status'] === 'canceled'): ?>
+                                        <!-- Form Xóa -->
+                                        <form method="POST" action="">
+                                            <input type="hidden" name="post_id" value="<?php echo htmlspecialchars($post['id']); ?>">
+                                            <button type="submit" name="delete_post" class="delete-button">Xóa</button>
                                         </form>
                                     <?php endif; ?>
                                 </td>
@@ -628,10 +756,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adminCode'])) {
             <div id="forumManagement" class="section">
                 <h2>Quản lý bài đăng</h2>
                 <div class="filter-buttons">
-                    <button class="active" onclick="filterUsers('all')">Tất cả bài đăng</button>
-                    <button onclick="filterUsers('notapproved')">Chưa duyệt</button>
-                    <button onclick="filterUsers('approved')">Đã duyệt</button>
-                    <button onclick="filterUsers('cancel')">Bị hủy</button>
+                    <button class="<?php echo ($_SESSION['ForumStatus'] == 'all') ? 'active' : ''; ?>" onclick="filterForum('all')">Tất cả bài viết</button>
+                    <button class="<?php echo ($_SESSION['ForumStatus'] == 'notapproved') ? 'active' : ''; ?>" onclick="filterForum('notapproved')">Chưa duyệt</button>
+                    <button class="<?php echo ($_SESSION['ForumStatus'] == 'approved') ? 'active' : ''; ?>" onclick="filterForum('approved')">Đã duyệt</button>
+                    <button class="<?php echo ($_SESSION['ForumStatus'] == 'cancel') ? 'active' : ''; ?>" onclick="filterForum('cancel')">Bị hủy</button>
                 </div>
 
                 <!-- Forum Table -->
@@ -671,21 +799,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adminCode'])) {
                                         ?>
                                     </p></td>
                                 <td class="view-cell">
-                                    <a href="/Travelforum/Travelforum/forum.php?#post-<?php echo htmlspecialchars($forum['id']); ?>">
+                                    <a href="./forum.php?#post-<?php echo htmlspecialchars($forum['id']); ?>">
                                         <button><i class="fa-regular fa-eye"></i> Xem bài đăng</button>
                                     </a>
                                 </td>
                                 <td class="approve-cell">
                                     <?php if ($forum['status'] === 'notapproved'): ?>
+                                        <!-- Form Duyệt -->
                                         <form method="POST" action="">
                                             <input type="hidden" name="forum_id" value="<?php echo htmlspecialchars($forum['id']); ?>">
                                             <input type="hidden" name="status" value="approve">
                                             <button type="submit" name="update_status" class="approve-button">Duyệt</button>
                                         </form>
+                                        <!-- Form Hủy -->
                                         <form method="POST" action="">
                                             <input type="hidden" name="forum_id" value="<?php echo htmlspecialchars($forum['id']); ?>">
                                             <input type="hidden" name="status" value="canceled">
                                             <button type="submit" name="update_status" class="cancel-button">Hủy</button>
+                                        </form>
+                                    <?php elseif ($forum['status'] === 'approve'): ?>
+                                        <!-- Form Hủy duyệt -->
+                                        <form method="POST" action="">
+                                            <input type="hidden" name="forum_id" value="<?php echo htmlspecialchars($forum['id']); ?>">
+                                            <input type="hidden" name="status" value="notapproved">
+                                            <button type="submit" name="update_status" class="notapproved-button">Hủy duyệt</button>
+                                        </form>
+                                    <?php elseif ($forum['status'] === 'canceled'): ?>
+                                        <!-- Form Xóa -->
+                                        <form method="POST" action="">
+                                            <input type="hidden" name="forum_id" value="<?php echo htmlspecialchars($forum['id']); ?>">
+                                            <button type="submit" name="delete_forum" class="delete-button">Xóa</button>
                                         </form>
                                     <?php endif; ?>
                                 </td>
@@ -713,7 +856,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adminCode'])) {
             <h2>Xác nhận</h2>
             <p>Bạn có chắc chắn muốn xóa tài khoản này không?</p>
             <form id="deleteAccountForm" action="admin.php" method="post">
-                <input type="hidden" name="acount_id" id="account_id_to_delete">
+                <input type="hidden" name="account_id" id="account_id_to_delete">
                 <button type="submit" class="btn btn-danger" name="action" value="deleteaccount">Xóa</button>
                 <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Hủy</button>
             </form>
@@ -826,16 +969,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adminCode'])) {
         };
 
         function filterUsers(status) {
-            // Chuyển hướng đến trang hiện tại với tham số status
-            window.location.href = `admin.php?status=${status}`;
+        // Chuyển hướng đến trang hiện tại với tham số status
+        window.location.href = 'admin.php?UserStatus=' + status;
         }
 
         function filterPosts(status) {
-            // Chuyển hướng đến trang hiện tại với tham số status
-            window.location.href = `admin.php?status=${status}`;
+        // Chuyển hướng đến trang hiện tại với tham số status
+        window.location.href = 'admin.php?PostStatus=' + status;
         }
 
-
+        function filterForum(status) {
+        // Chuyển hướng đến trang hiện tại với tham số status
+        window.location.href = 'admin.php?ForumStatus=' + status;
+        }
 
     </script>
 </body>

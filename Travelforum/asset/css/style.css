@@ -8,10 +8,13 @@
 
 .post-layout {
     display: flex;
+    gap: 20px; /* Khoảng cách giữa các phần */
+    align-items: flex-start; /* Căn các phần theo chiều dọc */
 }
 
+
 .post-container {
-    flex: 3;
+    flex: none;
     margin-right: 20px;
 }
 
@@ -36,15 +39,17 @@
 }
 
 .recent-posts {
-    flex: 1;
-    border: 1px solid #ddd;
-    padding: 10px;
+    flex: none; /* Không cho phép co dãn */
+    width: 278px; /* Chiều rộng cố định */
+    box-sizing: border-box; /* Bao gồm padding và border trong kích thước */
     border: 2px solid #007bff;
     padding: 10px;
     background-color: #f8f9fa; 
     border-radius: 8px;
     transition: all 0.3s ease;
 }
+
+
 
 .recent-post {
     margin-bottom: 10px;
@@ -258,5 +263,75 @@
 .hashtag {
     display: block;
     color: #007bff;
+    text-decoration: none;
+}
+.notification-modal {
+    display: none; /* Ẩn modal theo mặc định */
+    justify-content: center; /* Căn giữa theo chiều ngang */
+    align-items: center; /* Căn giữa theo chiều dọc */
+    position: fixed; /* Giữ modal luôn cố định trên màn hình */
+    top: 0;
+    left: 0;
+    width: 100%; /* Chiếm toàn bộ chiều rộng */
+    height: 100%; /* Chiếm toàn bộ chiều cao */
+    background-color: rgba(0, 0, 0, 0.5); /* Nền mờ cho modal */
+    z-index: 1000; /* Đảm bảo modal hiển thị trên các phần tử khác */
+}
+
+.notification-modal .modal-content {
+    background-color: #fefefe;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Chiều rộng của modal */
+    max-width: 500px; /* Chiều rộng tối đa của modal */
+    border-radius: 5px; /* Bo tròn các góc */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Đổ bóng cho modal */
+    animation: fadeIn 0.3s ease; /* Thêm hiệu ứng hiển thị */
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* CSS cho nút */
+.notification-modal button {
+    background-color: #28a745; /* Màu nền xanh cho nút xác nhận */
+    color: white; /* Màu chữ trắng */
+    border: none; /* Bỏ đường viền */
+    padding: 10px 15px; /* Padding cho nút */
+    text-align: center; /* Căn giữa chữ */
+    text-decoration: none; /* Bỏ gạch chân */
+    display: inline-block; /* Hiển thị nút inline */
+    margin-top: 10px; /* Khoảng cách từ trên xuống */
+    cursor: pointer; /* Thay đổi con trỏ khi di chuột qua nút */
+    border-radius: 5px; /* Bo tròn các góc */
+    font-size: 16px; /* Kích thước chữ */
+    transition: background-color 0.3s; /* Hiệu ứng chuyển màu nền */
+}
+
+.notification-modal button:hover {
+    background-color: #218838; /* Thay đổi màu khi di chuột qua */
+}
+
+.close {
+    position: absolute; /* Đặt nút đóng ở vị trí tuyệt đối */
+    right: 10px; /* Cách từ bên phải */
+    top: 10px; /* Cách từ trên cùng */
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer; /* Thay đổi con trỏ khi hover */
+}
+
+.close:hover,
+.close:focus {
+    color: black; /* Thay đổi màu khi hover */
     text-decoration: none;
 }

@@ -49,48 +49,11 @@ session_start(); // Bắt đầu phiên
             <h2>Cộng đồng mạnh mẽ</h2>
             <p>Cộng đồng của chúng tôi không ngừng lớn mạnh, với các thành viên đến từ nhiều nơi khác nhau, tất cả đều có chung niềm đam mê du lịch và khám phá. Chúng tôi khuyến khích các thành viên chia sẻ không chỉ các kinh nghiệm thực tế mà còn cả những câu chuyện, hình ảnh và mẹo nhỏ giúp cho chuyến đi trở nên thú vị và an toàn hơn. Mỗi bài viết, mỗi bình luận và mỗi phản hồi đều góp phần làm phong phú thêm kho tàng kiến thức của chúng tôi. 
                  Ngoài ra, cộng đồng cũng tổ chức các hoạt động giao lưu, workshop và buổi gặp mặt để mọi người có cơ hội kết nối trực tiếp, trao đổi và học hỏi lẫn nhau. Với một môi trường thân thiện và cởi mở, chúng tôi mong muốn tất cả các thành viên đều có thể tìm thấy niềm vui và cảm hứng mới từ những người cùng đam mê. Hãy tham gia cùng chúng tôi, để không chỉ là một người du lịch mà còn là một phần của một cộng đồng đầy năng lượng và sáng tạo!</p>
-            <a href="explore.html" class="btn btn-primary mt-3">Khám phá ngay!</a>
+            <a href="explore.php" class="btn btn-primary mt-3">Khám phá ngay!</a>
         </section>
     </div>
-    
-    
-
-    <!-- Footer -->
-    <div id="footer">
-        <div class="footer-container">
-            <div class="footer-section">
-                <h3>Liên hệ</h3>
-                <p>Email: contact@example.com</p>
-                <p>Điện thoại: +123 456 7890</p>
-            </div>
-            <div class="footer-section">
-                <h3>Thông tin</h3>
-                <ul>
-                    <li><a href="./aboutus.html">Về chúng tôi</a></li>
-                    <li><a href="./policy.html">Chính sách bảo mật</a></li>
-                    <li><a href="./policy.html">Điều khoản sử dụng</a></li>
-                </ul>  
-            </div>
-            <div class="footer-section">
-                <h3>Liên kết hữu ích</h3>
-                <ul>
-                    <li><a href="#faq">Câu hỏi thường gặp</a></li>
-                    <li><a href="#support">Hỗ trợ</a></li>
-                    <li><a href="#forum">Diễn đàn</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>Mạng xã hội</h3>
-                <div class="social-icons">
-                    <a href="https://www.threads.net/@hvdien04" target="_blank"><i class="fa-brands fa-square-threads"></i></a>
-                    <a href="https://www.instagram.com/hvdien04/" target="_blank"><i class="fa-brands fa-square-instagram"></i></a>
-                    <a href="https://www.facebook.com/HoangVanDien.Profile" target="_blank"><i class="fa-brands fa-facebook"></i></a>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2024 Diễn đàn du lịch Việt Nam. Bảo lưu mọi quyền.</p>
-        </div>
-    </div>
+    <?php
+        include 'footer.php'; 
+    ?>
 </body>
 </html>

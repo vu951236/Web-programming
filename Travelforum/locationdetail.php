@@ -35,34 +35,75 @@ try {
     $comment_stmt->execute(['idlocation' => $location_id]);
     $comments = $comment_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Xử lý đánh giá mới
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rating'])) {
         $newRating = (int) $_POST['rating'];
-        
+        $userId = $_SESSION['user_id']; // Giả sử bạn sử dụng session để lưu thông tin người dùng
+    
         // Kiểm tra nếu bài viết tồn tại
         if ($location) {
-            $currentRate = $location['rate'];
-            $currentAmongRate = $location['amongrate'];
-
-            // Tính toán đánh giá mới
-            $updatedRate = (($currentRate * $currentAmongRate) + $newRating) / ($currentAmongRate + 1);
-            $updatedAmongRate = $currentAmongRate + 1;
-
-            // Cập nhật cột rate và amongrate trong cơ sở dữ liệu
-            $updateStmt = $pdo->prepare("UPDATE locationdetail SET rate = :rate, amongrate = :amongrate WHERE id = :id");
-            $updateStmt->execute([
-                'rate' => $updatedRate,
-                'amongrate' => $updatedAmongRate,
-                'id' => $location_id
+            $locationId = $location['id'];
+    
+            // Kiểm tra xem người dùng đã đánh giá địa điểm này chưa
+            $checkRatingStmt = $pdo->prepare("
+                SELECT COUNT(*) FROM location_ratings 
+                WHERE user_id = :user_id AND location_id = :location_id
+            ");
+            $checkRatingStmt->execute([
+                'user_id' => $userId,
+                'location_id' => $locationId
             ]);
-
-            // Tải lại trang sau khi cập nhật
-            header("Location: " . $_SERVER['REQUEST_URI']);
-            exit;
+            $hasRated = $checkRatingStmt->fetchColumn() > 0;
+    
+            if ($hasRated) {
+                $_SESSION['message'] = "Bạn đã đánh giá bài viết này rồi.";
+            } else {
+                $currentRate = $location['rate'];
+                $currentAmongRate = $location['amongrate'];
+    
+                // Tính toán đánh giá mới
+                $updatedRate = (($currentRate * $currentAmongRate) + $newRating) / ($currentAmongRate + 1);
+                $updatedAmongRate = $currentAmongRate + 1;
+    
+                // Lấy giá trị cột `point` hiện tại
+                $currentPoint = $location['point'];
+    
+                // Cập nhật cột `point`
+                $updatedPoint = $currentPoint - $currentRate + $updatedRate;
+    
+                // Cập nhật cột `rate`, `amongrate`, `point` trong cơ sở dữ liệu
+                $updateStmt = $pdo->prepare("
+                    UPDATE locationdetail 
+                    SET rate = :rate, amongrate = :amongrate, point = :point 
+                    WHERE id = :id
+                ");
+                $updateStmt->execute([
+                    'rate' => $updatedRate,
+                    'amongrate' => $updatedAmongRate,
+                    'point' => $updatedPoint,
+                    'id' => $locationId
+                ]);
+    
+                // Lưu đánh giá của người dùng
+                $insertRatingStmt = $pdo->prepare("
+                    INSERT INTO location_ratings (user_id, location_id, rating) 
+                    VALUES (:user_id, :location_id, :rating)
+                ");
+                $insertRatingStmt->execute([
+                    'user_id' => $userId,
+                    'location_id' => $locationId,
+                    'rating' => $newRating
+                ]);
+    
+                // Tải lại trang sau khi cập nhật
+                $_SESSION['message'] = "Đánh giá bài viết thành công.";
+                header("Location: " . $_SERVER['REQUEST_URI']);
+                exit;
+            }
         } else {
             echo "Bài viết không tồn tại.";
         }
-    }
+    }    
+    
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment'])) {
         if (isset($_SESSION['user_id'])) {
             $commentContent = trim($_POST['comment']);
@@ -263,7 +304,7 @@ try {
 
     <main id="main" class="container">
         <div class="rating-section">
-            <h3>Rate this location</h3>
+            <h3>Đánh giá địa điểm</h3>
             <div class="star-rating">
                 <?php
                 $rate = $location['rate'];
@@ -289,7 +330,7 @@ try {
 
             <form method="POST" action="">
                 <input type="hidden" name="rating" id="ratingInput" value="<?php echo $rate; ?>"> <!-- Giá trị đánh giá sẽ được cập nhật -->
-                <button type="submit" class="btn btn-primary mt-2">Submit Rating</button>
+                <button type="submit" class="btn btn-primary mt-2">Gửi đánh giá</button>
             </form>
         </div>
 
@@ -313,7 +354,7 @@ try {
 
         <!-- Comments Section -->
         <div class="comments-section mt-4">
-            <h3>Comments</h3>
+            <h3>Bình luận</h3>
             <?php foreach ($comments as $comment): ?>
                 <div class="comment">
                     <p><strong><?php echo htmlspecialchars($comment['username']); ?>:</strong> <?php echo nl2br(htmlspecialchars($comment['content'])); ?></p>
@@ -340,25 +381,19 @@ try {
             <button id="confirmButton">Xác nhận</button>
         </div>
     </div>
-
-    <!-- Footer -->
-    <footer id="footer" class="bg-light p-4 mt-5">
-        <div class="container d-flex justify-content-between">
-            <div>
-                <h5>Contact</h5>
-                <p>Email: contact@example.com</p>
-                <p>Điện thoại: +123 456 7890</p>
-            </div>
-            <div>
-                <h5>Explore</h5>
-                <ul class="list-unstyled">
-                    <li><a href="#about">Về chúng tôi</a></li>
-                    <li><a href="#privacy">Chính sách bảo mật</a></li>
-                    <li><a href="#terms">Điều khoản sử dụng</a></li>
-                </ul>
-            </div>
+    <!-- Modal thông báo -->
+    <div id="notificationModal" class="notification-modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeNotificationModal()">&times;</span>
+            <h2>Thông báo</h2>
+            <p id="notificationMessage">Nội dung thông báo ở đây</p>
+            <button onclick="closeNotificationModal()">Xác nhận</button>
         </div>
-    </footer>
+    </div>
+
+    <?php
+        include 'footer.php'; 
+    ?>
 
     <script>
         // Example function to display posts related to a location
@@ -413,6 +448,20 @@ try {
                 modal.style.display = 'none';
             });
         });
+        function showNotification(message) {
+            document.getElementById('notificationMessage').innerText = message;
+            document.getElementById('notificationModal').style.display = 'block';
+        }
+
+        function closeNotificationModal() {
+            document.getElementById('notificationModal').style.display = 'none';
+        }
+        <?php if (isset($_SESSION['message'])): ?>
+            showNotification("<?php echo htmlspecialchars($_SESSION['message']); ?>");
+            // Xóa thông báo sau khi hiển thị
+            <?php unset($_SESSION['message']); ?>
+        <?php endif; ?>
+
     </script>
 </body>
 </html>
