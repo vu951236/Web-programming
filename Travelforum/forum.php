@@ -555,14 +555,33 @@ function copyLink(postId) {
     // Sử dụng API Clipboard để sao chép liên kết
     navigator.clipboard.writeText(postUrl)
         .then(() => {
-            // Hiển thị thông báo sao chép thành công
-            alert('Đã sao chép liên kết bài viết!');
+            // Hiển thị modal thông báo thành công
+            const successModal = document.getElementById('successModal');
+            const successMessage = document.getElementById('successModalMessage');
+            successMessage.innerText = 'Đã sao chép liên kết bài viết!';
+            successModal.style.display = 'block';
+
+            // Ẩn modal thành công sau 1 giây
+            setTimeout(function () {
+                successModal.style.display = 'none';
+            }, 1000);
         })
         .catch(error => {
             console.error('Không thể sao chép:', error);
-            alert('Có lỗi khi sao chép liên kết.');
+
+            // Hiển thị modal thông báo lỗi
+            const errorModal = document.getElementById('errorModal');
+            const errorMessage = document.getElementById('errorModalMessage');
+            errorMessage.innerText = 'Không thể sao chép liên kết: ' + error.message;
+            errorModal.style.display = 'block';
+
+            // Đóng modal khi nhấn nút đóng
+            document.getElementById('errorModalCloseBtn').onclick = function () {
+                errorModal.style.display = 'none';
+            };
         });
 }
+
 
 function deletePost(postId) {
     // Mở modal xác nhận xóa

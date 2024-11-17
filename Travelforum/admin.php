@@ -441,12 +441,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adminCode'])) {
 
         // Thực thi truy vấn
         if ($stmt->execute([$adminCode, $expirationTime])) {
-            $message = "Mã admin đã được tạo thành công!";
+            $_SESSION['message'] = "Mã admin được tạo thành công! Hãy sử dụng trong 5 phút.";
         } else {
-            $message = "Có lỗi xảy ra khi tạo mã admin.";
+            $_SESSION['message'] = "Có lỗi xảy ra khi tạo mã!";
         }
     } else {
-        $message = "Vui lòng nhập mã admin.";
+        $_SESSION['message'] = "Vui lòng nhập mã admin!";
     }
 }
 // Kiểm tra và lưu trạng thái nút vào session
@@ -936,6 +936,15 @@ if (isset($_GET['ForumStatus'])) {
             </form>
         </div>
     </div>
+    <!-- Modal thông báo -->
+    <div id="notificationModal" class="notification-modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeNotificationModal()">&times;</span>
+            <h2>Thông báo</h2>
+            <p id="notificationMessage">Nội dung thông báo ở đây</p>
+            <button onclick="closeNotificationModal()">Xác nhận</button>
+        </div>
+    </div>
 
     <script>
         // Dashboard
@@ -1056,6 +1065,21 @@ if (isset($_GET['ForumStatus'])) {
         // Chuyển hướng đến trang hiện tại với tham số status
         window.location.href = 'admin.php?ForumStatus=' + status;
         }
+
+        function showNotification(message) {
+            document.getElementById('notificationMessage').innerText = message;
+            document.getElementById('notificationModal').style.display = 'block';
+        }
+
+        function closeNotificationModal() {
+            document.getElementById('notificationModal').style.display = 'none';
+        }
+
+        <?php if (isset($_SESSION['message'])): ?>
+            showNotification("<?php echo htmlspecialchars($_SESSION['message']); ?>");
+            // Xóa thông báo sau khi hiển thị
+            <?php unset($_SESSION['message']); ?>
+        <?php endif; ?>
 
     </script>
 </body>

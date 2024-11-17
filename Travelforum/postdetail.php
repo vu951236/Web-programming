@@ -15,11 +15,23 @@ try {
     die("Kết nối đến cơ sở dữ liệu thất bại: " . $e->getMessage());
 }
 
-// Lấy nội dung bài viết
-$post_id = isset($_GET['id']) ? (int) $_GET['id'] : 1; // Lấy post_id từ query string
-$stmt = $pdo->prepare("SELECT * FROM postdetail WHERE id = :id");
-$stmt->execute(['id' => $post_id]);
+$post_id = $_GET['id']; // Giả sử bạn lấy ID bài post qua URL
+$sql = "
+    SELECT 
+        postdetail.*, 
+        locationdetail.name AS location_name 
+    FROM 
+        postdetail 
+    LEFT JOIN 
+        locationdetail 
+    ON 
+        postdetail.location = locationdetail.location
+    WHERE 
+        postdetail.id = ?";
+$stmt = $pdo->prepare($sql);
+$stmt->execute([$post_id]);
 $post = $stmt->fetch(PDO::FETCH_ASSOC);
+
 
 // Kiểm tra xem bài viết có tồn tại không
 if (!$post) {
@@ -364,9 +376,13 @@ if (isset($_SESSION['user_id'])) {
             <div class="post-layout d-flex">
                 <div class="post-content flex-grow-1">
                     <h1><?php echo htmlspecialchars($post['name']); ?></h1>
-                    <p class="date"><?php echo date('F j, Y', strtotime($post['date'])); ?></p>
+                    <div class="post-header">
+                        <p class="location"><?php echo htmlspecialchars($post['location_name']); ?></p>
+                        <p class="date"><?php echo date('F j, Y', strtotime($post['date'])); ?></p>
+                    </div>
                     <img src="<?php echo htmlspecialchars($post['image']); ?>" alt="Post Image" class="detail-image">
                     <p><?php echo nl2br(htmlspecialchars($post['content'])); ?></p>
+
 
                     <div class="comments-section mt-4">
                         <h3>Bình luận</h3>

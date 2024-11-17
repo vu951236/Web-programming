@@ -11,6 +11,14 @@
     gap: 20px; /* Khoảng cách giữa các phần */
     align-items: flex-start; /* Căn các phần theo chiều dọc */
 }
+.post-header {
+    display: flex;
+    align-items: center; /* Căn giữa các phần tử theo chiều dọc */
+}
+
+.post-header .location {
+    margin-right: 10px; /* Khoảng cách giữa địa điểm và ngày */
+}
 
 
 .post-container {

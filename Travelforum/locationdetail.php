@@ -26,8 +26,8 @@ try {
     }
 
     // Truy vấn các bài viết liên quan
-    $stmtPosts = $pdo->prepare("SELECT id, name, image FROM postdetail WHERE location = :location");
-    $stmtPosts->execute(['location' => $location['location']]);
+    $stmtPosts = $pdo->prepare("SELECT id, name, image FROM postdetail WHERE location = :location AND status =:status");
+    $stmtPosts->execute(['location' => $location['location'], 'status' => 'approve']);
     $relatedPosts = $stmtPosts->fetchAll(PDO::FETCH_ASSOC);
 
     // Lấy bình luận của bài viết
