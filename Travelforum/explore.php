@@ -143,42 +143,8 @@ if (isset($_SESSION['user_id'])) {
         </div>
     </div>
 
-    
-    <div id="footer">
-        <div class="footer-container">
-            <div class="footer-section">
-                <h3>Liên hệ</h3>
-                <p>Email: contact@example.com</p>
-                <p>Điện thoại: +123 456 7890</p>
-            </div>
-            <div class="footer-section">
-                <h3>Thông tin</h3>
-                <ul>
-                    <li><a href="#about">Về chúng tôi</a></li>
-                    <li><a href="#privacy">Chính sách bảo mật</a></li>
-                    <li><a href="#terms">Điều khoản sử dụng</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>Liên kết hữu ích</h3>
-                <ul>
-                    <li><a href="#faq">Câu hỏi thường gặp</a></li>
-                    <li><a href="#support">Hỗ trợ</a></li>
-                    <li><a href="#forum">Diễn đàn</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>Mạng xã hội</h3>
-                <div class="social-icons">
-                    <a href="https://www.threads.net/@hvdien04" target="_blank"><i class="fa-brands fa-square-threads"></i></a>
-                    <a href="https://www.instagram.com/hvdien04/" target="_blank"><i class="fa-brands fa-square-instagram"></i></a>
-                    <a href="https://www.facebook.com/HoangVanDien.Profile" target="_blank"><i class="fa-brands fa-facebook"></i></a>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2024 Diễn đàn của chúng tôi. Bảo lưu mọi quyền.</p>
-        </div>
-    </div>
+    <?php
+        include 'footer.php'; 
+    ?>
 </body>
 </html>
