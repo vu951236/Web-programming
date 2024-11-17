@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 17, 2024 lúc 09:22 AM
+-- Thời gian đã tạo: Th10 17, 2024 lúc 09:29 AM
 -- Phiên bản máy phục vụ: 9.1.0
 -- Phiên bản PHP: 8.2.12
 
@@ -102,7 +102,7 @@ CREATE TABLE `locationdetail` (
 --
 
 INSERT INTO `locationdetail` (`id`, `name`, `information`, `image`, `rate`, `amongrate`, `date`, `location`, `point`, `type`) VALUES
-(1, 'An Giang', 'Tỉnh An Giang nổi tiếng với chợ nổi Long Xuyên và vùng Bảy Núi linh thiêng.', 'database/locations/AnGiang.jpg', 0.00, 0, '2024-10-30 01:00:12', 'angiang', 8.20, 'dongbang'),
+(1, 'An Giang', 'Tỉnh An Giang nổi tiếng với chợ nổi Long Xuyên và vùng Bảy Núi linh thiêng.', 'database/locations/AnGiang.jpg', 0.00, 0, '2024-10-30 01:00:12', 'angiang', 0.00, 'dongbang'),
 (2, 'Bà Rịa - Vũng Tàu', 'Nơi có bãi biển Vũng Tàu nổi tiếng, thu hút nhiều khách du lịch.', 'database/locations/BaRia-VungTau.jpg', 0.00, 0, '2024-10-30 01:00:12', 'bariavungtau', 0.00, 'bien'),
 (3, 'Bắc Giang', 'Bắc Giang có nhiều cảnh quan tự nhiên và là nơi sản xuất vải thiều nổi tiếng.', 'database/locations/BacGiang.jpg', 0.00, 0, '2024-10-30 01:00:12', 'bacgiang', 0.00, 'nui'),
 (4, 'Bắc Kạn', 'Bắc Kạn có hồ Ba Bể và nhiều cảnh quan thiên nhiên tuyệt đẹp.', 'database/locations/BacKan.jpg', 0.00, 0, '2024-10-30 01:00:12', 'backan', 0.00, 'nui'),
@@ -116,14 +116,14 @@ INSERT INTO `locationdetail` (`id`, `name`, `information`, `image`, `rate`, `amo
 (12, 'Cà Mau', 'Cà Mau là cực Nam của Việt Nam, nổi tiếng với rừng ngập mặn.', 'database/locations/CaMau.jpg', 0.00, 0, '2024-10-30 01:00:12', 'camau', 0.00, 'bien'),
 (13, 'Cần Thơ', 'Cần Thơ là trung tâm kinh tế, văn hóa của Đồng bằng sông Cửu Long.', 'database/locations/CanTho.jpg', 0.00, 0, '2024-10-30 01:00:12', 'cantho', 0.00, 'dongbang'),
 (14, 'Cao Bằng', 'Cao Bằng có thác Bản Giốc và nhiều danh lam thắng cảnh.', 'database/locations/CaoBang.jpg', 0.00, 0, '2024-10-30 01:00:12', 'caobang', 0.00, 'nui'),
-(15, 'Đà Nẵng', 'Đà Nẵng là thành phố hiện đại, có nhiều bãi biển và cầu Rồng nổi tiếng.', 'database/locations/DaNang.jpg', 4.17, 12, '2024-10-30 01:00:12', 'danang', 19.92, 'bien'),
+(15, 'Đà Nẵng', 'Đà Nẵng là thành phố hiện đại, có nhiều bãi biển và cầu Rồng nổi tiếng.', 'database/locations/DaNang.jpg', 0.00, 0, '2024-10-30 01:00:12', 'danang', 0.00, 'bien'),
 (16, 'Đắk Lắk', 'Đắk Lắk là trung tâm cà phê lớn và văn hóa Tây Nguyên.', 'database/locations/DakLak.jpg', 0.00, 0, '2024-10-30 01:00:12', 'daklak', 0.00, 'nui'),
 (17, 'Đắk Nông', 'Nổi tiếng với các thác nước và cảnh quan thiên nhiên hùng vĩ.', 'database/locations/DakNong.jpg', 0.00, 0, '2024-10-30 01:00:12', 'daknong', 0.00, 'nui'),
-(18, 'Điện Biên', 'Điện Biên gắn liền với chiến thắng Điện Biên Phủ lịch sử.', 'database/locations/DienBien.jpg', 0.00, 0, '2024-10-30 01:00:12', 'dienbien', 4.20, 'nui'),
+(18, 'Điện Biên', 'Điện Biên gắn liền với chiến thắng Điện Biên Phủ lịch sử.', 'database/locations/DienBien.jpg', 0.00, 0, '2024-10-30 01:00:12', 'dienbien', 0.00, 'nui'),
 (19, 'Đồng Nai', 'Đồng Nai có nền công nghiệp phát triển và khu bảo tồn thiên nhiên Nam Cát Tiên.', 'database/locations/ DongNai.jpg', 0.00, 0, '2024-10-30 01:00:12', 'dongnai', 0.00, 'dongbang'),
 (20, 'Đồng Tháp', 'Nơi có vườn quốc gia Tràm Chim và nhiều cánh đồng sen.', 'database/locations/ DongThap.jpg', 0.00, 0, '2024-10-30 01:00:12', 'dongthap', 0.00, 'dongbang'),
 (21, 'Gia Lai', 'Gia Lai nổi tiếng với Biển Hồ và văn hóa cồng chiêng Tây Nguyên.', 'database/locations/GiaLai.jpg', 0.00, 0, '2024-10-30 01:00:12', 'gialai', 0.00, 'nui'),
-(22, 'Hà Giang', 'Hà Giang có cao nguyên đá Đồng Văn và nhiều cung đường đèo đẹp.', 'database/locations/HaGiang.jpg', 0.00, 0, '2024-10-30 01:00:12', 'hagiang', 6.00, 'nui'),
+(22, 'Hà Giang', 'Hà Giang có cao nguyên đá Đồng Văn và nhiều cung đường đèo đẹp.', 'database/locations/HaGiang.jpg', 0.00, 0, '2024-10-30 01:00:12', 'hagiang', 0.00, 'nui'),
 (23, 'Hà Nam', 'Hà Nam nổi tiếng với làng nghề và chùa Tam Chúc lớn nhất Việt Nam.', 'database/locations/HaNam.jpg', 0.00, 0, '2024-10-30 01:00:12', 'hanam', 0.00, 'dongbang'),
 (24, 'Hà Nội', 'Thủ đô của Việt Nam với nhiều di tích lịch sử và văn hóa.', 'database/locations/HaNoi.jpg', 0.00, 0, '2024-10-30 01:00:12', 'hanoi', 0.00, 'dongbang'),
 (25, 'Hà Tĩnh', 'Hà Tĩnh có bãi biển Thiên Cầm và các di tích lịch sử.', 'database/locations/HaTinh.jpg', 0.00, 0, '2024-10-30 01:00:12', 'hatinh', 0.00, 'nui'),
@@ -132,7 +132,7 @@ INSERT INTO `locationdetail` (`id`, `name`, `information`, `image`, `rate`, `amo
 (28, 'Hậu Giang', 'Hậu Giang là một tỉnh thuộc đồng bằng sông Cửu Long, phát triển nông nghiệp.', 'database/locations/HauGiang.jpg', 0.00, 0, '2024-10-30 01:00:12', 'haugiang', 0.00, 'dongbang'),
 (29, 'Hòa Bình', 'Hòa Bình có thủy điện Hòa Bình và văn hóa dân tộc Mường.', 'database/locations/HoaBinh.jpg', 0.00, 0, '2024-10-30 01:00:12', 'hoabinh', 0.00, 'nui'),
 (30, 'Hưng Yên', 'Hưng Yên nổi tiếng với nhãn lồng và nhiều làng nghề truyền thống.', 'database/locations/HungYen.jpg', 0.00, 0, '2024-10-30 01:00:12', 'hungyen', 0.00, 'dongbang'),
-(31, 'Khánh Hòa', 'Khánh Hòa có vịnh Nha Trang và nhiều bãi biển đẹp.', 'database/locations/KhanhHoa.jpg', 0.00, 0, '2024-10-30 01:00:12', 'khanhhoa', 5.00, 'bien'),
+(31, 'Khánh Hòa', 'Khánh Hòa có vịnh Nha Trang và nhiều bãi biển đẹp.', 'database/locations/KhanhHoa.jpg', 0.00, 0, '2024-10-30 01:00:12', 'khanhhoa', 0.00, 'bien'),
 (32, 'Kiên Giang', 'Kiên Giang có đảo Phú Quốc và cảnh quan biển đảo đẹp.', 'database/locations/KienGiang.jpg', 0.00, 0, '2024-10-30 01:00:12', 'kiengiang', 0.00, 'bien'),
 (33, 'Kon Tum', 'Kon Tum nổi tiếng với nhà rông Tây Nguyên và các bản làng dân tộc.', 'database/locations/KonTum.jpg', 0.00, 0, '2024-10-30 01:00:12', 'kontum', 0.00, 'nui'),
 (34, 'Lai Châu', 'Lai Châu có nhiều đỉnh núi cao và phong cảnh hùng vĩ.', 'database/locations/LaiChau.jpg', 0.00, 0, '2024-10-30 01:00:12', 'laichau', 0.00, 'nui'),
@@ -152,14 +152,14 @@ INSERT INTO `locationdetail` (`id`, `name`, `information`, `image`, `rate`, `amo
 (48, 'Quảng Ninh', 'Quảng Ninh có vịnh Hạ Long là di sản thiên nhiên thế giới.', 'database/locations/QuangNinh.jpg', 0.00, 0, '2024-10-30 01:00:12', 'quangninh', 0.00, 'bien'),
 (49, 'Quảng Trị', 'Quảng Trị gắn liền với nhiều di tích lịch sử chiến tranh.', 'database/locations/QuangTri.jpg', 0.00, 0, '2024-10-30 01:00:12', 'quangtri', 0.00, 'nui'),
 (50, 'Sóc Trăng', 'Sóc Trăng có chùa Dơi, chùa Chén Kiểu và văn hóa Khmer.', 'database/locations/SocTrang.jpg', 0.00, 0, '2024-10-30 01:00:12', 'soctrang', 0.00, 'dongbang'),
-(51, 'Sơn La', 'Sơn La có cao nguyên Mộc Châu với nhiều đồi chè và cảnh quan đẹp.', 'database/locations/SonLa.jpg', 0.00, 0, '2024-10-30 01:00:12', 'sonla', 6.00, 'nui'),
-(52, 'Tây Ninh', 'Tây Ninh có núi Bà Đen và đạo Cao Đài.', 'database/locations/tayninh.jpg', 0.00, 0, '2024-10-30 01:00:12', 'tayninh', 6.00, 'dongbang'),
+(51, 'Sơn La', 'Sơn La có cao nguyên Mộc Châu với nhiều đồi chè và cảnh quan đẹp.', 'database/locations/SonLa.jpg', 0.00, 0, '2024-10-30 01:00:12', 'sonla', 0.00, 'nui'),
+(52, 'Tây Ninh', 'Tây Ninh có núi Bà Đen và đạo Cao Đài.', 'database/locations/tayninh.jpg', 0.00, 0, '2024-10-30 01:00:12', 'tayninh', 0.00, 'dongbang'),
 (53, 'Thái Bình', 'Thái Bình là quê lúa, phát triển nông nghiệp và làng nghề.', 'database/locations/ThaiBinh.jpg', 0.00, 0, '2024-10-30 01:00:12', 'thaibinh', 0.00, 'dongbang'),
 (54, 'Thái Nguyên', 'Thái Nguyên nổi tiếng với chè Thái Nguyên và các khu công nghiệp.', 'database/locations/ThaiNguyen.jpg', 0.00, 0, '2024-10-30 01:00:12', 'thainguyen', 0.00, 'nui'),
 (55, 'Thanh Hóa', 'Thanh Hóa có bãi biển Sầm Sơn và nhiều di tích lịch sử.', 'database/locations/ThanhHoa.jpg', 0.00, 0, '2024-10-30 01:00:12', 'thanhhoa', 0.00, 'bien'),
 (56, 'Thừa Thiên Huế', 'Huế là cố đô với nhiều di sản văn hóa và lăng tẩm triều Nguyễn.', 'database/locations/ThuaThienHue.jpg', 0.00, 0, '2024-10-30 01:00:12', 'thuathienhue', 0.00, 'bien'),
 (57, 'Tiền Giang', 'Tiền Giang có chợ nổi Cái Bè và các cù lao sông nước.', 'database/locations/TienGiang.jpg', 0.00, 0, '2024-10-30 01:00:12', 'tiengiang', 0.00, 'dongbang'),
-(58, 'TP. Hồ Chí Minh', 'Trung tâm kinh tế lớn nhất Việt Nam với nhiều hoạt động sôi động.', 'database/locations/TPHoChiMinh.jpg', 0.00, 0, '2024-10-30 01:00:12', 'hochiminh', 11.73, 'bien'),
+(58, 'TP. Hồ Chí Minh', 'Trung tâm kinh tế lớn nhất Việt Nam với nhiều hoạt động sôi động.', 'database/locations/TPHoChiMinh.jpg', 0.00, 0, '2024-10-30 01:00:12', 'hochiminh', 0.00, 'bien'),
 (59, 'Trà Vinh', 'Trà Vinh có nhiều chùa Khmer và văn hóa truyền thống.', 'database/locations/TraVinh.jpg', 0.00, 0, '2024-10-30 01:00:12', 'travinh', 0.00, 'dongbang'),
 (60, 'Tuyên Quang', 'Tuyên Quang có di tích Tân Trào, gắn với lịch sử cách mạng.', 'database/locations/TuyenQuang.jpg', 0.00, 0, '2024-10-30 01:00:12', 'tuyenquang', 0.00, 'nui'),
 (61, 'Vĩnh Long', 'Vĩnh Long có nhiều cù lao và đặc trưng miền sông nước.', 'database/locations/VinhLong.jpg', 0.00, 0, '2024-10-30 01:00:12', 'vinhlong', 0.00, 'dongbang'),
@@ -191,15 +191,6 @@ CREATE TABLE `login_attempts` (
   `user_id` int DEFAULT NULL,
   `login_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Đang đổ dữ liệu cho bảng `login_attempts`
---
-
-INSERT INTO `login_attempts` (`id`, `user_id`, `login_time`) VALUES
-(43, 16, '2024-11-17 02:05:38'),
-(44, 16, '2024-11-17 02:06:02'),
-(45, 17, '2024-11-17 02:07:58');
 
 -- --------------------------------------------------------
 
@@ -238,13 +229,6 @@ CREATE TABLE `postdetail` (
   `typepost` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Đang đổ dữ liệu cho bảng `postdetail`
---
-
-INSERT INTO `postdetail` (`id`, `name`, `date`, `image`, `content`, `rate`, `amongrate`, `location`, `view`, `userid`, `description`, `status`, `typepost`) VALUES
-(83, 'Kinh nghiệm du lịch Hội An', '2024-11-17 02:07:01', 'database/posts/post_67394fc55c08a1.59362254.jpg', 'fAf', 3.50, 2, 'dienbien', 2, 16, 'jjef', 'approve', 'nghiduong');
-
 -- --------------------------------------------------------
 
 --
@@ -270,14 +254,6 @@ CREATE TABLE `post_ratings` (
   `rating` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Đang đổ dữ liệu cho bảng `post_ratings`
---
-
-INSERT INTO `post_ratings` (`id`, `user_id`, `post_id`, `rating`) VALUES
-(18, 16, 83, 4),
-(19, 17, 83, 3);
-
 -- --------------------------------------------------------
 
 --
@@ -298,14 +274,6 @@ CREATE TABLE `users` (
   `status` varchar(50) DEFAULT 'exemplary',
   `warned_until` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Đang đổ dữ liệu cho bảng `users`
---
-
-INSERT INTO `users` (`id`, `username`, `password`, `email`, `fullname`, `address`, `isadmin`, `avatar`, `banned_until`, `point`, `status`, `warned_until`) VALUES
-(16, 'vu951236', '$2y$10$Vkvbr4r8iZdzKmSBeGfxIOYvvWUxhnAKt8GhdgH0O5icU4dYn9Pz.', 'hoangvuvo907@gmail.com', 'Võ Hoàng Vũ', '440 Thống Nhất', 1, NULL, NULL, 4.20, 'exemplary', NULL),
-(17, 'vu951237', '$2y$10$I4WOKCw0sGXCV7MTYr4FjOQBNo1v7WfonS64Hhf08Jg1Mkj7FxAjO', 'hoangvuvo999@gmail.com', 'Võ Hoàng Vũ', '440 Thống Nhất', 0, NULL, NULL, 0.00, 'exemplary', NULL);
 
 --
 -- Chỉ mục cho các bảng đã đổ
@@ -416,7 +384,7 @@ ALTER TABLE `forumcomment`
 -- AUTO_INCREMENT cho bảng `forumdetail`
 --
 ALTER TABLE `forumdetail`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT cho bảng `locationcomment`
@@ -440,7 +408,7 @@ ALTER TABLE `location_ratings`
 -- AUTO_INCREMENT cho bảng `login_attempts`
 --
 ALTER TABLE `login_attempts`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
 
 --
 -- AUTO_INCREMENT cho bảng `postcomment`
@@ -452,7 +420,7 @@ ALTER TABLE `postcomment`
 -- AUTO_INCREMENT cho bảng `postdetail`
 --
 ALTER TABLE `postdetail`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=84;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=86;
 
 --
 -- AUTO_INCREMENT cho bảng `post_likes`
