@@ -105,7 +105,7 @@
     border-radius: 4px;
     border: 1px solid #ddd;
 }
-
+/* Đánh giá */
 .rating-section {
     display: flex;
     flex-direction: column;
@@ -161,8 +161,14 @@
 .star.partial {
     color: transparent; /* Ẩn màu của sao một phần */
 }
-
 .star.partial::before {
+    content: '★'; /* Hiện ngôi sao */
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: lightgray; /* Màu cho phần chưa lấp đầy */
+}
+.star.partial::after {
     content: '★'; /* Hiện ngôi sao */
     position: absolute;
     top: 0;

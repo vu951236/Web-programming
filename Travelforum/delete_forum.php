@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $postId = $input['post_id'];
 
     // Kiểm tra quyền xóa bài viết
-    $stmt = $conn->prepare("SELECT userid FROM forumdetail WHERE id = :post_id");
+    $stmt = $conn->prepare("SELECT userid, image FROM forumdetail WHERE id = :post_id");
     $stmt->execute(['post_id' => $postId]);
     $post = $stmt->fetch();
 
@@ -37,6 +37,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Xóa lượt thích liên quan
             $deleteLikesStmt = $conn->prepare("DELETE FROM post_likes WHERE post_id = :post_id");
             $deleteLikesStmt->execute(['post_id' => $postId]);
+
+            // Xóa hình ảnh trong thư mục (nếu có)
+            if (!empty($post['image'])) {
+                $imagePath = __DIR__ . '/database/forum/' . basename($post['image']);
+                if (file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+            }
 
             // Xóa bài viết
             $deletePostStmt = $conn->prepare("DELETE FROM forumdetail WHERE id = :post_id");
@@ -55,4 +63,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode(['success' => false, 'message' => 'Không có quyền xóa bài viết này.']);
     }
 }
-

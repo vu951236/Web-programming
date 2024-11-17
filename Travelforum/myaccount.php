@@ -262,8 +262,22 @@ try {
             // Bắt đầu giao dịch
             $pdo->beginTransaction();
 
+            // Truy vấn để lấy đường dẫn hình ảnh từ bài viết
+            $getImageQuery = "SELECT image FROM postdetail WHERE id = :post_id AND userid = :user_id";
+            $stmtImage = $pdo->prepare($getImageQuery);
+            $stmtImage->execute([':post_id' => $deletePostId, ':user_id' => $userId]);
+            $imagePath = $stmtImage->fetchColumn();
+
+            // Nếu tồn tại ảnh, xóa file trong thư mục database/posts
+            if ($imagePath) {
+                $imageFullPath = __DIR__ . '/database/posts/' . basename($imagePath);
+                if (file_exists($imageFullPath)) {
+                    unlink($imageFullPath);
+                }
+            }
+
             // Xóa các bình luận liên quan trong bảng postcomment
-            $deleteCommentsQuery = "DELETE FROM postcomment WHERE post_id = :post_id";
+            $deleteCommentsQuery = "DELETE FROM postcomment WHERE idpost = :post_id";
             $stmtComments = $pdo->prepare($deleteCommentsQuery);
             $stmtComments->execute([':post_id' => $deletePostId]);
 
@@ -299,55 +313,93 @@ try {
         exit();
     }
 
+
     // Xử lý yêu cầu xóa tài khoản
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'deleteaccount') {
-        $userId = $_SESSION['user_id']; // Lấy ID người dùng từ phiên làm việc
+        $userId = $_SESSION['user_id']; // Lấy ID người dùng từ session
 
-        // Xóa tất cả rating của người dùng trong bảng location_ratings
-        $deleteLocationRatingStmt = $pdo->prepare("DELETE FROM location_ratings WHERE user_id = :userid");
-        $deleteLocationRatingStmt->execute(['userid' => $userId]);
+        try {
+            // Bắt đầu giao dịch
+            $pdo->beginTransaction();
 
-        // Xóa tất cả rating của người dùng trong bảng post_ratings
-        $deletePostRatingStmt = $pdo->prepare("DELETE FROM post_ratings WHERE user_id = :userid");
-        $deletePostRatingStmt->execute(['userid' => $userId]);
+            // Lấy danh sách ảnh bài viết của người dùng từ bảng postdetail
+            $getPostImagesQuery = "SELECT image FROM postdetail WHERE userid = :userid";
+            $stmtPostImages = $pdo->prepare($getPostImagesQuery);
+            $stmtPostImages->execute([':userid' => $userId]);
+            $postImages = $stmtPostImages->fetchAll(PDO::FETCH_COLUMN);
 
-        // Xóa tất cả like của người dùng trong bảng post_likes
-        $deletePostLikeStmt = $pdo->prepare("DELETE FROM post_likes WHERE user_id = :userid");
-        $deletePostLikeStmt->execute(['userid' => $userId]);
+            // Xóa file ảnh bài viết
+            foreach ($postImages as $image) {
+                $imagePath = __DIR__ . '/database/posts/' . basename($image);
+                if (file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+            }
 
-        // Xóa tất cả bình luận của người dùng trong bảng locationcomment
-        $deleteLocationCommentsStmt = $pdo->prepare("DELETE FROM locationcomment WHERE userid = :userid");
-        $deleteLocationCommentsStmt->execute(['userid' => $userId]);
+            // Lấy danh sách ảnh bài đăng diễn đàn từ bảng forumdetail
+            $getForumImagesQuery = "SELECT image FROM forumdetail WHERE userid = :userid";
+            $stmtForumImages = $pdo->prepare($getForumImagesQuery);
+            $stmtForumImages->execute([':userid' => $userId]);
+            $forumImages = $stmtForumImages->fetchAll(PDO::FETCH_COLUMN);
 
-        // Xóa tất cả bình luận của người dùng trong bảng postcomment
-        $deletePostCommentsStmt = $pdo->prepare("DELETE FROM postcomment WHERE userid = :userid");
-        $deletePostCommentsStmt->execute(['userid' => $userId]);
+            // Xóa file ảnh bài đăng diễn đàn
+            foreach ($forumImages as $image) {
+                $imagePath = __DIR__ . '/database/forum/' . basename($image);
+                if (file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+            }
 
-        // Xóa tất cả bình luận của người dùng trong bảng forumcomment
-        $deleteForumCommentsStmt = $pdo->prepare("DELETE FROM forumcomment WHERE user_id = :userid");
-        $deleteForumCommentsStmt->execute(['userid' => $userId]);
+            // Xóa ảnh đại diện người dùng nếu có
+            $getAvatarQuery = "SELECT avatar FROM users WHERE id = :userid";
+            $stmtAvatar = $pdo->prepare($getAvatarQuery);
+            $stmtAvatar->execute([':userid' => $userId]);
+            $avatar = $stmtAvatar->fetchColumn();
 
-        // Xóa tất cả bài viết của người dùng trong bảng postdetail
-        $deletePostsStmt = $pdo->prepare("DELETE FROM postdetail WHERE userid = :userid");
-        $deletePostsStmt->execute(['userid' => $userId]);
+            if ($avatar) {
+                $avatarPath = __DIR__ . '/database/users/' . basename($avatar);
+                if (file_exists($avatarPath)) {
+                    unlink($avatarPath);
+                }
+            }
 
-        // Xóa tất cả bài viết của người dùng trong bảng forumdetail
-        $deleteForumStmt = $pdo->prepare("DELETE FROM forumdetail WHERE userid = :userid");
-        $deleteForumStmt->execute(['userid' => $userId]);
+            // Xóa dữ liệu liên quan từ các bảng khác
+            $deleteQueries = [
+                "DELETE FROM location_ratings WHERE user_id = :userid",
+                "DELETE FROM post_ratings WHERE user_id = :userid",
+                "DELETE FROM post_likes WHERE user_id = :userid",
+                "DELETE FROM locationcomment WHERE userid = :userid",
+                "DELETE FROM postcomment WHERE userid = :userid",
+                "DELETE FROM forumcomment WHERE user_id = :userid",
+                "DELETE FROM postdetail WHERE userid = :userid",
+                "DELETE FROM forumdetail WHERE userid = :userid",
+                "DELETE FROM login_attempts WHERE user_id = :userid"
+            ];
 
-        // Xóa các bản ghi trong login_attempts trước
-        $deleteAttemptsStmt = $pdo->prepare("DELETE FROM login_attempts WHERE user_id = :user_id");
-        $deleteAttemptsStmt->execute([':user_id' => $userId]);
+            foreach ($deleteQueries as $query) {
+                $stmt = $pdo->prepare($query);
+                $stmt->execute([':userid' => $userId]);
+            }
 
-        // Sau đó, xóa bản ghi trong bảng users
-        $deleteUserStmt = $pdo->prepare("DELETE FROM users WHERE id = :id");
-        $deleteUserStmt->execute([':id' => $userId]);
+            // Xóa tài khoản người dùng
+            $deleteUserQuery = "DELETE FROM users WHERE id = :id";
+            $stmtUser = $pdo->prepare($deleteUserQuery);
+            $stmtUser->execute([':id' => $userId]);
 
-        // Hủy phiên làm việc và chuyển hướng về trang chính
-        session_destroy();
-        header("Location: index.php"); // Chuyển hướng về trang chính hoặc trang đăng nhập
-        exit;
+            // Hoàn tất giao dịch
+            $pdo->commit();
+
+            // Hủy session và chuyển hướng về trang chính
+            session_destroy();
+            header("Location: index.php");
+            exit;
+        } catch (Exception $e) {
+            // Hủy giao dịch nếu xảy ra lỗi
+            $pdo->rollBack();
+            echo "Lỗi khi xóa tài khoản: " . $e->getMessage();
+        }
     }
+
     // Xử lý yêu cầu đăng lại bài viết
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new_status'])) {
         $postId = $_POST['post_id'] ?? null;
