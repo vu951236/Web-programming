@@ -15,7 +15,9 @@ try {
     die("Kết nối đến cơ sở dữ liệu thất bại: " . $e->getMessage());
 }
 
-$post_id = $_GET['id']; // Giả sử bạn lấy ID bài post qua URL
+// Lấy nội dung bài viết
+$post_id = isset($_GET['id']) ? (int) $_GET['id'] : 1; // Lấy post_id từ query string
+
 $sql = "
     SELECT 
         postdetail.*, 
