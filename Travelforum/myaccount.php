@@ -540,7 +540,7 @@ try {
                                     <button class="edit-btn" onclick="openEditModal(<?php echo htmlspecialchars(json_encode($post)); ?>)">
                                         <i class="fa fa-pencil"></i> Sửa
                                     </button>
-                                    <a href="/Travelforum/Travelforum/postdetail.php?id=<?php echo htmlspecialchars($post['id']); ?>">
+                                    <a href="./postdetail.php?id=<?php echo htmlspecialchars($post['id']); ?>">
                                         <button><i class="fa-regular fa-eye"></i> Xem bài viết</button>
                                     </a>
                                     <form action="javascript:void(0);" style="display: inline;" onclick="openDeleteModal(<?php echo htmlspecialchars($post['id']); ?>)">

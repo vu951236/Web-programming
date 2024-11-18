@@ -95,12 +95,12 @@ try {
                 ]);
     
                 // Tải lại trang sau khi cập nhật
-                $_SESSION['message'] = "Đánh giá bài viết thành công.";
+                $_SESSION['message'] = "Đánh giá địa điểm thành công.";
                 header("Location: " . $_SERVER['REQUEST_URI']);
                 exit;
             }
         } else {
-            echo "Bài viết không tồn tại.";
+            echo "Địa điểm không tồn tại.";
         }
     }    
     
